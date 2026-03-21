@@ -73,7 +73,13 @@ export default function Login() {
                 SIGN IN
               </button>
 
-              <p className={`text-[#5c5a5a] text-center pt-10`}>OR</p>
+              <div className="flex flex-row items-center pt-10 -mr-5 z-10">
+                <hr className="flex-1 border-[#C5A059] mr-5"></hr>
+                <p className={`text-[#5c5a5a] ${roboto.className} text-center`}>
+                  OR
+                </p>
+                <hr className="flex-1 border-[#C5A059] ml-5"></hr>
+              </div>
               <button
                 type="button"
                 className={`cursor-pointer relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] block mt-10 -mr-5 p-6 z-10`}
@@ -93,7 +99,7 @@ export default function Login() {
           <Image
             src="/images/login_image.png"
             fill={true}
-            className="scale-145 opacity-30"
+            className="scale-145 opacity-25"
             alt="Image of flower and vase, grey-scale"
           ></Image>
         </div>
