@@ -16,13 +16,31 @@ export default function Login() {
           The Curated Althaïr
         </h3>
         <div>
-          <h1 className={`text-black ${gelasio.className}`}>Welcome Back</h1>
+          <h1
+            className={`text-black ${gelasio.className} items-center justify-center text-6xl pt-50`}
+          >
+            Welcome Back
+          </h1>
         </div>
       </div>
-      <div className="bg-[#faf9f7]">
-        <p className={`text-black ${roboto.className} ml-5 pb-40`}>
-          All rights reserved etc...
+      <div className="bg-[#faf9f7] flex justify-between">
+        <p
+          className={`text-[#5c5a5a] ${roboto.className} pl-15 pb-15 pt-15 tracking-wider text-sm`}
+        >
+          © 2026 THE CURATED ALTHAïR. ALL RIGHTS RESERVED.
         </p>
+        <div className="flex flex-row pb-15 pt-15">
+          <p
+            className={`text-[#5c5a5a] ${roboto.className} tracking-wider text-sm pr-15`}
+          >
+            PRIVACY POLICY
+          </p>
+          <p
+            className={`text-[#5c5a5a] ${roboto.className} tracking-wider text-sm pr-15`}
+          >
+            SUPPORT
+          </p>
+        </div>
       </div>
     </main>
   );
