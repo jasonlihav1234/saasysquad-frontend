@@ -4,10 +4,12 @@ import Image from "next/image";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
+  style: ["normal", "italic"],
 });
 
 const roboto = Roboto({
   subsets: ["latin"],
+  style: ["normal", "italic"],
 });
 
 export default function Login() {
@@ -31,7 +33,7 @@ export default function Login() {
             <div className="flex flex-col pt-10">
               <label
                 htmlFor="email-input"
-                className={`text-[#5c5a5a] ${roboto.className} tracking-widest mb-3`}
+                className={`text-[#5c5a5a] ${roboto.className} tracking-widest mb-3 cursor-text`}
               >
                 EMAIL ADDRESS
               </label>
@@ -40,23 +42,33 @@ export default function Login() {
                 className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] -mr-5 z-10 p-6`}
                 id="email-input"
                 placeholder="name@example.com"
+                required
               ></input>
             </div>
             <div className="flex flex-col pt-10">
-              <label
-                htmlFor="password-input"
-                className={`text-[#5c5a5a] ${roboto.className} tracking-widest mb-3`}
-              >
-                PASSWORD
-              </label>
+              <div className="flex flex-row justify-between -mr-5">
+                <label
+                  htmlFor="password-input"
+                  className={`text-[#5D4201] ${roboto.className} tracking-widest mb-3 cursor-text`}
+                >
+                  PASSWORD
+                </label>
+
+                <p
+                  className={`text-[#806737] ${roboto.className} tracking-widest hover:underline cursor-pointer`}
+                >
+                  FORGOT PASSWORD?
+                </p>
+              </div>
               <input
                 name="PASSWORD"
                 className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] -mr-5 z-10 p-6 mb-5`}
                 id="password-input"
                 placeholder="********"
+                required
               ></input>
               <button
-                className={`bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-10 -mr-5 z-10 p-6 text-white font-bold`}
+                className={`cursor-pointer bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-10 -mr-5 z-10 p-6 text-white font-bold`}
               >
                 SIGN IN
               </button>
@@ -64,14 +76,17 @@ export default function Login() {
               <p className={`text-[#5c5a5a] text-center pt-10`}>OR</p>
               <button
                 type="button"
-                className={`relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] block mt-10 -mr-5 p-6 z-10`}
+                className={`cursor-pointer relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] block mt-10 -mr-5 p-6 z-10`}
               >
                 CREATE AN ACCOUNT
               </button>
             </div>
           </Form>
-          <p className={`italic text-center text-[#5c5a5a] mt-10`}>
-            By continuining, you agree to our Terms of Service
+          <p
+            className={`italic ${roboto.className} text-center text-[#5c5a5a] mt-10`}
+          >
+            By continuing, you agree to our{" "}
+            <span className="cursor-pointer underline">Terms of Services</span>
           </p>
         </div>
         <div className="relative w-full h-full overflow-hidden">
@@ -91,12 +106,12 @@ export default function Login() {
         </p>
         <div className="flex flex-row pb-15 pt-15">
           <p
-            className={`text-[#5c5a5a] ${roboto.className} tracking-wider text-sm pr-15`}
+            className={`cursor-pointer text-[#5c5a5a] ${roboto.className} tracking-wider text-sm pr-15 hover:underline`}
           >
             PRIVACY POLICY
           </p>
           <p
-            className={`text-[#5c5a5a] ${roboto.className} tracking-wider text-sm pr-15`}
+            className={`cursor-pointer text-[#5c5a5a] ${roboto.className} tracking-wider text-sm pr-15 hover:underline`}
           >
             SUPPORT
           </p>
