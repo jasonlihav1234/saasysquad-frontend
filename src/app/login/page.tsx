@@ -1,4 +1,5 @@
 import { Gelasio, Roboto } from "next/font/google";
+import Form from "next/form";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -21,6 +22,41 @@ export default function Login() {
           >
             Welcome Back
           </h1>
+          <Form action="/">
+            <div className="flex flex-col">
+              <label
+                htmlFor="email-input"
+                className={`text-[#5c5a5a] ${roboto.className} tracking-widest`}
+              >
+                EMAIL ADDRESS
+              </label>
+              <input
+                name="EMAIL ADDRESS"
+                className={`bg-[#faf9f7] border-2 border-gray text-[#5c5a5a]`}
+                id="email-input"
+                placeholder="name@example.com"
+              ></input>
+            </div>
+            <div className="flex flex-col">
+              <label
+                htmlFor="password-input"
+                className={`text-[#5c5a5a] ${roboto.className} tracking-widest`}
+              >
+                PASSWORD
+              </label>
+              <input
+                name="PASSWORD"
+                className={`bg-[#faf9f7] border-2 border-gray text-[#5c5a5a]`}
+                id="password-input"
+                placeholder="********"
+              ></input>
+              <button
+                className={`bg-[#5f5e5e] ${roboto.className} tracking-widest`}
+              >
+                SIGN IN
+              </button>
+            </div>
+          </Form>
         </div>
       </div>
       <div className="bg-[#faf9f7] flex justify-between">
