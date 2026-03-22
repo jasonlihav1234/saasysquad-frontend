@@ -1,6 +1,7 @@
 import { Gelasio, Roboto } from "next/font/google";
 import Form from "next/form";
 import Image from "next/image";
+import Link from "next/link";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -80,12 +81,16 @@ export default function Login() {
                 </p>
                 <hr className="flex-1 border-[#C5A059] ml-5"></hr>
               </div>
-              <button
-                type="button"
-                className={`cursor-pointer relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] block mt-10 -mr-5 p-6 z-10`}
-              >
-                CREATE AN ACCOUNT
-              </button>
+              <div className="-mr-5 z-10">
+                <Link href="/register" className="z-10 w-full">
+                  <button
+                    type="button"
+                    className={`cursor-pointer relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] block mt-10 p-6 w-full`}
+                  >
+                    CREATE AN ACCOUNT
+                  </button>
+                </Link>
+              </div>
             </div>
           </Form>
           <p
