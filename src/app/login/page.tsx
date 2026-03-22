@@ -16,7 +16,7 @@ export default function Login() {
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full grid grid-rows-2">
       <div className="grid grid-cols-3 row-span-2">
-        <h3 className={`text-black ${gelasio.className} text-3xl ml-5 pt-5`}>
+        <h3 className={`text-black ${gelasio.className} text-3xl ml-10 pt-5`}>
           The Curated Althaïr
         </h3>
         <div className="h-full flex flex-col justify-center">
