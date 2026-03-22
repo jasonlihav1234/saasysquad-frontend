@@ -48,13 +48,12 @@ export default function Login() {
       );
 
       if (response.status === 200) {
-        alert("works");
         const body = await response.json();
         localStorage.setItem("accessToken", body.accessToken);
         localStorage.setItem("refreshToken", body.refreshToken);
         router.push("/dashboard");
       } else {
-        alert("incorrect credenitals");
+        alert("incorrect credentials");
       }
     } catch (error) {
       console.log("Failed");
