@@ -39,7 +39,55 @@ export default function Register() {
             Join the Althaïr
           </h1>
           <Form action="/">
-          
+            <div className="flex flex-col">
+              <label
+                className={`text-[#5c5a5a] ${roboto.className} tracking-widest cursor-text`}
+              >
+                USERNAME
+              </label>
+              <input
+                name="USERNAME"
+                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] -mr-5 z-10 p-6`}
+              ></input>
+            </div>
+            <div className="flex flex-col">
+              <label
+                className={`text-[#5c5a5a] ${roboto.className} tracking-widest cursor-text`}
+              >
+                EMAIL ADDRESS
+              </label>
+              <input
+                name="EMAIL ADDRESS"
+                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] -mr-5 z-10 p-6`}
+              ></input>
+            </div>
+            <div className="flex flex-col">
+              <label
+                className={`text-[#5c5a5a] ${roboto.className} tracking-widest cursor-text`}
+              >
+                PASSWORD
+              </label>
+              <input
+                name="PASSWORD"
+                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] -mr-5 z-10 p-6`}
+              ></input>
+            </div>
+            <div className="flex flex-col">
+              <label
+                className={`text-[#5c5a5a] ${roboto.className} tracking-widest cursor-text`}
+              >
+                CONFIRM PASSWORD
+              </label>
+              <input
+                name="CONFIRM PASSWORD"
+                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] -mr-5 z-10 p-6`}
+              ></input>
+            </div>
+            <button
+              className={`cursor-pointer bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-10 -mr-5 z-10 p-6 text-white font-bold`}
+            >
+              SIGN IN
+            </button>
           </Form>
         </div>
       </div>
