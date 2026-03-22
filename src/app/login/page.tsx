@@ -4,6 +4,7 @@ import { Gelasio, Roboto } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -18,6 +19,7 @@ const roboto = Roboto({
 export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef<boolean>(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -46,9 +48,13 @@ export default function Login() {
       );
 
       if (response.status === 200) {
-        // alert("works");
+        alert("works");
+        const body = await response.json();
+        localStorage.setItem("accessToken", body.accessToken);
+        localStorage.setItem("refreshToken", body.refreshToken);
+        router.push("/dashboard");
       } else {
-        // alert("incorrect credenitals");
+        alert("incorrect credenitals");
       }
     } catch (error) {
       console.log("Failed");
@@ -85,6 +91,7 @@ export default function Login() {
               </label>
               <input
                 name="email"
+                type="email"
                 className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] -mr-5 z-10 p-6 disabled:opacity-80 disabled:cursor-not-allowed`}
                 id="email-input"
                 placeholder="name@example.com"
@@ -104,11 +111,12 @@ export default function Login() {
                 <p
                   className={`text-[#806737] ${roboto.className} tracking-widest hover:underline cursor-pointer`}
                 >
-                  FORGOT PASSWORD?
+                  <Link href="/forgot-password">FORGOT PASSWORD?</Link>
                 </p>
               </div>
               <input
                 name="password"
+                type="password"
                 className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] -mr-5 z-10 p-6 mb-5 disabled:opacity-80`}
                 id="password-input"
                 placeholder="********"
@@ -135,7 +143,7 @@ export default function Login() {
                   <button
                     type="button"
                     disabled={isSubmitting}
-                    className={`cursor-pointer relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] block mt-10 p-6 w-full`}
+                    className={`cursor-pointer relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] block mt-10 p-6 w-full disabled:opacity-80`}
                   >
                     CREATE AN ACCOUNT
                   </button>
@@ -153,6 +161,8 @@ export default function Login() {
         <div className="relative w-full h-full overflow-hidden">
           <Image
             src="/images/login_image.png"
+            placeholder="blur"
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAJCAMAAADNcxasAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAB+UExURX19fLm5ucLCwpaWlbGxsX5+fpeXl7e3t5ubm76+vWRkZJCQj62trJWVlMHBwW1ubY2NjJqamZSUk8HBwHV1dJiYmJybmpGRkGdnZ46OjpaVlF5fXomJiIODgoyNjH18e3FxcEhIR25ubWVmZHh4d1hYVxwcGyIjIjc3N////46r3OIAAAABYktHRCnKt4UkAAAAB3RJTUUH6gMWCxcdIwnneQAAAD1JREFUCNcFwQUCgCAAALEzMUEwsFv0/y90A88PQqJYJClZXpQSVWlT07SdlfTDaAWTmZeVbT/Oi/tx7/cDP0EDcycdVKwAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMDMtMjJUMTE6MjM6MjgrMDA6MDAMr3xUAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTAzLTIyVDExOjIzOjI4KzAwOjAwffLE6AAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyNi0wMy0yMlQxMToyMzoyOSswMDowMIyQ7oMAAAAASUVORK5CYII="
             fill={true}
             className="scale-145 opacity-25"
             alt="Image of flower and vase, grey-scale"
