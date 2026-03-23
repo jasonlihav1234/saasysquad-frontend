@@ -1,7 +1,6 @@
 "use client";
 
 import { Gelasio, Roboto } from "next/font/google";
-import Form from "next/form";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef } from "react";
@@ -37,11 +36,12 @@ export default function Register() {
       setIsSubmitting(false);
       alert("Passwords do not match");
 
+      isSubmittingRef.current = false;
       return;
     }
 
     try {
-      const response = await fetch(
+      const registerResponse = await fetch(
         "https://sassysquad-backend.vercel.app/auth/register",
         {
           method: "POST",
@@ -56,11 +56,37 @@ export default function Register() {
         },
       );
 
-      if (response.status !== 200) {
+      if (registerResponse.status !== 201) {
+        const res = await registerResponse.json();
+        console.log(res);
         alert("Registering failed");
         setIsSubmitting(false);
 
+        isSubmittingRef.current = false;
         return;
+      }
+
+      const loginResponse = await fetch(
+        "https://sassysquad-backend.vercel.app/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.get("email"),
+            password: formData.get("password"),
+          }),
+        },
+      );
+
+      if (loginResponse.status === 200) {
+        const body = await loginResponse.json();
+        localStorage.setItem("accessToken", body.accessToken);
+        localStorage.setItem("refreshToken", body.refreshToken);
+        router.push("/dashboard");
+      } else {
+        alert("Login failed after registering");
       }
     } catch (error) {
       console.log(error);
@@ -97,7 +123,7 @@ export default function Register() {
           <h1 className={`${gelasio.className} text-6xl text-black`}>
             Join the Althaïr
           </h1>
-          <Form action="/">
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col pt-10">
               <label
                 htmlFor="username-register"
@@ -107,9 +133,10 @@ export default function Register() {
               </label>
               <input
                 name="username"
-                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] p-6`}
+                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] p-6 disabled:opacity-80 disabled:cursor-not-allowed`}
                 placeholder="test_username"
                 id="username-register"
+                disabled={isSubmitting}
                 required
               ></input>
             </div>
@@ -123,9 +150,10 @@ export default function Register() {
               <input
                 name="email"
                 type="email"
-                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] p-6`}
+                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] p-6 disabled:opacity-80 disabled:cursor-not-allowed`}
                 placeholder="name@example.com"
                 id="email-register"
+                disabled={isSubmitting}
                 required
               ></input>
             </div>
@@ -139,9 +167,10 @@ export default function Register() {
               <input
                 name="password"
                 type="password"
-                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] p-6`}
+                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] p-6 disabled:opacity-80 disbled:cursor-not-allowed`}
                 placeholder="*******"
                 id="password-register"
+                disabled={isSubmitting}
                 required
               ></input>
             </div>
@@ -155,18 +184,21 @@ export default function Register() {
               <input
                 name="password_confirm"
                 type="password"
-                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] p-6`}
+                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] p-6 disabled:opacity-80 disabled:cursor-not-allowed`}
                 placeholder="*******"
                 id="confirm-password-register"
+                disabled={isSubmitting}
                 required
               ></input>
             </div>
             <button
-              className={`cursor-pointer bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-20 w-full p-6 text-white font-bold`}
+              type="submit"
+              disabled={isSubmitting}
+              className={`cursor-pointer bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-20 w-full p-6 text-white font-bold disabled:opacity-80 disabled:cursor-not-allowed`}
             >
               SIGN IN
             </button>
-          </Form>
+          </form>
           <p
             className={`${roboto.className} text-[#5c5a5a] tracking-wide text-center pt-10 border-t-1 border-[#E3E2E0] mt-20 pb-10`}
           >
