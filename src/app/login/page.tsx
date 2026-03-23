@@ -142,9 +142,41 @@ export default function Login() {
                   <button
                     type="button"
                     disabled={isSubmitting}
-                    className={`cursor-pointer relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] block mt-10 p-6 w-full disabled:opacity-80`}
+                    className={`${roboto.className} cursor-pointer relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] block mt-10 p-6 w-full disabled:opacity-80`}
                   >
                     CREATE AN ACCOUNT
+                  </button>
+                </Link>
+                <Link href="/register" className="z-10 w-full">
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    className={`${roboto.className} cursor-pointer relative text-black bg-[#f8f8f8] hover:bg-white transition duration-300 font-bold tracking-widest border-1 border-[#C5A059] flex justify-center items-center mt-10 p-6 w-full disabled:opacity-80`}
+                  >
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 18 18"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"
+                        fill="#4285F4"
+                      />
+                      <path
+                        d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z"
+                        fill="#34A853"
+                      />
+                      <path
+                        d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.712s.102-1.173.282-1.712V4.956H.957a8.991 8.991 0 000 8.088l3.007-2.332z"
+                        fill="#FBBC05"
+                      />
+                      <path
+                        d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.956L3.964 7.29C4.672 3.163 6.656 3.58 9 3.58z"
+                        fill="#EA4335"
+                      />
+                    </svg>
+                    <p className="pl-3">SIGN IN WITH GOOGLE</p>
                   </button>
                 </Link>
               </div>
