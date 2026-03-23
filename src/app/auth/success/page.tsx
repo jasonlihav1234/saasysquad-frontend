@@ -36,14 +36,22 @@ export default function AuthSuccessPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-[#F9F8F6]">
-      <div className="flex flex-col items-center">
-        <div className="h-20 w-20 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
-        <p
-          className={`mt-4 text-black animate-pulse text-center text-xl ${roboto.className}`}
+      {error ? (
+        <div
+          className={`text-[#B22222] text-3xl ${roboto.className} tracking-wide`}
         >
-          Completing secure login...
-        </p>
-      </div>
+          {error}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center">
+          <div className="h-20 w-20 animate-spin rounded-full border-4 border-[#CBA65E] border-t-transparent"></div>
+          <p
+            className={`mt-4 text-[#5c5a5a] animate-pulse text-center text-xl ${roboto.className}`}
+          >
+            Completing secure login...
+          </p>
+        </div>
+      )}
     </main>
   );
 }
