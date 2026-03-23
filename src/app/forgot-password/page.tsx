@@ -34,7 +34,7 @@ export default function ForgotPasswordPage() {
 
     try {
       const response = await fetch(
-        "https://sassysquad-backend-git-debug-branch-jasons-projects-ac5e4f90.vercel.app/auth/forgot-password",
+        "https://sassysquad-backend.vercel.app/auth/forgot-password",
         {
           method: "POST",
           headers: {
@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
           }),
         },
       );
-      console.log(await response.json());
+
       if (response.status === 200) {
         alert("Email sent");
       } else {
