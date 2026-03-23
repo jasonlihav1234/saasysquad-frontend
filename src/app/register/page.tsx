@@ -30,6 +30,8 @@ export default function Register() {
         <div className="relative w-full h-full overflow-hidden">
           <Image
             src="/images/register_image.png"
+            placeholder="blur"
+            blurDataURL="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAkAAAAFCAMAAACgjTZZAAAAIGNIUk0AAHomAACAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAACKUExURTw8OY6OjLS1s21uaVZXUllaVSYmJC4vLFhZVE5OS6eopba3tIOEf4eIg4iIhDExLzw9OXV2cE5OSmlpZIKDfqippbm5toWFgjExLkJDP35+eU9QS2NkX5OTj4KCfkxLR0ZGQiYmIz9AO3JybVxdV6WlorS1soqLh0xMSTo7OCEiHzU2MmVmYP///+BRiRYAAAABYktHRC3N2kE9AAAAB3RJTUUH6gMXBCExKy06twAAADpJREFUCNdjYGBkYmZhZWPnYODk4ubh5eMXEGQQEhYRFROXkJRikJaRlZNXUFRSZlBRVVPX0NTS1gEAQBAD3+rqVI0AAAAldEVYdGRhdGU6Y3JlYXRlADIwMjYtMDMtMjNUMDQ6MzM6MzMrMDA6MDAtxDQEAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDI2LTAzLTIzVDA0OjMzOjMzKzAwOjAwXJmMuAAAACh0RVh0ZGF0ZTp0aW1lc3RhbXAAMjAyNi0wMy0yM1QwNDozMzo0OSswMDowMKU5+zAAAAAASUVORK5CYII="
             fill={true}
             className="object-cover"
             alt="Image of home good, grey-scale"
@@ -64,6 +66,7 @@ export default function Register() {
               </label>
               <input
                 name="EMAIL ADDRESS"
+                type="email"
                 className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b-1 border-[#C5A059] text-[#5c5a5a] p-6`}
                 placeholder="name@example.com"
                 id="email-register"
