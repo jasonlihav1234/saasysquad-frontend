@@ -1,7 +1,7 @@
 "use client";
 
 import { Gelasio, Roboto } from "next/font/google";
-import { useRef, useState } from "react";
+import { useRef, useState, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 
@@ -15,7 +15,7 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef<boolean>(false);
   const searchParams = useSearchParams();
@@ -163,5 +163,13 @@ export default function ResetPasswordPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
