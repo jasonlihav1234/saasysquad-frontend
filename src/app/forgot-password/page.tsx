@@ -108,11 +108,13 @@ export default function ForgotPasswordPage() {
           </div>
         </form>
 
-        <p
-          className={`tracking-widest underline decoration-[#E9C176] underline-offset-10 text-[#5c5a5a] ${roboto.className} text-center cursor-pointer pt-7`}
-        >
-          <Link href="/login">RETURN TO LOGIN</Link>
-        </p>
+        <Link href="/login" className="mt-7">
+          <p
+            className={`tracking-widest underline decoration-[#E9C176] underline-offset-10 text-[#5c5a5a] ${roboto.className} text-center cursor-pointer`}
+          >
+            RETURN TO LOGIN
+          </p>
+        </Link>
         <hr className="border border-[#E3E2E0] w-32 mt-50"></hr>
       </div>
 

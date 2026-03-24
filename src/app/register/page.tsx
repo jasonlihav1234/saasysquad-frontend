@@ -102,11 +102,13 @@ export default function Register() {
         <h1 className={`text-black ${gelasio.className} text-3xl pl-10`}>
           The Curated Althaïr
         </h1>
-        <p
-          className={`text-black ${roboto.className} text-xl pr-10 cursor-pointer hover:underline`}
-        >
-          <Link href="/login">LOGIN</Link>
-        </p>
+        <Link href="/login" className="z-10 -mr-5">
+          <p
+            className={`text-black ${roboto.className} text-xl pr-10 cursor-pointer hover:underline`}
+          >
+            LOGIN
+          </p>
+        </Link>
       </div>
       <div className="grid grid-cols-2 grow">
         <div className="relative w-full h-full overflow-hidden">

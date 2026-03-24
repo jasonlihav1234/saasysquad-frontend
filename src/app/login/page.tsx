@@ -107,11 +107,13 @@ export default function Login() {
                   PASSWORD
                 </label>
 
-                <p
-                  className={`text-[#806737] ${roboto.className} tracking-widest hover:underline cursor-pointer`}
-                >
-                  <Link href="/forgot-password">FORGOT PASSWORD?</Link>
-                </p>
+                <Link href="/forgot-password">
+                  <p
+                    className={`text-[#806737] ${roboto.className} tracking-widest hover:underline cursor-pointer`}
+                  >
+                    FORGOT PASSWORD?
+                  </p>
+                </Link>
               </div>
               <input
                 name="password"
@@ -147,7 +149,10 @@ export default function Login() {
                     CREATE AN ACCOUNT
                   </button>
                 </Link>
-                <Link href="https://sassysquad-backend.vercel.app/auth/google/login" className="z-10 w-full">
+                <Link
+                  href="https://sassysquad-backend.vercel.app/auth/google/login"
+                  className="z-10 w-full"
+                >
                   <button
                     type="button"
                     disabled={isSubmitting}
