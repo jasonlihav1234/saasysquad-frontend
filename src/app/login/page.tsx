@@ -1,6 +1,7 @@
 import { Gelasio, Roboto } from "next/font/google";
 import Form from "next/form";
 import Image from "next/image";
+import Footer from "@/components/universal/Footer";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -104,25 +105,7 @@ export default function Login() {
           ></Image>
         </div>
       </div>
-      <div className="bg-[#F1F1EF] flex justify-between">
-        <p
-          className={`text-[#5c5a5a] ${roboto.className} pl-15 pb-15 pt-15 tracking-wider text-sm`}
-        >
-          © 2026 THE CURATED ALTHAïR. ALL RIGHTS RESERVED.
-        </p>
-        <div className="flex flex-row pb-15 pt-15">
-          <p
-            className={`cursor-pointer text-[#5c5a5a] ${roboto.className} tracking-wider text-sm pr-15 hover:underline`}
-          >
-            PRIVACY POLICY
-          </p>
-          <p
-            className={`cursor-pointer text-[#5c5a5a] ${roboto.className} tracking-wider text-sm pr-15 hover:underline`}
-          >
-            SUPPORT
-          </p>
-        </div>
-      </div>
+      <Footer variant="page" />
     </main>
   );
 }
