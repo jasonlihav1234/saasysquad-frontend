@@ -3,6 +3,7 @@ import Footer from "@/components/universal/Footer";
 import { Roboto, Gelasio } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
+import "material-symbols";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -33,29 +34,43 @@ export default function Dashboard() {
           <div className="hidden md:flex gap-6 items-center">
             <Link
               href="/dashboard"
-              className={`text-[#775A19] dark:text-[#C5A059] border-b border-[#775A19] pb-1`}
+              className={`text-[#775A19] dark:text-[#C5A059] border-b border-[#775A19]`}
             >
               Catalog
+            </Link>
+            <Link
+              href="/purchases"
+              className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
+            >
+              Purchases
+            </Link>
+            <Link
+              href="/sales"
+              className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
+            >
+              Sales
             </Link>
           </div>
         </div>
         <div className="relative hidden lg:block group">
           <input
-            className="bg-surface-container-low border-none focus:ring-0 w-120 py-2 px-2 text-sm font-body outline-none border-b border-outline-variant focus:border-secondary transition-all"
+            className={`bg-[#F4F3F1] focus:ring-0 sm:w-50 md:w-100 lg:w-150 py-2 px-2 text-sm ${roboto.className} outline-none border-b border-[#D1C5B4] focus:border-[#775A19] transition-all`}
             placeholder="Search catalog..."
           ></input>
-          <span className="material-symbols-outlined absolute right-2 top-2 text-primary opacity-50">
+          <span className="material-symbols-sharp absolute right-2 top-2 text-primary opacity-50 cursor-pointer">
             search
           </span>
         </div>
         <div className="flex items-center gap-6">
-          <button className="flex items-center gap-2 px-5 py-2 bg-primary text-on-primary text-xs uppercase tracking-widest hover:bg-on-surface transition-colors">
-            <span className="material-symbols-outlined text-sm">add photo</span>
+          <button className="flex items-center gap-2 px-5 py-2 bg-[#5F5E5E] text-[#FFFFFF] text-xs uppercase tracking-widest hover:bg-[#1A1C1B] transition-colors cursor-pointer">
+            <span className="material-symbols-outlined text-sm">
+              image_arrow_up
+            </span>
             <span className="hidden sm:inline">recommend with ai</span>
           </button>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <span className="material-symbols-outlined text-primary cursor-pointer hover:text-secondary transition-colors">
-              shopping_bag
+              shopping_cart
             </span>
             <div className="w-8 h-8 bg-surface-container-highest flex items-center justify-center overflow-hidden">
               <Image
