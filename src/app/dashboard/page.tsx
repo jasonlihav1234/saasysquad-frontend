@@ -83,10 +83,25 @@ export default function Dashboard() {
           </div>
         </div>
       </nav>
-      <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col overflow-y-auto">
-        <div className="flex flex-1"></div>
-        <Footer />
+      <main className="bg-[#F9F8F6] pt-32 pb-24 px-12 mx-auto">
+        <header className="mb-20 flex flex-col md:flex-row justify-between items-end gap-8">
+          <div className="max-w-2xl">
+            <h1
+              className={`text-6xl md:text-7xl ${gelasio.className} tracking-tighter text-[#1a1c1b]`}
+            >
+              The Althair
+              <br></br>
+              <span className="italic text-[#5f5e5e] font-normal">Catalog</span>
+            </h1>
+          </div>
+          <div className={`${roboto.className} flex flex-wrap gap-4 font-body text-xs uppercase tracking-widest`}>
+            <button className="px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] border-b-2 border-b-[#775A19] cursor-pointer">
+              New Arrivals
+            </button>
+          </div>
+        </header>
       </main>
+      <Footer />
     </>
   );
 }
