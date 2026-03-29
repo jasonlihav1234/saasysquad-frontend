@@ -94,12 +94,56 @@ export default function Dashboard() {
               <span className="italic text-[#5f5e5e] font-normal">Catalog</span>
             </h1>
           </div>
-          <div className={`${roboto.className} flex flex-wrap gap-4 font-body text-xs uppercase tracking-widest`}>
+          <div
+            className={`${roboto.className} flex flex-wrap gap-4 font-body text-xs uppercase tracking-widest`}
+          >
             <button className="px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] border-b-2 border-b-[#775A19] cursor-pointer">
               New Arrivals
             </button>
+            <button className="px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] cursor-pointer">
+              Best Sellers
+            </button>
+            <button className="px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] cursor-pointer">
+              Browse All
+            </button>
           </div>
         </header>
+        <footer className="mt-32 pt-16 border-t border-[#D1C5B4]/10 flex justify-center items-center gap-12">
+          <button className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer">
+            chevron_left
+          </button>
+          <div
+            className={`flex gap-8 ${roboto.className} text-sm tracking-widest`}
+          >
+            <Link
+              href="/"
+              className="text-[#1A1C1B] font-bold border-b border-[#1A1C1B]"
+            >
+              01
+            </Link>
+            <Link
+              href="/"
+              className="text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors"
+            >
+              02
+            </Link>
+            <Link
+              href="/"
+              className="text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors"
+            >
+              03
+            </Link>
+            <Link
+              href="/"
+              className="text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors"
+            >
+              04
+            </Link>
+          </div>
+          <button className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer">
+            chevron_right
+          </button>
+        </footer>
       </main>
       <Footer />
     </>
