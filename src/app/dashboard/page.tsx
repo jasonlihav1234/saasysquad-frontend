@@ -23,6 +23,7 @@ export default function Dashboard() {
   const [hasItems, setHasItems] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [items, setItems] = useState<any[]>([]);
+  const router = useRouter();
 
   const handleInputChange = (e: any) => {
     setSearchTerm(e.target.value.toLowerCase());
@@ -31,16 +32,10 @@ export default function Dashboard() {
   const handleSearchSubmit = async (e: any) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    let searchString = formData.get("search-string");
+    let searchString =
+      formData.get("search-string")?.toString().toLowerCase() || "";
 
-    if (searchString) {
-      searchString = String(searchString).trim().toLowerCase();
-    } else {
-      alert("Invalid search query");
-      return;
-    }
-
-    try {
+    const executeSearch = async (searchString: string) => {
       const response = await fetch(
         "https://sassysquad-backend.vercel.app/items",
         {
@@ -56,7 +51,7 @@ export default function Dashboard() {
         const body = await response.json();
         // filter out items that don't match the string
         const filteredArray = body.filter((item: any) => {
-          return item.item_name.trim().toLowerCase() === searchString;
+          return item.item_name.trim().toLowerCase().includes(searchString);
         });
 
         if (filteredArray.length === 0) {
@@ -68,10 +63,39 @@ export default function Dashboard() {
           setItems(filteredArray);
         }
       } else if (response.status === 401) {
+        const response = await fetch(
+          "https://sassysquad-backend.vercel.app/auth/refresh",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              refreshToken: localStorage.getItem("refreshToken"),
+            }),
+          },
+        );
+
+        if (response.status === 200) {
+          const body = await response.json();
+          localStorage.setItem("accessToken", body.accessToken);
+          localStorage.setItem("refreshToken", body.refreshToken);
+
+          await executeSearch(searchString);
+        } else {
+          localStorage.clear();
+          router.push("/login");
+        }
       } else {
+        const body = await response.json();
+        alert(body);
       }
+    };
+
+    try {
+      await executeSearch(searchString);
     } catch (error) {
-      console.log(error);
+      alert(`Fatal error: ${error}`);
     }
   };
 
