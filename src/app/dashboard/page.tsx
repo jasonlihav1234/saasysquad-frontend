@@ -21,6 +21,59 @@ const gelasio = Gelasio({
 
 export default function Dashboard() {
   const [hasItems, setHasItems] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [items, setItems] = useState<any[]>([]);
+
+  const handleInputChange = (e: any) => {
+    setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const handleSearchSubmit = async (e: any) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    let searchString = formData.get("search-string");
+
+    if (searchString) {
+      searchString = String(searchString).trim().toLowerCase();
+    } else {
+      alert("Invalid search query");
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        "https://sassysquad-backend.vercel.app/items",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorisation: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        },
+      );
+
+      if (response.status === 200) {
+        const body = await response.json();
+        // filter out items that don't match the string
+        const filteredArray = body.filter((item: any) => {
+          return item.item_name.trim().toLowerCase() === searchString;
+        });
+
+        if (filteredArray.length === 0) {
+          setHasItems(false);
+          setItems([]);
+        } else {
+          setHasItems(true);
+          setSearchTerm("");
+          setItems(filteredArray);
+        }
+      } else if (response.status === 401) {
+      } else {
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
@@ -61,13 +114,21 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="relative hidden lg:block group">
-          <input
-            className={`bg-[#F4F3F1] focus:ring-0 sm:w-50 md:w-100 lg:w-150 py-2 px-2 text-sm ${roboto.className} outline-none border-b border-[#D1C5B4] focus:border-[#775A19] transition-all`}
-            placeholder="Search catalog..."
-          ></input>
-          <span className="material-symbols-sharp absolute right-2 top-2 text-primary opacity-50 cursor-pointer">
-            search
-          </span>
+          <form className="relative inline-block" onSubmit={handleSearchSubmit}>
+            <input
+              className={`bg-[#F4F3F1] focus:ring-0 sm:w-50 md:w-100 lg:w-150 py-2 px-2 text-sm ${roboto.className} outline-none border-b border-[#D1C5B4] focus:border-[#775A19] transition-all`}
+              placeholder="Search catalog..."
+              name="search-string"
+              value={searchTerm}
+              onChange={handleInputChange}
+            ></input>
+            <button
+              type="submit"
+              className="material-symbols-sharp absolute right-2 top-2 text-primary opacity-50 cursor-pointer"
+            >
+              search
+            </button>
+          </form>
         </div>
         <div className="flex items-center gap-6">
           <button className="flex items-center gap-2 px-5 py-2 bg-[#5F5E5E] text-[#FFFFFF] text-xs uppercase tracking-widest hover:bg-[#1A1C1B] transition-colors cursor-pointer">
@@ -81,17 +142,19 @@ export default function Dashboard() {
               shopping_cart
             </span>
             <div className="w-8 h-8 bg-surface-container-highest flex items-center justify-center overflow-hidden">
-              <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIEWWIsS24oEuhS288WfCZjz-DYqXxsIG0aCNeFSv78p1rnf6XwcNzKSw-Xn1_AUFH_ESsayZqp-A6g9FAOCencuC1ka2p90hh06vwU4RCpA5Hwuk70p6PViQLxszYYVWfaLRm4VcP-tFyWJY2Zgqmwlg37Yt-iN7qKnSfl812uX1V6D9gAzX43IGcr63yiDKlxJjky5qS3cDTR63mrstO31kxFyupT6m7F2_peMXjtNvbrgTXD5doEoG3vBr0gESyhoIGCZvtgLi7"
-                alt="User Profile"
-                width={32}
-                height={32}
-              ></Image>
+              <Link href="/me">
+                <Image
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIEWWIsS24oEuhS288WfCZjz-DYqXxsIG0aCNeFSv78p1rnf6XwcNzKSw-Xn1_AUFH_ESsayZqp-A6g9FAOCencuC1ka2p90hh06vwU4RCpA5Hwuk70p6PViQLxszYYVWfaLRm4VcP-tFyWJY2Zgqmwlg37Yt-iN7qKnSfl812uX1V6D9gAzX43IGcr63yiDKlxJjky5qS3cDTR63mrstO31kxFyupT6m7F2_peMXjtNvbrgTXD5doEoG3vBr0gESyhoIGCZvtgLi7"
+                  alt="User Profile"
+                  width={32}
+                  height={32}
+                ></Image>
+              </Link>
             </div>
           </div>
         </div>
       </nav>
-      <main className="bg-[#F9F8F6] pt-32 pb-24 px-12 mx-auto">
+      <main className="bg-[#F9F8F6] pt-32 pb-24 px-12 mx-auto min-h-screen">
         {hasItems ? (
           <>
             <header className="mb-20 flex flex-col md:flex-row justify-between items-end gap-8">
@@ -171,7 +234,7 @@ export default function Dashboard() {
                 No items found.
               </p>
             </div>
-            <section className="relative w-full h-[600px] mb-32 overflow-hidden bg-[#f4f3f1]">
+            <section className="relative w-full h-[600px] mb-32 overflow-hidden bg-[#f4f3f1] mt-27">
               <div className="absolute inset-0 flex items-center justify-center opacity-40 mix-blend-multiply">
                 <img
                   alt="Minimalist Interior"
