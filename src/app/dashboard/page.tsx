@@ -20,9 +20,29 @@ const gelasio = Gelasio({
 });
 
 export default function Dashboard() {
-  const [hasItems, setHasItems] = useState(false);
+  const [hasItems, setHasItems] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  const [items, setItems] = useState<any[]>([]);
+  // useful - item_name, price, image_url
+  const [items, setItems] = useState<any[]>([
+    {
+      item_name: "Earth Ovoid Vessel",
+      price: 840.0,
+      image_url:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuB6lpnZPenUoxA4grBp1o8XLkj_N7RHfgiyNRZd4I5sPj0AkLl1xfdBNVii-m2DA91V9kVJlNwfz9fSJFQ7u06-W3HSs_kDB60h9rB-EcSi8IMzg0laDY_H8IY9gmlCia2TsPIQAzMhstGhgzGvY3Vpsu2_ffaSaxY6ke4upPMK2GT0I-l322bnhVqXTx5Tn68BEPUwmdzmIh8t-F19cW6JSvkjAN-Gx7LO9bNlpuIfHp_MvVirq7PGUr7rtTihdmxybVmI9vp6lAAS",
+    },
+    {
+      item_name: "Raw Linen Throw",
+      price: 320.0,
+      image_url:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuAWGgUilHOT-zzW0DcPVqCT53N7_4McZ84Qrwe0rRtdqoOyvhiHBVr08PtpNoq3S_TdNzDx_JPbfax0Ebl-tKEjV7kwP8jm_L1gPWLhDNrJraus5O1xIF5UkNiy5U4JObaBpnR1tyRr4BhLEMxC9nI8jFy5sIIkFCEIlRWtWz7ye4-dp_K15mCrKO7neIN4RrMe1CuzdQGk5gu6521T2CPrW1kOx2JGdknIv0YxavwN5iC-VuMlX1qZZY41xdJeom1tMPXOrmpBkvhK",
+    },
+    {
+      item_name: "Oblique Oak Chair",
+      price: 1450.0,
+      image_url:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
+    },
+  ]);
   const router = useRouter();
 
   const handleInputChange = (e: any) => {
@@ -50,7 +70,7 @@ export default function Dashboard() {
       if (response.status === 200) {
         const body = await response.json();
         // filter out items that don't match the string
-        const filteredArray = body.filter((item: any) => {
+        const filteredArray = body.items.filter((item: any) => {
           return item.item_name.trim().toLowerCase().includes(searchString);
         });
 
@@ -207,6 +227,33 @@ export default function Dashboard() {
                 </button>
               </div>
             </header>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+              {items.map((item) => (
+                <div className="group cursor-pointer">
+                  <div className="relative aspect-[1/1] bg-[#efeeec] overflow-hidden mb-6">
+                    <img
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transofrm duration-700 ease-out"
+                      alt="store product image"
+                      src={`${item.image_url}`}
+                    ></img>
+                  </div>
+                  <div className="flex justify-between items-baseline gap-4">
+                    <div>
+                      <h3
+                        className={`text-xl ${gelasio.className} antialiased mb-1`}
+                      >{`${item.item_name}`}</h3>
+                    </div>
+                    <div>
+                      <span
+                        className={`text-md ${gelasio.className} text-[#775a19] whitespace-nowrap`}
+                      >
+                        {`$${item.price}`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
             <footer className="mt-32 pt-16 border-t border-[#D1C5B4]/10 flex justify-center items-center gap-12">
               <button className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer">
                 chevron_left
