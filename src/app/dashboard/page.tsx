@@ -35,74 +35,72 @@ export default function Dashboard() {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   // useful - item_name, price, image_url, item_id
-  const [items, setItems] = useState<any[]>([
-    {
-      item_id: 1,
-      item_name: "Earth Ovoid Vessel",
-      price: 840.0,
-      image_url:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuB6lpnZPenUoxA4grBp1o8XLkj_N7RHfgiyNRZd4I5sPj0AkLl1xfdBNVii-m2DA91V9kVJlNwfz9fSJFQ7u06-W3HSs_kDB60h9rB-EcSi8IMzg0laDY_H8IY9gmlCia2TsPIQAzMhstGhgzGvY3Vpsu2_ffaSaxY6ke4upPMK2GT0I-l322bnhVqXTx5Tn68BEPUwmdzmIh8t-F19cW6JSvkjAN-Gx7LO9bNlpuIfHp_MvVirq7PGUr7rtTihdmxybVmI9vp6lAAS",
-    },
-    {
-      item_id: 2,
-      item_name: "Raw Linen Throw",
-      price: 320.0,
-      image_url:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAWGgUilHOT-zzW0DcPVqCT53N7_4McZ84Qrwe0rRtdqoOyvhiHBVr08PtpNoq3S_TdNzDx_JPbfax0Ebl-tKEjV7kwP8jm_L1gPWLhDNrJraus5O1xIF5UkNiy5U4JObaBpnR1tyRr4BhLEMxC9nI8jFy5sIIkFCEIlRWtWz7ye4-dp_K15mCrKO7neIN4RrMe1CuzdQGk5gu6521T2CPrW1kOx2JGdknIv0YxavwN5iC-VuMlX1qZZY41xdJeom1tMPXOrmpBkvhK",
-    },
-    {
-      item_id: 3,
-      item_name: "Oblique2 Oak Chair",
-      price: 1450.0,
-      image_url:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
-    },
-    {
-      item_id: 4,
-      item_name: "Oblique3 Oak Chair",
-      price: 1450.0,
-      image_url:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
-    },
-    {
-      item_id: 5,
-      item_name: "Oblique4 Oak Chair",
-      price: 1450.0,
-      image_url:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
-    },
-    {
-      item_id: 6,
-      item_name: "Oblique5 Oak Chair",
-      price: 1450.0,
-      image_url:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
-    },
-    {
-      item_id: 7,
-      item_name: "Oblique6 Oak Chair",
-      price: 1450.0,
-      image_url:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
-    },
-    {
-      item_id: 8,
-      item_name: "Oblique7 Oak Chair",
-      price: 1450.0,
-      image_url:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
-    },
-    {
-      item_id: 9,
-      item_name: "Oblique8 Oak Chair",
-      price: 1450.0,
-      image_url:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
-    },
-  ]);
-  const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
-  const emptySlots = itemsPerPage - currentItems.length;
+  const [items, setItems] = useState<any[]>();
   const router = useRouter();
+
+  useEffect(() => {
+    const fetchItems = async (isRetry: boolean = false) => {
+      try {
+        const response = await fetch(
+          "https://sassysquad-backend.vercel.app/items",
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          },
+        );
+
+        if (response.status === 200) {
+          const data = await response.json();
+          setItems(data.items);
+        } else if (response.status === 401) {
+          if (isRetry) {
+            throw new Error("Refresh token was also rejected");
+          }
+
+          const responseRefresh = await fetch(
+            "https://sassysquad-backend.vercel.app/auth/refresh",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                refreshToken: localStorage.getItem("refreshToken"),
+              }),
+            },
+          );
+
+          if (responseRefresh.status === 200) {
+            const body = await responseRefresh.json();
+            localStorage.setItem("accessToken", body.accessToken);
+            localStorage.setItem("refreshToken", body.refreshToken);
+
+            await fetchItems(true);
+          } else {
+            localStorage.clear();
+            router.push("/login");
+          }
+        } else {
+          throw new Error("Critical failure");
+        }
+      } catch (error) {
+        alert(error);
+
+        localStorage.clear();
+        router.push("/login");
+      }
+    };
+
+    fetchItems();
+  }, [router]);
+
+  console.log(items);
+  const safeItems = items || [];
+  const currentItems = safeItems.slice(indexOfFirstItem, indexOfLastItem);
+  const emptySlots = itemsPerPage - currentItems.length;
 
   const handlePageChange = (newPageNumber: number) => {
     if (newPageNumber < 1 || newPageNumber > totalPages) {
@@ -138,7 +136,7 @@ export default function Dashboard() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorisation: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         },
       );
@@ -159,7 +157,7 @@ export default function Dashboard() {
           setItems(filteredArray);
         }
       } else if (response.status === 401) {
-        const response = await fetch(
+        const responseRefresh = await fetch(
           "https://sassysquad-backend.vercel.app/auth/refresh",
           {
             method: "POST",
@@ -172,8 +170,8 @@ export default function Dashboard() {
           },
         );
 
-        if (response.status === 200) {
-          const body = await response.json();
+        if (responseRefresh.status === 200) {
+          const body = await responseRefresh.json();
           localStorage.setItem("accessToken", body.accessToken);
           localStorage.setItem("refreshToken", body.refreshToken);
 
@@ -286,7 +284,10 @@ export default function Dashboard() {
           </div>
         </div>
       </nav>
-      <main className="bg-[#F9F8F6] pt-32 pb-24 px-12 mx-auto min-h-screen" ref={topRef}>
+      <main
+        className="bg-[#F9F8F6] pt-32 pb-24 px-12 mx-auto min-h-screen"
+        ref={topRef}
+      >
         {hasItems ? (
           <>
             <header className="mb-20 flex flex-col md:flex-row justify-between items-end gap-8">
@@ -362,36 +363,38 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-              <footer className={`mt-32 pt-16 border-t border-[#D1C5B4]/10 flex justify-center items-center gap-12 ${category !== "browse-all" ? "invisible pointer-events-none" : "" }`}>
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
-                >
-                  chevron_left
-                </button>
-                <div
-                  className={`flex gap-8 ${roboto.className} text-sm tracking-widest`}
-                >
-                  {pageNumbers.map((number) => (
-                    <button
-                      key={number}
-                      onClick={() => handlePageChange(number)}
-                      disabled={number === currentPage}
-                      className={`${number === currentPage ? "text-[#1A1C1B] font-bold border-b border-[#1A1C1B]" : "text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors cursor-pointer"}`}
-                    >
-                      {number >= 10 ? number : `0${number}`}
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
-                >
-                  chevron_right
-                </button>
-              </footer>
+            <footer
+              className={`mt-32 pt-16 border-t border-[#D1C5B4]/10 flex justify-center items-center gap-12 ${category !== "browse-all" ? "invisible pointer-events-none" : ""}`}
+            >
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
+              >
+                chevron_left
+              </button>
+              <div
+                className={`flex gap-8 ${roboto.className} text-sm tracking-widest`}
+              >
+                {pageNumbers.map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => handlePageChange(number)}
+                    disabled={number === currentPage}
+                    className={`${number === currentPage ? "text-[#1A1C1B] font-bold border-b border-[#1A1C1B]" : "text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors cursor-pointer"}`}
+                  >
+                    {number >= 10 ? number : `0${number}`}
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
+              >
+                chevron_right
+              </button>
+            </footer>
           </>
         ) : (
           <>

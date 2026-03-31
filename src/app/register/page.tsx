@@ -197,7 +197,7 @@ export default function Register() {
               disabled={isSubmitting}
               className={`cursor-pointer bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-20 w-full p-6 text-white font-bold disabled:opacity-80 disabled:cursor-not-allowed`}
             >
-              SIGN IN
+              REGISTER
             </button>
           </form>
           <p
