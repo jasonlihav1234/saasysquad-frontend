@@ -4,9 +4,8 @@ import { Roboto, Gelasio } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import "material-symbols";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
-import { SegmentStateProvider } from "next/dist/next-devtools/userspace/app/segment-explorer-node";
 
 // probably should make this user/dashboard
 
@@ -28,6 +27,7 @@ export default function Dashboard() {
   const [category, setCategory] = useState("new-arrival");
   const topRef = useRef<HTMLElement>(null);
   const itemsPerPage = 6;
+  const searchParams = useSearchParams();
   const pageNumbers = Array.from(
     { length: totalPages },
     (_, index) => index + 1,
@@ -37,6 +37,9 @@ export default function Dashboard() {
   // useful - item_name, price, image_url, item_id
   const [items, setItems] = useState<any[]>();
   const router = useRouter();
+  const isAiSidebarOpen = searchParams.get("sidebar") === "ai";
+  const openSidebar = () => router.push("?sidebar=ai");
+  const closeSidebar = () => router.push("?");
 
   useEffect(() => {
     const fetchItems = async (isRetry: boolean = false) => {
@@ -88,16 +91,12 @@ export default function Dashboard() {
         }
       } catch (error) {
         alert(error);
-
-        localStorage.clear();
-        router.push("/login");
       }
     };
 
     fetchItems();
   }, [router]);
 
-  console.log(items);
   const safeItems = items || [];
   const currentItems = safeItems.slice(indexOfFirstItem, indexOfLastItem);
   const emptySlots = itemsPerPage - currentItems.length;
@@ -261,12 +260,57 @@ export default function Dashboard() {
           </form>
         </div>
         <div className="flex items-center gap-6">
-          <button className="flex items-center gap-2 px-5 py-2 bg-[#5F5E5E] text-[#FFFFFF] text-xs uppercase tracking-widest hover:bg-[#1A1C1B] transition-colors cursor-pointer">
+          <button
+            onClick={openSidebar}
+            className="flex items-center gap-2 px-5 py-2 bg-[#5F5E5E] text-[#FFFFFF] text-xs uppercase tracking-widest hover:bg-[#1A1C1B] transition-colors cursor-pointer"
+          >
             <span className="material-symbols-outlined text-sm">
               image_arrow_up
             </span>
             <span className="hidden sm:inline">recommend with ai</span>
           </button>
+
+          <aside
+            className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${isAiSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
+          >
+            <div className="p-8 flex justify-between items-center border-b border-[#d1c5b4]">
+              <h2 className={`text-2xl ${gelasio.className} tracking-tight`}>
+                AI Curator
+              </h2>
+              <button
+                onClick={closeSidebar}
+                className="material-symbols-outlined hover:text-[#775a19] transition-colors cursor-pointer"
+              >
+                close
+              </button>
+            </div>
+            <div className="p-8 flex-1 overflow-y-auto">
+              <div className="mb-8">
+                <p
+                  className={`text-sm ${roboto.className} leading-relaxed mb-6`}
+                >
+                  Discover pieces that resonate with your vision. Upload an
+                  image of a space, a texture, or an inspiration to find
+                  matching artisanal items from our collection.
+                </p>
+                <div className="border-2 border-dashed border-[#d1c5b4]/50 aspect-[4/3] flex flex-col items-center justify-center p-8 text-center group hover:border-[#775a19] transition-colors cursor-pointer bg-[#ffffff]">
+                  <span className="material-symbols-outlined text-4xl text-[#5f5e5e] mb-4 group-hover:scale-110 transition-transform">
+                    image_arrow_up
+                  </span>
+                  <span
+                    className={`text-sm ${roboto.className} font-medium uppercase tracking-widest mb-2 text-[#775a19]]`}
+                  >
+                    Upload Image
+                  </span>
+                  <span
+                    className={`text-[10px] text-[#5f5e5e]/60 uppercase tracking-tighter`}
+                  >
+                    JPG, PNG up to 10MB
+                  </span>
+                </div>
+              </div>
+            </div>
+          </aside>
           <div className="flex items-center gap-6">
             <span className="material-symbols-outlined text-primary cursor-pointer hover:text-secondary transition-colors">
               shopping_cart
