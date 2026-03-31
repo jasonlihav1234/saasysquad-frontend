@@ -22,28 +22,96 @@ const gelasio = Gelasio({
 export default function Dashboard() {
   const [hasItems, setHasItems] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  // useful - item_name, price, image_url
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(2);
+  const itemsPerPage = 6;
+  const pageNumbers = Array.from(
+    { length: totalPages },
+    (_, index) => index + 1,
+  );
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  // useful - item_name, price, image_url, item_id
   const [items, setItems] = useState<any[]>([
     {
+      item_id: 1,
       item_name: "Earth Ovoid Vessel",
       price: 840.0,
       image_url:
         "https://lh3.googleusercontent.com/aida-public/AB6AXuB6lpnZPenUoxA4grBp1o8XLkj_N7RHfgiyNRZd4I5sPj0AkLl1xfdBNVii-m2DA91V9kVJlNwfz9fSJFQ7u06-W3HSs_kDB60h9rB-EcSi8IMzg0laDY_H8IY9gmlCia2TsPIQAzMhstGhgzGvY3Vpsu2_ffaSaxY6ke4upPMK2GT0I-l322bnhVqXTx5Tn68BEPUwmdzmIh8t-F19cW6JSvkjAN-Gx7LO9bNlpuIfHp_MvVirq7PGUr7rtTihdmxybVmI9vp6lAAS",
     },
     {
+      item_id: 2,
       item_name: "Raw Linen Throw",
       price: 320.0,
       image_url:
         "https://lh3.googleusercontent.com/aida-public/AB6AXuAWGgUilHOT-zzW0DcPVqCT53N7_4McZ84Qrwe0rRtdqoOyvhiHBVr08PtpNoq3S_TdNzDx_JPbfax0Ebl-tKEjV7kwP8jm_L1gPWLhDNrJraus5O1xIF5UkNiy5U4JObaBpnR1tyRr4BhLEMxC9nI8jFy5sIIkFCEIlRWtWz7ye4-dp_K15mCrKO7neIN4RrMe1CuzdQGk5gu6521T2CPrW1kOx2JGdknIv0YxavwN5iC-VuMlX1qZZY41xdJeom1tMPXOrmpBkvhK",
     },
     {
-      item_name: "Oblique Oak Chair",
+      item_id: 3,
+      item_name: "Oblique2 Oak Chair",
+      price: 1450.0,
+      image_url:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
+    },
+    {
+      item_id: 4,
+      item_name: "Oblique3 Oak Chair",
+      price: 1450.0,
+      image_url:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
+    },
+    {
+      item_id: 5,
+      item_name: "Oblique4 Oak Chair",
+      price: 1450.0,
+      image_url:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
+    },
+    {
+      item_id: 6,
+      item_name: "Oblique5 Oak Chair",
+      price: 1450.0,
+      image_url:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
+    },
+    {
+      item_id: 7,
+      item_name: "Oblique6 Oak Chair",
+      price: 1450.0,
+      image_url:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
+    },
+    {
+      item_id: 8,
+      item_name: "Oblique7 Oak Chair",
+      price: 1450.0,
+      image_url:
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
+    },
+    {
+      item_id: 9,
+      item_name: "Oblique8 Oak Chair",
       price: 1450.0,
       image_url:
         "https://lh3.googleusercontent.com/aida-public/AB6AXuBRPa6AsHFm_R12tWXZvgh9seL0IavW-y2gls_AETPGFbYsVUKImLN8YOyYU3R8evkKFU14ai2b3JjskFBcdhpeKR-Nu8jTF9vOWZvFHuXit-2lnZfpdAXhWzuA6tdGP4Ln_aRHkOpldmiLarpb6S0iOUU-cDnfyvqCjh4Aq5SSTDmWnLFsIDjo4zH3FdkeGmnYOzrEB73gZ9iYIQrMuAxkB2ZDToAQvxAueJgGyPHZEKUEaX2IPkvAGgh5DhcA-D2D1gEpaGcNeUPr",
     },
   ]);
+  const currentItems = items.slice(indexOfFirstItem, indexOfLastItem);
+  const emptySlots = itemsPerPage - currentItems.length;
   const router = useRouter();
+
+  const handleNext = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prev) => prev + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prev) => prev - 1);
+    }
+  };
 
   const handleInputChange = (e: any) => {
     setSearchTerm(e.target.value.toLowerCase());
@@ -228,8 +296,8 @@ export default function Dashboard() {
               </div>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-              {items.map((item) => (
-                <div className="group cursor-pointer">
+              {currentItems.map((item) => (
+                <div key={item.item_id} className="group cursor-pointer">
                   <div className="relative aspect-[1/1] bg-[#efeeec] overflow-hidden mb-6">
                     <img
                       className="w-full h-full object-cover group-hover:scale-105 transition-transofrm duration-700 ease-out"
@@ -255,38 +323,32 @@ export default function Dashboard() {
               ))}
             </div>
             <footer className="mt-32 pt-16 border-t border-[#D1C5B4]/10 flex justify-center items-center gap-12">
-              <button className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer">
+              <button
+                onClick={handlePrev}
+                disabled={currentPage === 1}
+                className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
+              >
                 chevron_left
               </button>
               <div
                 className={`flex gap-8 ${roboto.className} text-sm tracking-widest`}
               >
-                <Link
-                  href="/"
-                  className="text-[#1A1C1B] font-bold border-b border-[#1A1C1B]"
-                >
-                  01
-                </Link>
-                <Link
-                  href="/"
-                  className="text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors"
-                >
-                  02
-                </Link>
-                <Link
-                  href="/"
-                  className="text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors"
-                >
-                  03
-                </Link>
-                <Link
-                  href="/"
-                  className="text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors"
-                >
-                  04
-                </Link>
+                {pageNumbers.map((number) => (
+                  <button
+                    key={number}
+                    onClick={() => setCurrentPage(number)}
+                    disabled={number === currentPage}
+                    className={`${number === currentPage ? "text-[#1A1C1B] font-bold border-b border-[#1A1C1B]" : "text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors cursor-pointer"}`}
+                  >
+                    {number >= 10 ? number : `0${number}`}
+                  </button>
+                ))}
               </div>
-              <button className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer">
+              <button
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+                className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
+              >
                 chevron_right
               </button>
             </footer>
