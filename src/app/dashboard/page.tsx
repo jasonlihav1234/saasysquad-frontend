@@ -1,11 +1,12 @@
 "use client";
+
 import Footer from "@/components/universal/Footer";
 import { Roboto, Gelasio } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 
 // probably should make this user/dashboard
 
@@ -19,7 +20,7 @@ const gelasio = Gelasio({
   style: ["normal", "italic"],
 });
 
-export default function Dashboard() {
+function DashboardContent() {
   const [hasItems, setHasItems] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -521,5 +522,13 @@ export default function Dashboard() {
         <Footer />
       </main>
     </>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">Loading...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }
