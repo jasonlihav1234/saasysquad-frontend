@@ -5,7 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import "material-symbols";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { SegmentStateProvider } from "next/dist/next-devtools/userspace/app/segment-explorer-node";
 
 // probably should make this user/dashboard
 
@@ -24,6 +25,8 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(2);
+  const [category, setCategory] = useState("new-arrival");
+  const topRef = useRef<HTMLElement>(null);
   const itemsPerPage = 6;
   const pageNumbers = Array.from(
     { length: totalPages },
@@ -101,16 +104,21 @@ export default function Dashboard() {
   const emptySlots = itemsPerPage - currentItems.length;
   const router = useRouter();
 
-  const handleNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((prev) => prev + 1);
+  const handlePageChange = (newPageNumber: number) => {
+    if (newPageNumber < 1 || newPageNumber > totalPages) {
+      return;
     }
-  };
 
-  const handlePrev = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prev) => prev - 1);
-    }
+    setCurrentPage(newPageNumber);
+    // race condition, need nextjs to finish rendering page first
+    setTimeout(() => {
+      if (topRef.current) {
+        topRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    });
   };
 
   const handleInputChange = (e: any) => {
@@ -185,6 +193,18 @@ export default function Dashboard() {
     } catch (error) {
       alert(`Fatal error: ${error}`);
     }
+  };
+
+  const handleNewArrival = () => {
+    setCategory("new-arrival");
+  };
+
+  const handleBestSeller = () => {
+    setCategory("best-sellers");
+  };
+
+  const handleBrowseAll = () => {
+    setCategory("browse-all");
   };
 
   return (
@@ -266,7 +286,7 @@ export default function Dashboard() {
           </div>
         </div>
       </nav>
-      <main className="bg-[#F9F8F6] pt-32 pb-24 px-12 mx-auto min-h-screen">
+      <main className="bg-[#F9F8F6] pt-32 pb-24 px-12 mx-auto min-h-screen" ref={topRef}>
         {hasItems ? (
           <>
             <header className="mb-20 flex flex-col md:flex-row justify-between items-end gap-8">
@@ -284,13 +304,22 @@ export default function Dashboard() {
               <div
                 className={`${roboto.className} flex flex-wrap gap-4 font-body text-xs uppercase tracking-widest`}
               >
-                <button className="px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] border-b-2 border-b-[#775A19] cursor-pointer">
+                <button
+                  onClick={handleNewArrival}
+                  className={`px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] ${category === "new-arrival" && "border-b-2 border-b-[#775A19] cursor-pointer"}`}
+                >
                   New Arrivals
                 </button>
-                <button className="px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] cursor-pointer">
+                <button
+                  onClick={handleBestSeller}
+                  className={`px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] cursor-pointer ${category === "best-sellers" && "border-b-2 border-b-[#775A19] cursor-pointer"}`}
+                >
                   Best Sellers
                 </button>
-                <button className="px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] cursor-pointer">
+                <button
+                  onClick={handleBrowseAll}
+                  className={`px-6 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors text-[#775A19] cursor-pointer ${category === "browse-all" && "border-b-2 border-b-[#775A19] cursor-pointer"}`}
+                >
                   Browse All
                 </button>
               </div>
@@ -321,37 +350,48 @@ export default function Dashboard() {
                   </div>
                 </div>
               ))}
+
+              {Array.from({ length: emptySlots }).map((_, index) => (
+                <div
+                  key={`ghost-${index}`}
+                  className="invisible pointer-events-none"
+                  aria-hidden="true"
+                >
+                  <div className="aspect-[1/1] mb-6"></div>
+                  <div className="h-7 mb-1"></div>
+                </div>
+              ))}
             </div>
-            <footer className="mt-32 pt-16 border-t border-[#D1C5B4]/10 flex justify-center items-center gap-12">
-              <button
-                onClick={handlePrev}
-                disabled={currentPage === 1}
-                className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
-              >
-                chevron_left
-              </button>
-              <div
-                className={`flex gap-8 ${roboto.className} text-sm tracking-widest`}
-              >
-                {pageNumbers.map((number) => (
-                  <button
-                    key={number}
-                    onClick={() => setCurrentPage(number)}
-                    disabled={number === currentPage}
-                    className={`${number === currentPage ? "text-[#1A1C1B] font-bold border-b border-[#1A1C1B]" : "text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors cursor-pointer"}`}
-                  >
-                    {number >= 10 ? number : `0${number}`}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={handleNext}
-                disabled={currentPage === totalPages}
-                className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
-              >
-                chevron_right
-              </button>
-            </footer>
+              <footer className={`mt-32 pt-16 border-t border-[#D1C5B4]/10 flex justify-center items-center gap-12 ${category !== "browse-all" ? "invisible pointer-events-none" : "" }`}>
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
+                >
+                  chevron_left
+                </button>
+                <div
+                  className={`flex gap-8 ${roboto.className} text-sm tracking-widest`}
+                >
+                  {pageNumbers.map((number) => (
+                    <button
+                      key={number}
+                      onClick={() => handlePageChange(number)}
+                      disabled={number === currentPage}
+                      className={`${number === currentPage ? "text-[#1A1C1B] font-bold border-b border-[#1A1C1B]" : "text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors cursor-pointer"}`}
+                    >
+                      {number >= 10 ? number : `0${number}`}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="material-symbols-outlined text-[#5F5E5E] hover:text-[#775A19] transition-colors cursor-pointer"
+                >
+                  chevron_right
+                </button>
+              </footer>
           </>
         ) : (
           <>
