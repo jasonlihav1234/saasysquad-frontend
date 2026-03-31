@@ -207,7 +207,7 @@ export default function Dashboard() {
   return (
     <>
       <nav
-        className={`flex justify-between items-center top-0 z-50 px-12 h-20 fixed bg-[#F9F8F6] dark:bg-[#1a1c1b] opacity-85 ${roboto.className} antialiased tracking-tight w-full`}
+        className={`flex justify-between items-center top-0 z-50 px-12 h-20 fixed bg-[#F9F8F6] dark:bg-[#1a1c1b] ${roboto.className} antialiased tracking-tight w-full`}
       >
         <div className="flex items-center gap-8">
           <span
@@ -270,6 +270,14 @@ export default function Dashboard() {
             <span className="hidden sm:inline">recommend with ai</span>
           </button>
 
+          {isAiSidebarOpen && (
+            <div
+              onClick={closeSidebar}
+              className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm transition-opacity"
+              aria-hidden="true"
+            ></div>
+          )}
+
           <aside
             className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${isAiSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
           >
@@ -309,6 +317,44 @@ export default function Dashboard() {
                   </span>
                 </div>
               </div>
+              <div className="space-y-6">
+                <h4
+                  className={`text-[10px] uppercase tracking-[0.2em] font-bold text-[#775a19]`}
+                >
+                  How it works
+                </h4>
+                <div className="flex gap-4">
+                  <span className={`italic ${gelasio.className} text-xs`}>
+                    01
+                  </span>
+                  <p className="text-xs text-[#4e4639] leading-relaxed">
+                    Our AI analyzes colour palettes, textures, and form factors.
+                  </p>
+                </div>
+                <div className="flex gap-4">
+                  <span className={`italic ${gelasio.className} text-xs`}>
+                    02
+                  </span>
+                  <p className="text-xs text-[#4e4639] leading-relaxed">
+                    It cross-references our entire archive of limited editions
+                    and bespoke pieces.
+                  </p>
+                </div>
+                <div className="flex gap-4">
+                  <span className={`italic ${gelasio.className} text-xs`}>
+                    03
+                  </span>
+                  <p className="text-xs text-[#4e4639] leading-relaxed">
+                    The AI presents a tailoured selection curated specifically
+                    for your aesthetic.
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="p-8 border-t border-[#d1c5b4]/10">
+              <button className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer">
+                Start Visual Search
+              </button>
             </div>
           </aside>
           <div className="flex items-center gap-6">
