@@ -213,7 +213,7 @@ export default function Dashboard() {
           <span
             className={`text-2xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}
           >
-            The Curated Althair
+            The Curated Althaïr
           </span>
           <div className="hidden md:flex gap-6 items-center">
             <Link
@@ -385,7 +385,7 @@ export default function Dashboard() {
                 <h1
                   className={`text-6xl md:text-7xl ${gelasio.className} tracking-tighter text-[#1a1c1b]`}
                 >
-                  The Althair
+                  The Althaïr
                   <br></br>
                   <span className="italic text-[#5f5e5e] font-normal">
                     Catalog
