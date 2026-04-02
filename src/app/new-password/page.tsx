@@ -21,6 +21,7 @@ const color = {
   colorWhite: "#F9F8F6",
   colorGreyLight: "#787777",
   textColor: "#5c5a5a",
+  colorGold: "#E9C176",
 };
 
 export default function CreateNewPasswordPage() {
@@ -65,6 +66,11 @@ export default function CreateNewPasswordPage() {
             >
               UPDATE PASSWORD →
             </button>
+            <p
+              className={`tracking-widest underline decoration-[${color.colorGold}] underline-offset-10 text-[${color.textColor}] ${roboto.className} text-center cursor-pointer pt-7`}
+            >
+              <Link href="/login">RETURN TO LOGIN</Link>
+            </p>
           </form>
         </div>
       </div>
