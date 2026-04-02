@@ -18,33 +18,48 @@ const roboto = Roboto({
 });
 
 const color = {
-    colorWhite: "#F9F8F6",
-    colorGrey:"#787777",
-}
+  colorWhite: "#F9F8F6",
+  colorGreyLight: "#787777",
+  textColor: "#5c5a5a",
+};
 
-export default function CreateNewPasswordPage () {
-    return (
-    <main className={`bg-[${color.colorWhite}] grid grid-rows-[auto_1fr_auto] min-h-screen w-full`}>
-        <h1
+export default function CreateNewPasswordPage() {
+  return (
+    <main
+      className={`bg-[${color.colorWhite}] grid grid-rows-[auto_1fr_auto] min-h-screen w-full`}
+    >
+      <h1
         className={`${gelasio.className} text-black text-3xl text-center pt-10`}
       >
         The Curated Althaïr
       </h1>
 
-      <div className={`flex bg-[${color.colorWhite}] border border-solid border-black items-center justify-center flex-col`}>
-      <h1
-          className={`text-black text-5xl md:text-6xl text-center`}
-        >
+      <div
+        className={`flex bg-[${color.colorWhite}] border border-solid border-black items-center justify-center flex-col`}
+      >
+        <h1 className={`text-black text-5xl md:text-6xl text-center`}>
           Create New <br></br> Password
         </h1>
 
         <p
-          className={`text-center text-[${color.colorGrey}] pt-5 text-lg max-w-sm`}
+          className={`text-center text-[${color.colorGreyLight}] pt-5 text-lg max-w-sm`}
         >
           Please enter your new credentials below.
         </p>
+        <div>
+          <form className="pt-16 w-full max-w-md border border-black border-solid">
+            <label
+              className={`text-[${color.textColor}] tracking-widest pb-3 cursor-text`}
+            >
+              NEW PASSWORD
+            </label>
+            <input className={`w-full focus:outline-none text-[${color.textColor}]`} />
+            <button className={`text-black cursor-pointer w-full`}>Update Password</button>
+          </form>
+        </div>
       </div>
 
       <Footer />
-    </main>);
+    </main>
+  );
 }
