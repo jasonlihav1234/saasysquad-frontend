@@ -1,13 +1,9 @@
 "use client";
 
-import { Gelasio, Roboto } from "next/font/google";
+import { Roboto } from "next/font/google";
 import Link from "next/link";
 import Footer from "@/components/universal/Footer";
-
-const gelasio = Gelasio({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-});
+import PasswordPageBrandingHeader from "@/components/universal/PasswordPageBrandingHeader";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -26,11 +22,7 @@ export default function CreateNewPasswordPage() {
     <main
       className={`bg-[${color.colorWhite}] grid grid-rows-[auto_1fr_auto] min-h-screen w-full`}
     >
-      <h1
-        className={`${gelasio.className} text-black text-3xl text-center pt-10`}
-      >
-        The Curated Althaïr
-      </h1>
+      <PasswordPageBrandingHeader />
 
       <div
         className={`flex bg-[${color.colorWhite}] border border-solid border-black items-center justify-center flex-col`}
