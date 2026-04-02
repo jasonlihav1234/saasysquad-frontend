@@ -17,19 +17,32 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
-const colorWhite = "#F9F8F6";
+const color = {
+    colorWhite: "#F9F8F6",
+    colorGrey:"#787777",
+}
 
 export default function CreateNewPasswordPage () {
     return (
-    <main className={`bg-[${colorWhite}] grid grid-rows-[auto_1fr_auto] min-h-screen w-full`}>
+    <main className={`bg-[${color.colorWhite}] grid grid-rows-[auto_1fr_auto] min-h-screen w-full`}>
         <h1
         className={`${gelasio.className} text-black text-3xl text-center pt-10`}
       >
         The Curated Althaïr
       </h1>
 
-      <div className={`flex bg-[${colorWhite}] border border-solid border-black`}>
+      <div className={`flex bg-[${color.colorWhite}] border border-solid border-black items-center justify-center flex-col`}>
+      <h1
+          className={`text-black text-5xl md:text-6xl text-center`}
+        >
+          Create New <br></br> Password
+        </h1>
 
+        <p
+          className={`text-center text-[${color.colorGrey}] pt-5 text-lg max-w-sm`}
+        >
+          Please enter your new credentials below.
+        </p>
       </div>
 
       <Footer />

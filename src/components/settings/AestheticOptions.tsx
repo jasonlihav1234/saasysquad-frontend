@@ -42,7 +42,6 @@ export default function AestheticOptions() {
         </p>
 
         <div className="flex flex-col md:flex-row gap-8">
-          {/* Environment Mode */}
           <div className="flex-1 bg-[#F1F1EF] p-6">
             <h3 className={`${roboto.className} text-black text-xs uppercase tracking-widest mb-6`}>
               ENVIRONMENT MODE
@@ -73,7 +72,6 @@ export default function AestheticOptions() {
             </div>
           </div>
 
-          {/* Accent Tone */}
           <div className="flex-1 bg-[#F1F1EF] p-6">
             <h3 className={`${roboto.className} text-black text-xs uppercase tracking-widest mb-6`}>
               ACCENT TONE
@@ -97,13 +95,10 @@ export default function AestheticOptions() {
         </div>
       </section>
 
-      {/* Divider */}
       <div className="w-full h-px bg-[#C5A059]/20 mb-24" />
 
-      {/* Feature Requests */}
       <section id="requests" className="mb-12">
         <div className="bg-[#474747] p-8 lg:p-12 relative overflow-hidden">
-          {/* Subtle background accent */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-[#C5A059]/10 blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
           <div className="relative z-10">
