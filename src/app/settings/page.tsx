@@ -24,7 +24,6 @@ export const metadata = {
 export default function SettingsPage() {
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
-      {/* Top bar */}
       <header className="flex items-center justify-between bg-[#F1F1EF] border-b border-[#C5A059]/20 px-10 py-4">
         <Link
           href="/"
@@ -39,7 +38,6 @@ export default function SettingsPage() {
         </h2>
       </header>
 
-      {/* Body: sidebar + content */}
       <div className="flex flex-1 overflow-hidden">
         <Sidebar />
 

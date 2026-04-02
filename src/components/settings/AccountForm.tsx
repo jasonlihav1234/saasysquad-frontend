@@ -15,7 +15,6 @@ const roboto = Roboto({
 export default function AccountForm() {
   return (
     <div>
-      {/* Page heading */}
       <div className="mb-12">
         <h1 className={`${gelasio.className} text-black text-4xl font-normal leading-tight tracking-tight mb-2`}>
           Account Details
@@ -25,7 +24,6 @@ export default function AccountForm() {
         </p>
       </div>
 
-      {/* Portrait section */}
       <section id="account" className="mb-16 flex flex-col sm:flex-row items-start gap-8 bg-[#F1F1EF] p-8">
         <div className="w-32 h-32 shrink-0 bg-[#E3E2E0] border border-[#C5A059]/30 overflow-hidden">
           <img
@@ -61,7 +59,6 @@ export default function AccountForm() {
         </div>
       </section>
 
-      {/* Personal Narrative form */}
       <section className="mb-24">
         <h2 className={`${gelasio.className} text-black text-2xl font-medium mb-8`}>
           Personal Details
@@ -144,10 +141,8 @@ export default function AccountForm() {
         </form>
       </section>
 
-      {/* Divider */}
       <div className="w-full h-px bg-[#C5A059]/20 mb-24" />
 
-      {/* Security section */}
       <section id="security" className="mb-24 bg-[#F1F1EF] p-8">
         <h2 className={`${gelasio.className} text-black text-2xl font-medium mb-2`}>
           Security
