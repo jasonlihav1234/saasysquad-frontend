@@ -53,8 +53,18 @@ export default function CreateNewPasswordPage() {
             >
               NEW PASSWORD
             </label>
-            <input className={`w-full focus:outline-none text-[${color.textColor}]`} />
-            <button className={`text-black cursor-pointer w-full`}>Update Password</button>
+            <input
+              className={`w-full focus:outline-none text-[${color.textColor}]`}
+            />
+            <button className={`text-black cursor-pointer w-full`}>
+              Update Password
+            </button>
+            <button
+              type="submit"
+              className={`cursor-pointer w-full bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-12 text-white font-bold disabled:opacity-80 p-5 disbled:opacity-80 disabled:cursor-not-allowed`}
+            >
+              UPDATE PASSWORD →
+            </button>
           </form>
         </div>
       </div>
