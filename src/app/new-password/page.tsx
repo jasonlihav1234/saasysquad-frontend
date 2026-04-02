@@ -1,10 +1,7 @@
 "use client";
 
 import { Gelasio, Roboto } from "next/font/google";
-import Image from "next/image";
 import Link from "next/link";
-import { useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import Footer from "@/components/universal/Footer";
 
 const gelasio = Gelasio({
@@ -50,28 +47,28 @@ export default function CreateNewPasswordPage() {
         <div>
           <form className="pt-16 w-full max-w-md border border-black border-solid">
             <label
-              htmlFor="email-reset"
+              htmlFor="new-password"
               className={`text-[#5c5a5a] ${roboto.className} tracking-widest pb-3 cursor-text`}
             >
               NEW PASSWORD
             </label>
             <input
-              type="email"
-              name="email"
-              placeholder="name@example.com"
+              type="password"
+              name="new-password"
+              placeholder="**************"
               className={`${roboto.className} w-full focus:outline-none bg-[#E3E2E0] border-b-2 border-[#C5A059] text-[#5c5a5a] p-5 disabled:opacity-80 disabled:cursor-not-allowed`}
               required
             />
             <label
-              htmlFor="email-reset"
+              htmlFor="new-password-confirm"
               className={`text-[#5c5a5a] ${roboto.className} tracking-widest pb-3 cursor-text`}
             >
               CONFIRM NEW PASSWORD
             </label>
             <input
-              type="email"
-              name="email"
-              placeholder="name@example.com"
+              type="password"
+              name="new-password-confirm"
+              placeholder="**************"
               className={`${roboto.className} w-full focus:outline-none bg-[#E3E2E0] border-b-2 border-[#C5A059] text-[#5c5a5a] p-5 disabled:opacity-80 disabled:cursor-not-allowed`}
               required
             />
@@ -90,7 +87,7 @@ export default function CreateNewPasswordPage() {
         </div>
       </div>
 
-      <Footer />
+      <Footer variant="page" />
     </main>
   );
 }
