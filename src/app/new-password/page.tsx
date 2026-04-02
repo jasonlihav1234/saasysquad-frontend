@@ -50,16 +50,31 @@ export default function CreateNewPasswordPage() {
         <div>
           <form className="pt-16 w-full max-w-md border border-black border-solid">
             <label
-              className={`text-[${color.textColor}] tracking-widest pb-3 cursor-text`}
+              htmlFor="email-reset"
+              className={`text-[#5c5a5a] ${roboto.className} tracking-widest pb-3 cursor-text`}
             >
               NEW PASSWORD
             </label>
             <input
-              className={`w-full focus:outline-none text-[${color.textColor}]`}
+              type="email"
+              name="email"
+              placeholder="name@example.com"
+              className={`${roboto.className} w-full focus:outline-none bg-[#E3E2E0] border-b-2 border-[#C5A059] text-[#5c5a5a] p-5 disabled:opacity-80 disabled:cursor-not-allowed`}
+              required
             />
-            <button className={`text-black cursor-pointer w-full`}>
-              Update Password
-            </button>
+            <label
+              htmlFor="email-reset"
+              className={`text-[#5c5a5a] ${roboto.className} tracking-widest pb-3 cursor-text`}
+            >
+              CONFIRM NEW PASSWORD
+            </label>
+            <input
+              type="email"
+              name="email"
+              placeholder="name@example.com"
+              className={`${roboto.className} w-full focus:outline-none bg-[#E3E2E0] border-b-2 border-[#C5A059] text-[#5c5a5a] p-5 disabled:opacity-80 disabled:cursor-not-allowed`}
+              required
+            />
             <button
               type="submit"
               className={`cursor-pointer w-full bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-12 text-white font-bold disabled:opacity-80 p-5 disbled:opacity-80 disabled:cursor-not-allowed`}
