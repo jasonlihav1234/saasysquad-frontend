@@ -21,12 +21,32 @@ const gelasio = Gelasio({
 });
 
 export default function SellProducePage() {
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+
+  const handleImageChange = (e: any) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setImageBase64(base64String);
+
+      console.log(base64String);
+    };
+
+    reader.readAsDataURL(file);
+  };
+
   return (
     <div className="flex">
       <aside
         className={`w-64 bg-[#F5F3EF] text-[#2D2D2D] ${roboto.className} min-h-screen flex overflow-hidden flex-col justify_between border-r border-[#D1CFC9]/50 shrink-0`}
       >
-        <div className="p-8 pt-10">
+        <div className="p-8 pt-10 border-b border-[#775a19]">
           <h1
             className={`${gelasio.className} italic text-xl text-[#2D2D2D] mb-1 tracking-wide`}
           >
@@ -36,7 +56,7 @@ export default function SellProducePage() {
         <nav className="mt-8 px-4">
           <ul className="space-y-2">
             <Link
-              href="/catalog"
+              href="/dashboard"
               className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
             >
               <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none -translate-y-[2px]">
@@ -45,7 +65,7 @@ export default function SellProducePage() {
               Catalog
             </Link>
             <Link
-              href="/catalog"
+              href="/purchases"
               className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
             >
               <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
@@ -54,7 +74,7 @@ export default function SellProducePage() {
               Purchases
             </Link>
             <Link
-              href="/catalog"
+              href="/sales"
               className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
             >
               <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
@@ -63,7 +83,7 @@ export default function SellProducePage() {
               Sales
             </Link>
             <Link
-              href="/catalog"
+              href="/messages"
               className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
             >
               <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
@@ -109,21 +129,37 @@ export default function SellProducePage() {
                 </p>
               </header>
               <form className="space-y-12">
-                <div className="group relative aspect-[16/9] bg-[#efeeec] flex flex-col items-center justify-center border border-dashed border-[#d1c5b4] transition-all hover:bg-[#e9e8e6] overflow-hidden cursor-pointer">
-                  <span className="material-symbols-outlined text-4xl text-[#5f5e5e] mb-4">
-                    add_photo_alternate
-                  </span>
-                  <p
-                    className={`${roboto.className} text-xs uppercase- tracking-widest text-[#5f5e5e] uppercase`}
-                  >
-                    Upload High-Resolution Image
-                  </p>
-                  <p
-                    className={`text-[10px] ${roboto.className} mt-2 text-[#5f5e5e]`}
-                  >
-                    JPG OR PNG (MAX 50MB)
-                  </p>
-                </div>
+                <label className="group relative aspect-[16/9] bg-[#efeeec] flex flex-col items-center justify-center border border-dashed border-[#d1c5b4] transition-all hover:bg-[#e9e8e6] overflow-hidden cursor-pointer">
+                  <input
+                    type="file"
+                    accept="image/jpeg, image/png"
+                    className="hidden"
+                    onChange={handleImageChange}
+                  ></input>
+                  {imageBase64 ? (
+                    <img
+                      src={imageBase64}
+                      alt="Preview"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    ></img>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined !text-4xl text-[#5f5e5e] mb-4">
+                        add_photo_alternate
+                      </span>
+                      <p
+                        className={`${roboto.className} text-xs uppercase- tracking-widest text-[#5f5e5e] uppercase`}
+                      >
+                        Upload High-Resolution Image
+                      </p>
+                      <p
+                        className={`text-[10px] ${roboto.className} mt-2 text-[#5f5e5e]`}
+                      >
+                        JPG OR PNG (MAX 50MB)
+                      </p>
+                    </>
+                  )}
+                </label>
                 <section className="space-y-8">
                   <div className="flex justify-between items-end">
                     <h3 className={`${gelasio.className} text-2xl`}>
