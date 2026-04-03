@@ -139,6 +139,47 @@ export default function SellProducePage() {
                     placeholder="Describe the materials, history, and craftmanship..."
                   ></textarea>
                 </div>
+                <section className="space-y-8">
+                  <div className="flex justify-between items-end">
+                    <h3 className={`${gelasio.className} text-2xl`}>
+                      Categorization
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <button className="py-4 border border-[#775a19] bg-[#775a19]/5 text-[#775a19] flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer">
+                      <span className="material-symbols-outlined text-lg">
+                        chair_alt
+                      </span>
+                      <span className="text-[0.7rem] uppercase tracking-widest font-medium">
+                        Chair
+                      </span>
+                    </button>
+                    <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
+                      <span className="material-symbols-outlined text-lg">
+                        oral_disease
+                      </span>
+                      <span className="text-[0.7rem] uppercase tracking-widest font-medium">
+                        Sculpture
+                      </span>
+                    </button>
+                    <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
+                      <span className="material-symbols-outlined text-lg">
+                        chair
+                      </span>
+                      <span className="text-[0.7rem] uppercase tracking-widest font-medium">
+                        Sofa
+                      </span>
+                    </button>
+                    <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
+                      <span className="material-symbols-outlined text-lg">
+                        table_bar
+                      </span>
+                      <span className="text-[0.7rem] uppercase tracking-widest font-medium">
+                        Table
+                      </span>
+                    </button>
+                  </div>
+                </section>
               </div>
             </form>
           </div>
