@@ -139,6 +139,18 @@ export default function SellProducePage() {
                     placeholder="Describe the materials, history, and craftmanship..."
                   ></textarea>
                 </div>
+                <div className="flex flex-col gap-2">
+                  <label
+                    className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                  >
+                    Inventory Count
+                  </label>
+                  <input
+                    className={`bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 tex-tlg ${roboto.className} focus:ring-0`}
+                    type="number"
+                    value={1}
+                  ></input>
+                </div>
                 <section className="space-y-8">
                   <div className="flex justify-between items-end">
                     <h3 className={`${gelasio.className} text-2xl`}>
@@ -198,12 +210,11 @@ export default function SellProducePage() {
                     <label className="block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2">
                       or specify a unique classification
                     </label>
-                    <input className="w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50"
-                            placeholder="Specify other..."
-                            type="text"
-                    
-                    >
-                    </input>
+                    <input
+                      className="w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50"
+                      placeholder="Specify other..."
+                      type="text"
+                    ></input>
                   </div>
                 </section>
               </div>
