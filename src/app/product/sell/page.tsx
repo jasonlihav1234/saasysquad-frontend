@@ -24,7 +24,7 @@ export default function SellProducePage() {
   return (
     <div className="flex">
       <aside
-        className={`w-64 bg-[#F5F3EF] text-[#2D2D2D] ${roboto.className} h-screen flex overflow-hidden flex-col justify_between border-r border-[#D1CFC9]/50 shrink-0`}
+        className={`w-64 bg-[#F5F3EF] text-[#2D2D2D] ${roboto.className} min-h-screen flex overflow-hidden flex-col justify_between border-r border-[#D1CFC9]/50 shrink-0`}
       >
         <div className="p-8 pt-10">
           <h1
@@ -80,42 +80,10 @@ export default function SellProducePage() {
         >
           <div className="flex gap-8 justify-between items-center px-12 py-6 w-full max-w-[1920px] mx-auto">
             <span
-              className={`text-2xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}
+              className={`text-4xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}
             >
               The Curated Althaïr
             </span>
-            <div className="hidden md:flex gap-6 items-center">
-              <Link
-                href="/dashboard"
-                className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
-              >
-                Catalog
-              </Link>
-              <Link
-                href="/purchases"
-                className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
-              >
-                Purchases
-              </Link>
-              <Link
-                href="/sales"
-                className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
-              >
-                Sales
-              </Link>
-              <Link
-                href="/messages"
-                className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
-              >
-                Messages
-              </Link>
-              <Link
-                href="/product/sell"
-                className={`text-[#775A19] dark:text-[#C5A059] border-b border-[#775A19]`}
-              >
-                Sell Product
-              </Link>
-            </div>
             <div className="w-8 h-8 bg-surface-container-highest flex items-center justify-center overflow-hidden">
               <Link href="/me">
                 <Image
@@ -129,7 +97,7 @@ export default function SellProducePage() {
           </div>
         </header>
         <main
-          className={`pt-16 pb-24 px-6 md:px-12 flex-groew max-w-[1920px] mx-auto w-full`}
+          className={`pt-5 pb-24 px-6 md:px-12 flex-groew max-w-[1920px] mx-auto w-full`}
         >
           <div className="grid grid-cols1 lg:grid-cols-12 gap-16">
             <div className="lg:col-span-7 space-y-16">
@@ -296,7 +264,7 @@ export default function SellProducePage() {
                 </div>
               </form>
             </div>
-            <aside className="lg:col-span-5">
+            <aside className="lg:col-span-5 pt-30.5">
               <div className="sticky top-32 space-y-8">
                 <section className="bg-[#f4f3f1] p-10 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-4 opacity-10">
