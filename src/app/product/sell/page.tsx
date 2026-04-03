@@ -34,30 +34,26 @@ export default function SellProducePage() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const fetchData = [
-        "Lighting",
-        "Chair",
-        "Sculpture",
-        "Sofa",
-        "Table",
-        "Vase",
-        "Textiles",
-        "Storage",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-        "Decor",
-      ];
-      setDbCategories(fetchData);
+      const response = await fetch(
+        "https://sassysquad-backend.vercel.app/categories",
+        {
+          method: "GET",
+          headers: {
+            // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiIyMTNiMTNkZS03MjMzLTRlYTUtOTE5Yi02ODNhMzdjYWM1ZjUiLCJpYXQiOjE3NzUyMjQyMTAsImV4cCI6MTc3NTIyNTExMCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.ncw3aCn02u7AlYTp0fjGc8cG0utSqP5e0ayrEFiiIeY`,
+          },
+        },
+      );
+
+      const body = await response.json();
+      const filteredCategories = body.categories.map((entry: any) => {
+        return entry.category_name
+          .split("-")
+          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(" ");
+      });
+
+      setDbCategories(filteredCategories);
     };
 
     fetchCategories();
@@ -105,6 +101,8 @@ export default function SellProducePage() {
 
     reader.readAsDataURL(file);
   };
+
+  const handleFormSubmit = (e: any) => {};
 
   return (
     <div className="flex bg-[#faf9f7]">
@@ -193,7 +191,7 @@ export default function SellProducePage() {
                   List a New Item
                 </p>
               </header>
-              <form className="space-y-12">
+              <form className="space-y-12" onSubmit={handleFormSubmit}>
                 <label className="group relative aspect-[16/9] bg-[#efeeec] flex flex-col items-center justify-center border border-dashed border-[#d1c5b4] transition-all hover:bg-[#e9e8e6] overflow-hidden cursor-pointer">
                   <input
                     type="file"
@@ -234,9 +232,9 @@ export default function SellProducePage() {
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <button
                       type="button"
-                      onClick={() => setCategory("chair")}
+                      onClick={() => setCategory("Chair")}
                       className={`py-4 border flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer ${
-                        category === "chair"
+                        category === "Chair"
                           ? "border-[#775a19] bg-[#775a19]/5 text-[#775a19]"
                           : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
                       }`}
@@ -251,9 +249,9 @@ export default function SellProducePage() {
 
                     <button
                       type="button"
-                      onClick={() => setCategory("sculpture")}
+                      onClick={() => setCategory("Sculpture")}
                       className={`py-4 border flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer ${
-                        category === "sculpture"
+                        category === "Sculpture"
                           ? "border-[#775a19] bg-[#775a19]/5 text-[#775a19]"
                           : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
                       }`}
@@ -268,9 +266,9 @@ export default function SellProducePage() {
 
                     <button
                       type="button"
-                      onClick={() => setCategory("sofa")}
+                      onClick={() => setCategory("Sofa")}
                       className={`py-4 border flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer ${
-                        category === "sofa"
+                        category === "Sofa"
                           ? "border-[#775a19] bg-[#775a19]/5 text-[#775a19]"
                           : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
                       }`}
@@ -285,9 +283,9 @@ export default function SellProducePage() {
 
                     <button
                       type="button"
-                      onClick={() => setCategory("table")}
+                      onClick={() => setCategory("Table")}
                       className={`py-4 border flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer ${
-                        category === "table"
+                        category === "Table"
                           ? "border-[#775a19] bg-[#775a19]/5 text-[#775a19]"
                           : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
                       }`}
