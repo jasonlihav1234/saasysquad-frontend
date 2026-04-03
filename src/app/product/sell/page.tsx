@@ -238,6 +238,42 @@ export default function SellProducePage() {
               </div>
             </form>
           </div>
+          <aside className="lg:col-span-5">
+            <div className="sticky top-32 space-y-8">
+              <section className="bg-[#f4f3f1] p-10 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4 opacity-10">
+                  <span className="material-symbols-outlined text-8xl">
+                    auto_awesome
+                  </span>
+                </div>
+                <div className="relative z-10 space-y-6">
+                  <h3
+                    className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}
+                  >
+                    Atelier Insights
+                  </h3>
+                  <p
+                    className={`${roboto.className} text-sm text-[#4e4639] leading-relaxed`}
+                  >
+                    Utilize our machine learning model to determine the optimal
+                    market value based on historical sales
+                  </p>
+                  <div className="bg-[#ffffff] border border-[#d1c5b4] p-8 flex flex-col items-center text-center space-y-4">
+                    <span className="material-symbols-outlined text-[#775a19] text-4xl">
+                      analytics
+                    </span>
+                    <p
+                      className={`${roboto.className} text-xs uppercase tracking-widest text-[#5f5e5e] font-bold`}
+                    >
+                      Awaiting Data
+                    </p>
+                    <p className={`text-xs text-[#615e57] mt-1 ${roboto.className}`}>Complete item details to generate a precise estimation.</p>
+                  </div>
+                  <button></button>
+                </div>
+              </section>
+            </div>
+          </aside>
         </div>
       </main>
     </>
