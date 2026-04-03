@@ -23,7 +23,9 @@ const gelasio = Gelasio({
 export default function SellProducePage() {
   return (
     <>
-      <header className="top-0 w-full z-50 glass-nav">
+      <header
+        className={`top-0 w-full z-50 glass-nav ${roboto.className} antialiased tracking-tight`}
+      >
         <div className="flex gap-8 justify-between items-center px-12 py-6 w-full max-w-[1920px] mx-auto">
           <span
             className={`text-2xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}
@@ -102,6 +104,70 @@ export default function SellProducePage() {
                   JPG OR PNG (MAX 50MB)
                 </p>
               </div>
+              <section className="space-y-8">
+                <div className="flex justify-between items-end">
+                  <h3 className={`${gelasio.className} text-2xl`}>
+                    Categorization
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <button className="py-4 border border-[#775a19] bg-[#775a19]/5 text-[#775a19] flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer">
+                    <span className="material-symbols-outlined text-lg">
+                      chair_alt
+                    </span>
+                    <span className="text-[0.7rem] uppercase tracking-widest font-medium">
+                      Chair
+                    </span>
+                  </button>
+                  <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
+                    <span className="material-symbols-outlined text-lg">
+                      oral_disease
+                    </span>
+                    <span className="text-[0.7rem] uppercase tracking-widest font-medium">
+                      Sculpture
+                    </span>
+                  </button>
+                  <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
+                    <span className="material-symbols-outlined text-lg">
+                      chair
+                    </span>
+                    <span className="text-[0.7rem] uppercase tracking-widest font-medium">
+                      Sofa
+                    </span>
+                  </button>
+                  <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
+                    <span className="material-symbols-outlined text-lg">
+                      table_bar
+                    </span>
+                    <span className="text-[0.7rem] uppercase tracking-widest font-medium">
+                      Table
+                    </span>
+                  </button>
+                </div>
+                <details className="group">
+                  <summary className="list-none cursor-pointer flex items-center gap-2 text-[#a7a5a5] hover:text-[#775a19] transition-colors text-sm select-none">
+                    <span className="material-symbols-outlined text-lg group-open:rotate-180 transition-transform">
+                      expand_more
+                    </span>
+                    <span
+                      className={`uppercase tracking-widest text-[0.7rem] font-semibold ${roboto.className}`}
+                    >
+                      View More Category Options
+                    </span>
+                  </summary>
+                  <div>{/* this would be where I map other categories */}</div>
+                </details>
+                <div className="pt-4">
+                  <label className="block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2">
+                    or specify a unique classification
+                  </label>
+                  <input
+                    className="w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50"
+                    placeholder="Specify other..."
+                    type="text"
+                  ></input>
+                </div>
+              </section>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div className="flex flex-col gap-2">
                   <label
@@ -131,13 +197,16 @@ export default function SellProducePage() {
                   <label
                     className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
                   >
-                    Description
+                    Search Tags
                   </label>
-                  <textarea
-                    rows={4}
-                    className={`bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 resize-none`}
-                    placeholder="Describe the materials, history, and craftmanship..."
-                  ></textarea>
+                  {/* <div>mapp some tags here</div> */}
+                  <div className="flex items-center bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3">
+                    <input
+                      className="bg-transparent border-0 focus:ring-0 text-sm p-0 flex-grow"
+                      placeholder="Add more..."
+                      type="text"
+                    ></input>
+                  </div>
                 </div>
                 <div className="flex flex-col gap-2">
                   <label
@@ -151,82 +220,17 @@ export default function SellProducePage() {
                     value={1}
                   ></input>
                 </div>
-                <section className="space-y-8">
-                  <div className="flex justify-between items-end">
-                    <h3 className={`${gelasio.className} text-2xl`}>
-                      Categorization
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <button className="py-4 border border-[#775a19] bg-[#775a19]/5 text-[#775a19] flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer">
-                      <span className="material-symbols-outlined text-lg">
-                        chair_alt
-                      </span>
-                      <span className="text-[0.7rem] uppercase tracking-widest font-medium">
-                        Chair
-                      </span>
-                    </button>
-                    <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
-                      <span className="material-symbols-outlined text-lg">
-                        oral_disease
-                      </span>
-                      <span className="text-[0.7rem] uppercase tracking-widest font-medium">
-                        Sculpture
-                      </span>
-                    </button>
-                    <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
-                      <span className="material-symbols-outlined text-lg">
-                        chair
-                      </span>
-                      <span className="text-[0.7rem] uppercase tracking-widest font-medium">
-                        Sofa
-                      </span>
-                    </button>
-                    <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
-                      <span className="material-symbols-outlined text-lg">
-                        table_bar
-                      </span>
-                      <span className="text-[0.7rem] uppercase tracking-widest font-medium">
-                        Table
-                      </span>
-                    </button>
-                  </div>
-                  <details className="group">
-                    <summary className="list-none cursor-pointer flex items-center gap-2 text-[#a7a5a5] hover:text-[#775a19] transition-colors text-sm select-none">
-                      <span className="material-symbols-outlined text-lg group-open:rotate-180 transition-transform">
-                        expand_more
-                      </span>
-                      <span
-                        className={`uppercase tracking-widest text-[0.7rem] font-semibold ${roboto.className}`}
-                      >
-                        View More Category Options
-                      </span>
-                    </summary>
-                    <div>
-                      {/* this would be where I map other categories */}
-                    </div>
-                  </details>
-                  <div className="pt-4">
-                    <label className="block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2">
-                      or specify a unique classification
-                    </label>
-                    <input
-                      className="w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50"
-                      placeholder="Specify other..."
-                      type="text"
-                    ></input>
-                  </div>
-                </section>
-                <div className="flex flex-col gap-2">
-                  <label>Search Tags</label>
-                  <div>{/* mapp some tags here */}</div>
-                  <div className="flex items-center bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3">
-                    <input
-                      className="bg-transparent border-0 focus:ring-0 text-sm p-0 flex-grow"
-                      placeholder="Add more..."
-                      type="text"
-                    ></input>
-                  </div>
+                <div className="flex flex-col gap-2 col-span-2">
+                  <label
+                    className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                  >
+                    Description
+                  </label>
+                  <textarea
+                    rows={4}
+                    className={`bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 resize-none`}
+                    placeholder="Describe the materials, history, and craftmanship..."
+                  ></textarea>
                 </div>
               </div>
               <div className="flex gap-8 pt-8">
