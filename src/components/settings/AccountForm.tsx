@@ -1,5 +1,6 @@
 "use client";
 
+import PageSectionHeading from "@/components/universal/PageSectionHeading";
 import { Gelasio, Roboto } from "next/font/google";
 
 const gelasio = Gelasio({
@@ -15,14 +16,11 @@ const roboto = Roboto({
 export default function AccountForm() {
   return (
     <div>
-      <div className="mb-12">
-        <h1 className={`${gelasio.className} text-black text-4xl font-normal leading-tight tracking-tight mb-2`}>
-          Account Details
-        </h1>
-        <p className={`${roboto.className} text-[#5F5E5E] text-base`}>
-          Manage your personal details within The Curated Althaïr.
-        </p>
-      </div>
+      <PageSectionHeading
+        className="mb-12"
+        title="Account Details"
+        description="Manage your personal details within The Curated Althaïr."
+      />
 
       <section id="account" className="mb-16 flex flex-col sm:flex-row items-start gap-8 bg-[#F1F1EF] p-8">
         <div className="w-32 h-32 shrink-0 bg-[#E3E2E0] border border-[#C5A059]/30 overflow-hidden">
