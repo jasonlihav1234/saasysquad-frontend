@@ -80,8 +80,38 @@ export default function SellProducePage() {
         <div className="grid grid-cols1 lg:grid-cols-12 gap-16">
           <div className="lg:col-span-7 space-y-16">
             <header>
-              <p className={`${gelasio.className} text-5xl font-black tracking-tight leading-tight text-[#1a1c1b]`}>List a New Item</p>
+              <p
+                className={`${gelasio.className} text-5xl font-black tracking-tight leading-tight text-[#1a1c1b]`}
+              >
+                List a New Item
+              </p>
             </header>
+            <form className="space-y-12">
+              <div className="group relative aspect-[16/9] bg-[#efeeec] flex flex-col items-center justify-center border border-dashed border-[#d1c5b4] transition-all hover:bg-[#e9e8e6] overflow-hidden cursor-pointer">
+                <span className="material-symbols-outlined text-4xl text-[#5f5e5e] mb-4">
+                  add_photo_alternate
+                </span>
+                <p
+                  className={`${roboto.className} text-xs uppercase- tracking-widest text-[#5f5e5e] uppercase`}
+                >
+                  Upload High-Resolution Image
+                </p>
+                <p
+                  className={`text-[10px] ${roboto.className} mt-2 text-[#5f5e5e]`}
+                >
+                  JPG OR PNG (MAX 50MB)
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <div className="flex flex-col gap-2">
+                  <label
+                    className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                  >
+                    Item Name
+                  </label>
+                </div>
+              </div>
+            </form>
           </div>
         </div>
       </main>
