@@ -16,10 +16,8 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Account Details", href: "#account", active: true },
-  { label: "Security", href: "#security" },
-  { label: "Notifications", href: "#notifications" },
-  { label: "Theme", href: "#aesthetic" },
-  { label: "Feature Requests", href: "#requests" },
+  { label: "Purchases", href: "#purchases" },
+  { label: "Sales", href: "#sales" },
 ];
 
 export default function Sidebar() {
