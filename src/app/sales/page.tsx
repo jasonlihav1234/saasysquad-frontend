@@ -92,6 +92,49 @@ export default function SalesPage() {
                 </div>
               </div>
             </section>
+
+            <section className="pb-24">
+              <div className="flex justify-between items-end mb-10">
+                <div className="max-w-md">
+                  <h3 className={`${gelasio.className} text-3xl mb-4`}>
+                    Recent Sales
+                  </h3>
+                  <p
+                    className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed`}
+                  >
+                    Sales tab description here.
+                  </p>
+                </div>
+              </div>
+
+              <div className="overflow-hidden">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr
+                      className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e] bg-[#f4f3f1]`}
+                    >
+                      <th className="px-6 py-4 font-medium">Product Detail</th>
+                      <th className="px-6 py-4 font-medium">Order Date</th>
+                      <th className="px-6 py-4 font-medium">Customer</th>
+                      <th className="px-6 py-4 font-medium">Price</th>
+                      <th className="px-6 py-4 font-medium">Status</th>
+                      <th className="px-6 py-4 font-medium text-right">
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="px-6 py-8" colSpan={6}>
+                        <p className={`${roboto.className} text-sm text-[#5f5e5e]/70`}>
+                          wip.
+                        </p>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </section>
           </div>
 
           <div className="p-8 md:p-12 lg:p-16 max-w">
