@@ -179,6 +179,32 @@ export default function SellProducePage() {
                       </span>
                     </button>
                   </div>
+                  <details className="group">
+                    <summary className="list-none cursor-pointer flex items-center gap-2 text-[#a7a5a5] hover:text-[#775a19] transition-colors text-sm select-none">
+                      <span className="material-symbols-outlined text-lg group-open:rotate-180 transition-transform">
+                        expand_more
+                      </span>
+                      <span
+                        className={`uppercase tracking-widest text-[0.7rem] font-semibold ${roboto.className}`}
+                      >
+                        View More Category Options
+                      </span>
+                    </summary>
+                    <div>
+                      {/* this would be where I map other categories */}
+                    </div>
+                  </details>
+                  <div className="pt-4">
+                    <label className="block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2">
+                      or specify a unique classification
+                    </label>
+                    <input className="w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50"
+                            placeholder="Specify other..."
+                            type="text"
+                    
+                    >
+                    </input>
+                  </div>
                 </section>
               </div>
             </form>
