@@ -267,9 +267,20 @@ export default function SellProducePage() {
                     >
                       Awaiting Data
                     </p>
-                    <p className={`text-xs text-[#615e57] mt-1 ${roboto.className}`}>Complete item details to generate a precise estimation.</p>
+                    <p
+                      className={`text-xs text-[#615e57] mt-1 ${roboto.className}`}
+                    >
+                      Complete item details to generate a precise estimation.
+                    </p>
+                    <button
+                      className={`w-full bg-[#775a19] text-[#ffffff] px-6 py-4 ${roboto.className} text-[0.7rem] uppercase tracking-[0.15em] hover:opacity-90 transition-all flex items-center justify-center gap-2 group cursor-pointer`}
+                    >
+                      Estimate Market Value
+                      <span className="material-symbols-outlined !text-[1rem] group-hover:translate-x-1 transition-transform">
+                        arrow_forward
+                      </span>
+                    </button>
                   </div>
-                  <button></button>
                 </div>
               </section>
             </div>
