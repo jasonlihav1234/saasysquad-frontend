@@ -1,10 +1,10 @@
 import PurchaseOrderItem, {
   type PurchaseOrderItemProps,
-} from "@/components/purchases/PurchaseOrderItem";
-import Sidebar from "@/components/settings/Sidebar";
+} from "@/components/user-settings/purchases/PurchaseOrderItem";
+import Sidebar from "@/components/user-settings/shared-components/Sidebar";
 import Footer from "@/components/universal/Footer";
-import PageSectionHeading from "@/components/universal/PageSectionHeading";
-import SubpageHeader from "@/components/universal/SubpageHeader";
+import PageSectionHeading from "@/components/user-settings/shared-components/PageSectionHeading";
+import SubpageHeader from "@/components/user-settings/shared-components/SubpageHeader";
 import { Roboto } from "next/font/google";
 
 const roboto = Roboto({

@@ -1,8 +1,8 @@
-import Sidebar from "@/components/settings/Sidebar";
-import AccountForm from "@/components/settings/AccountForm";
-import AestheticOptions from "@/components/settings/AestheticOptions";
+import Sidebar from "@/components/user-settings/shared-components/Sidebar";
+import AccountForm from "@/components/user-settings/settings/AccountForm";
+import AestheticOptions from "@/components/user-settings/settings/AestheticOptions";
 import Footer from "@/components/universal/Footer";
-import SubpageHeader from "@/components/universal/SubpageHeader";
+import SubpageHeader from "@/components/user-settings/shared-components/SubpageHeader";
 
 export const metadata = {
   title: "Settings & Preferences | The Curated Althaïr",
