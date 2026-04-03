@@ -32,6 +32,10 @@ export default function SellProducePage() {
     const fetchCategories = async () => {
       const fetchData = [
         "Lighting",
+        "Chair",
+        "Sculpture",
+        "Sofa",
+        "Table",
         "Vase",
         "Textiles",
         "Storage",
@@ -336,8 +340,8 @@ export default function SellProducePage() {
                       Item Name
                     </label>
                     <input
-                      className={`bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0`}
-                      placeholder="e.g.Mid-Century Oak Table"
+                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg italic ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
+                      placeholder="e.g. Mid-Century Oak Table"
                       type="text"
                     ></input>
                   </div>
@@ -348,7 +352,7 @@ export default function SellProducePage() {
                       Listing Price
                     </label>
                     <input
-                      className={`bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0`}
+                      className={`pl-4 italic bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
                       placeholder="0.00"
                       type="number"
                     ></input>
@@ -362,7 +366,7 @@ export default function SellProducePage() {
                     {/* <div>mapp some tags here</div> */}
                     <div className="flex items-center bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3">
                       <input
-                        className="bg-transparent border-0 focus:ring-0 text-sm p-0 flex-grow"
+                        className={`${roboto.className} italic pl-4 bg-transparent border-0 focus:ring-0 text-sm p-0 flex-grow focus:outline-0`}
                         placeholder="Add more..."
                         type="text"
                       ></input>
@@ -375,9 +379,8 @@ export default function SellProducePage() {
                       Inventory Count
                     </label>
                     <input
-                      className={`bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 tex-tlg ${roboto.className} focus:ring-0`}
+                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 tex-tlg ${roboto.className} focus:ring-0 focus:outline-0`}
                       type="number"
-                      value={1}
                     ></input>
                   </div>
                   <div className="flex flex-col gap-2 col-span-2">
@@ -388,7 +391,7 @@ export default function SellProducePage() {
                     </label>
                     <textarea
                       rows={4}
-                      className={`bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 resize-none`}
+                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 resize-none focus:outline-0`}
                       placeholder="Describe the materials, history, and craftmanship..."
                     ></textarea>
                   </div>
