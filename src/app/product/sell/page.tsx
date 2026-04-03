@@ -22,6 +22,7 @@ const gelasio = Gelasio({
 
 export default function SellProducePage() {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [category, setCategory] = useState<string>("");
 
   const handleImageChange = (e: any) => {
     const file = e.target.files?.[0];
@@ -167,34 +168,61 @@ export default function SellProducePage() {
                     </h3>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <button className="py-4 border border-[#775a19] bg-[#775a19]/5 text-[#775a19] flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer">
-                      <span className="material-symbols-outlined text-lg">
-                        chair_alt
-                      </span>
+                    <button
+                      type="button"
+                      onClick={() => setCategory("chair")}
+                      className={`py-4 border flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer ${
+                        category === "chair"
+                          ? "border-[#775a19] bg-[#775a19]/5 text-[#775a19]"
+                          : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-lg">chair_alt</span>
                       <span className="text-[0.7rem] uppercase tracking-widest font-medium">
                         Chair
                       </span>
                     </button>
-                    <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
-                      <span className="material-symbols-outlined text-lg">
-                        oral_disease
-                      </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setCategory("sculpture")}
+                      className={`py-4 border flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer ${
+                        category === "sculpture"
+                          ? "border-[#775a19] bg-[#775a19]/5 text-[#775a19]"
+                          : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-lg">oral_disease</span>
                       <span className="text-[0.7rem] uppercase tracking-widest font-medium">
                         Sculpture
                       </span>
                     </button>
-                    <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
-                      <span className="material-symbols-outlined text-lg">
-                        chair
-                      </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setCategory("sofa")}
+                      className={`py-4 border flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer ${
+                        category === "sofa"
+                          ? "border-[#775a19] bg-[#775a19]/5 text-[#775a19]"
+                          : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-lg">chair</span>
                       <span className="text-[0.7rem] uppercase tracking-widest font-medium">
                         Sofa
                       </span>
                     </button>
-                    <button className="py-4 border border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e] flex flex-col items-center gap-2 transition active:scale-95 cursor-pointer">
-                      <span className="material-symbols-outlined text-lg">
-                        table_bar
-                      </span>
+
+                    <button
+                      type="button"
+                      onClick={() => setCategory("table")}
+                      className={`py-4 border flex flex-col items-center gap-2 transition-all active:scale-95 cursor-pointer ${
+                        category === "table"
+                          ? "border-[#775a19] bg-[#775a19]/5 text-[#775a19]"
+                          : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-lg">table_bar</span>
                       <span className="text-[0.7rem] uppercase tracking-widest font-medium">
                         Table
                       </span>
