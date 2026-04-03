@@ -23,7 +23,7 @@ const gelasio = Gelasio({
 export default function SellProducePage() {
   return (
     <>
-      <header className="fixed top-0 w-full z-50 glass-nav">
+      <header className="top-0 w-full z-50 glass-nav">
         <div className="flex gap-8 justify-between items-center px-12 py-6 w-full max-w-[1920px] mx-auto">
           <span
             className={`text-2xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}
@@ -75,7 +75,7 @@ export default function SellProducePage() {
         </div>
       </header>
       <main
-        className={`pt-32 pb-24 px-6 md:px-12 flex-groew max-w-[1920px] mx-auto w-full`}
+        className={`pt-16 pb-24 px-6 md:px-12 flex-groew max-w-[1920px] mx-auto w-full`}
       >
         <div className="grid grid-cols1 lg:grid-cols-12 gap-16">
           <div className="lg:col-span-7 space-y-16">
@@ -217,6 +217,24 @@ export default function SellProducePage() {
                     ></input>
                   </div>
                 </section>
+                <div className="flex flex-col gap-2">
+                  <label>Search Tags</label>
+                  <div>{/* mapp some tags here */}</div>
+                  <div className="flex items-center bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3">
+                    <input
+                      className="bg-transparent border-0 focus:ring-0 text-sm p-0 flex-grow"
+                      placeholder="Add more..."
+                      type="text"
+                    ></input>
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-8 pt-8">
+                <button
+                  className={`flex-1 bg-[#5f5e5e] text-[#ffffff] px-12 py-5 ${roboto.className} text-xs uppercase tracking-[0.2em] hover:bg-[#1a1c1b] transition-all cursor-pointer`}
+                >
+                  Create Item
+                </button>
               </div>
             </form>
           </div>
