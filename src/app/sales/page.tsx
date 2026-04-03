@@ -3,6 +3,9 @@ import Sidebar from "@/components/user-settings/shared-components/Sidebar";
 import Footer from "@/components/universal/Footer";
 import PageSectionHeading from "@/components/user-settings/shared-components/PageSectionHeading";
 import SubpageHeader from "@/components/user-settings/shared-components/SubpageHeader";
+import SalesTableRow, {
+  type SaleRowItem,
+} from "@/components/user-settings/sales/SalesTableRow";
 import { Gelasio, Roboto } from "next/font/google";
 
 const gelasio = Gelasio({
@@ -19,6 +22,27 @@ const statCardShell =
   "bg-[#efeeec] p-10 flex flex-col justify-center items-center text-center";
 
 const statCardCaption = `${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60`;
+
+const SALES_ROWS: SaleRowItem[] = [
+  {
+    id: "AT-8829",
+    productTitle: "Stoneware Vase",
+    sku: "AT-8829",
+    orderDate: "Oct 24, 2026",
+    customer: "Julianne Moore",
+    price: "$420.00",
+    status: "awaiting_shipment",
+  },
+  {
+    id: "AT-1092",
+    productTitle: "Salt Set",
+    sku: "AT-1092",
+    orderDate: "Oct 21, 2026",
+    customer: "John Smith",
+    price: "$185.00",
+    status: "delivered",
+  },
+];
 
 export const metadata = {
   title: "Sales | The Curated Althaïr",
@@ -124,13 +148,9 @@ export default function SalesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td className="px-6 py-8" colSpan={6}>
-                        <p className={`${roboto.className} text-sm text-[#5f5e5e]/70`}>
-                          wip.
-                        </p>
-                      </td>
-                    </tr>
+                    {SALES_ROWS.map((item) => (
+                      <SalesTableRow key={item.id} item={item} />
+                    ))}
                   </tbody>
                 </table>
               </div>
