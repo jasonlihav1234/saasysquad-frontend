@@ -25,6 +25,7 @@ export default function SellProducePage() {
   const [category, setCategory] = useState<string>("");
   const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [toGeneratePrice, setToGeneratePrice] = useState(true);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -95,7 +96,7 @@ export default function SellProducePage() {
   };
 
   return (
-    <div className="flex">
+    <div className="flex bg-[#faf9f7]">
       <aside
         className={`w-64 bg-[#F5F3EF] text-[#2D2D2D] ${roboto.className} min-h-screen flex overflow-hidden flex-col justify_between border-r border-[#D1CFC9]/50 shrink-0`}
       >
@@ -147,7 +148,7 @@ export default function SellProducePage() {
           </ul>
         </nav>
       </aside>
-      <div className="flex flex-col">
+      <div className="flex flex-col flex-1">
         <header
           className={`top-0 w-full z-50 glass-nav ${roboto.className} antialiased tracking-tight`}
         >
@@ -407,49 +408,121 @@ export default function SellProducePage() {
             </div>
             <aside className="lg:col-span-5 pt-30.5">
               <div className="sticky top-32 space-y-8">
-                <section className="bg-[#f4f3f1] p-10 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <span className="material-symbols-outlined !text-8xl">
-                      auto_awesome
-                    </span>
-                  </div>
-                  <div className="relative z-10 space-y-6">
-                    <h3
-                      className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}
-                    >
-                      Atelier Insights
-                    </h3>
-                    <p
-                      className={`${roboto.className} text-sm text-[#4e4639] leading-relaxed`}
-                    >
-                      Utilize our machine learning model to determine the
-                      optimal market value based on historical sales
-                    </p>
-                    <div className="bg-[#ffffff] border border-[#d1c5b4] p-8 flex flex-col items-center text-center space-y-4">
-                      <span className="material-symbols-outlined text-[#775a19] !text-4xl">
-                        analytics
+                {toGeneratePrice ? (
+                  <section className="bg-[#ffffff] p-10 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                      <span className="material-symbols-outlined !text-8xl">
+                        auto_awesome
                       </span>
+                    </div>
+                    <div className="relative z-10 space-y-6">
+                      <h3
+                        className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}
+                      >
+                        Atelier Insights
+                      </h3>
                       <p
-                        className={`${roboto.className} text-xs uppercase tracking-widest text-[#5f5e5e] font-bold`}
+                        className={`${roboto.className} block text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
                       >
-                        Awaiting Data
+                        Suggested Range
                       </p>
-                      <p
-                        className={`text-xs text-[#615e57] mt-1 ${roboto.className}`}
-                      >
-                        Complete item details to generate a precise estimation.
-                      </p>
-                      <button
-                        className={`w-full bg-[#775a19] text-[#ffffff] px-6 py-4 ${roboto.className} text-[0.7rem] uppercase tracking-[0.15em] hover:opacity-90 transition-all flex items-center justify-center gap-2 group cursor-pointer`}
-                      >
-                        Estimate Market Value
-                        <span className="material-symbols-outlined !text-[1rem] group-hover:translate-x-1 transition-transform">
-                          arrow_forward
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                        >
+                          $1200
                         </span>
+                        <span className="text-[#5f5e5e] font-light">—</span>
+                        <span
+                          className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                        >
+                          $1500
+                        </span>
+                      </div>
+                      <div className="mb-12">
+                        <p
+                          className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
+                          Estimated Volume
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-baseline gap-1">
+                            <span
+                              className={`text-4xl ${gelasio.className} font-black text-[#775a19]`}
+                            >
+                              2-4
+                            </span>
+                            <span
+                              className={`text-[0.75rem] uppercase tracking-widest font-bold ${roboto.className}`}
+                            >
+                              Units
+                            </span>
+                          </div>
+
+                          <div className="flex items-end gap-1 h-12">
+                            <div className="w-1 bg-[#e3e2e0] h-4"></div>
+                            <div className="w-1 bg-[#e3e2e0] h-6"></div>
+                            <div className="w-1 bg-[#775a19] h-10"></div>
+                            <div className="w-1 bg-[#775a19] h-8"></div>
+                            <div className="w-1 bg-[#e3e2e0] h-5"></div>
+                            <div className="w-1 bg-[#e3e2e0] h-3"></div>
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        className={`flex-1 bg-[#5f5e5e] text-[#ffffff] px-12 py-5 ${roboto.className} text-xs uppercase tracking-[0.2em] hover:bg-[#1a1c1b] transition-all cursor-pointer w-full`}
+                      >
+                        Regenerate Estimate
                       </button>
                     </div>
-                  </div>
-                </section>
+                  </section>
+                ) : (
+                  <section className="bg-[#f4f3f1] p-10 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                      <span className="material-symbols-outlined !text-8xl">
+                        auto_awesome
+                      </span>
+                    </div>
+                    <div className="relative z-10 space-y-6">
+                      <h3
+                        className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}
+                      >
+                        Atelier Insights
+                      </h3>
+                      <p
+                        className={`${roboto.className} text-sm text-[#4e4639] leading-relaxed`}
+                      >
+                        Utilize our machine learning model to determine the
+                        optimal market value based on historical sales
+                      </p>
+                      <div className="bg-[#ffffff] border border-[#d1c5b4] p-8 flex flex-col items-center text-center space-y-4">
+                        <span className="material-symbols-outlined text-[#775a19] !text-4xl">
+                          analytics
+                        </span>
+                        <p
+                          className={`${roboto.className} text-xs uppercase tracking-widest text-[#5f5e5e] font-bold`}
+                        >
+                          Awaiting Data
+                        </p>
+                        <p
+                          className={`text-xs text-[#615e57] mt-1 ${roboto.className}`}
+                        >
+                          Complete item details to generate a precise
+                          estimation.
+                        </p>
+                        <button
+                          className={`w-full bg-[#775a19] text-[#ffffff] px-6 py-4 ${roboto.className} text-[0.7rem] uppercase tracking-[0.15em] hover:opacity-90 transition-all flex items-center justify-center gap-2 group cursor-pointer`}
+                        >
+                          Estimate Market Value
+                          <span className="material-symbols-outlined !text-[1rem] group-hover:translate-x-1 transition-transform">
+                            arrow_forward
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  </section>
+                )}
               </div>
             </aside>
           </div>
