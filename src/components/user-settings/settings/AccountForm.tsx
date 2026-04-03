@@ -1,5 +1,6 @@
 "use client";
 
+import PageSectionHeading from "@/components/user-settings/shared-components/PageSectionHeading";
 import { Gelasio, Roboto } from "next/font/google";
 
 const gelasio = Gelasio({
@@ -15,16 +16,16 @@ const roboto = Roboto({
 export default function AccountForm() {
   return (
     <div>
-      <div className="mb-12">
-        <h1 className={`${gelasio.className} text-black text-4xl font-normal leading-tight tracking-tight mb-2`}>
-          Account Details
-        </h1>
-        <p className={`${roboto.className} text-[#5F5E5E] text-base`}>
-          Manage your personal details within The Curated Althaïr.
-        </p>
-      </div>
+      <PageSectionHeading
+        className="mb-12"
+        title="Account Details"
+        description="Manage your personal details within The Curated Althaïr."
+      />
 
-      <section id="account" className="mb-16 flex flex-col sm:flex-row items-start gap-8 bg-[#F1F1EF] p-8">
+      <section
+        id="account"
+        className="mb-16 flex flex-col sm:flex-row items-start gap-8 bg-[#F1F1EF] p-8"
+      >
         <div className="w-32 h-32 shrink-0 bg-[#E3E2E0] border border-[#C5A059]/30 overflow-hidden">
           <img
             src="/images/login_image.png"
@@ -35,7 +36,9 @@ export default function AccountForm() {
 
         <div className="flex flex-col gap-4 max-w-md">
           <div>
-            <h3 className={`${gelasio.className} text-black text-xl font-medium mb-1`}>
+            <h3
+              className={`${gelasio.className} text-black text-xl font-medium mb-1`}
+            >
               Profile Picture
             </h3>
             <p className={`${roboto.className} text-[#5F5E5E] text-sm`}>
@@ -60,7 +63,9 @@ export default function AccountForm() {
       </section>
 
       <section className="mb-24">
-        <h2 className={`${gelasio.className} text-black text-2xl font-medium mb-8`}>
+        <h2
+          className={`${gelasio.className} text-black text-2xl font-medium mb-8`}
+        >
           Personal Details
         </h2>
 
@@ -125,7 +130,9 @@ export default function AccountForm() {
               rows={4}
               className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6 resize-none`}
             />
-            <p className={`${roboto.className} text-xs text-[#5F5E5E] mt-2 text-right`}>
+            <p
+              className={`${roboto.className} text-xs text-[#5F5E5E] mt-2 text-right`}
+            >
               Additional Text add later.
             </p>
           </div>
@@ -144,7 +151,9 @@ export default function AccountForm() {
       <div className="w-full h-px bg-[#C5A059]/20 mb-24" />
 
       <section id="security" className="mb-24 bg-[#F1F1EF] p-8">
-        <h2 className={`${gelasio.className} text-black text-2xl font-medium mb-2`}>
+        <h2
+          className={`${gelasio.className} text-black text-2xl font-medium mb-2`}
+        >
           Security
         </h2>
         <p className={`${roboto.className} text-[#5F5E5E] text-sm mb-6`}>
