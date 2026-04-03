@@ -6,7 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense, use } from "react";
 
 // probably should make this user/dashboard
 
@@ -23,6 +23,54 @@ const gelasio = Gelasio({
 export default function SellProducePage() {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [category, setCategory] = useState<string>("");
+  const [dbCategories, setDbCategories] = useState<string[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const fetchData = [
+        "Lighting",
+        "Vase",
+        "Textiles",
+        "Storage",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+        "Decor",
+      ];
+      setDbCategories(fetchData);
+    };
+
+    fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredCategories = dbCategories.filter((cat) =>
+    cat.toLowerCase().includes(category.toLowerCase()),
+  );
 
   const handleImageChange = (e: any) => {
     const file = e.target.files?.[0];
@@ -177,7 +225,9 @@ export default function SellProducePage() {
                           : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
                       }`}
                     >
-                      <span className="material-symbols-outlined text-lg">chair_alt</span>
+                      <span className="material-symbols-outlined text-lg">
+                        chair_alt
+                      </span>
                       <span className="text-[0.7rem] uppercase tracking-widest font-medium">
                         Chair
                       </span>
@@ -192,7 +242,9 @@ export default function SellProducePage() {
                           : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
                       }`}
                     >
-                      <span className="material-symbols-outlined text-lg">oral_disease</span>
+                      <span className="material-symbols-outlined text-lg">
+                        oral_disease
+                      </span>
                       <span className="text-[0.7rem] uppercase tracking-widest font-medium">
                         Sculpture
                       </span>
@@ -207,7 +259,9 @@ export default function SellProducePage() {
                           : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
                       }`}
                     >
-                      <span className="material-symbols-outlined text-lg">chair</span>
+                      <span className="material-symbols-outlined text-lg">
+                        chair
+                      </span>
                       <span className="text-[0.7rem] uppercase tracking-widest font-medium">
                         Sofa
                       </span>
@@ -222,36 +276,56 @@ export default function SellProducePage() {
                           : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
                       }`}
                     >
-                      <span className="material-symbols-outlined text-lg">table_bar</span>
+                      <span className="material-symbols-outlined text-lg">
+                        table_bar
+                      </span>
                       <span className="text-[0.7rem] uppercase tracking-widest font-medium">
                         Table
                       </span>
                     </button>
                   </div>
-                  <details className="group">
-                    <summary className="list-none cursor-pointer flex items-center gap-2 text-[#a7a5a5] hover:text-[#775a19] transition-colors text-sm select-none">
-                      <span className="material-symbols-outlined text-lg group-open:rotate-180 transition-transform">
-                        expand_more
-                      </span>
-                      <span
-                        className={`uppercase tracking-widest text-[0.7rem] font-semibold ${roboto.className}`}
-                      >
-                        View More Category Options
-                      </span>
-                    </summary>
-                    <div>
-                      {/* this would be where I map other categories */}
-                    </div>
-                  </details>
-                  <div className="pt-4">
+                  <div className={`pt-4 ${roboto.className}`}>
                     <label className="block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2">
-                      or specify a unique classification
+                      select an existing category or specify a unique
+                      classification
                     </label>
                     <input
-                      className="w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50"
+                      list="category-suggestions"
+                      name="category"
+                      id="category"
+                      className="pl-4 focus:outline-0 w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50"
                       placeholder="Specify other..."
                       type="text"
+                      value={category}
+                      onChange={(e) => {
+                        setCategory(e.target.value);
+                        setIsOpen(true);
+                      }}
+                      onFocus={() => setIsOpen(true)}
                     ></input>
+
+                    {isOpen && (
+                      <ul className="z-10 w-full mt-1 bg-white border border-[#d1c5b4] shadow-lg max-h-48 overflow-y-auto">
+                        {filteredCategories.length > 0 ? (
+                          filteredCategories.map((cat, index) => (
+                            <li
+                              key={index}
+                              className="px-4 py-3 text-sm text-[#5f5e5e] hover:bg-[#775a19]/5 hover:text-[#775a19] cursor-pointer transition-colors"
+                              onClick={() => {
+                                setCategory(cat);
+                                setIsOpen(false);
+                              }}
+                            >
+                              {cat}
+                            </li>
+                          ))
+                        ) : (
+                          <li className="px-4 py-3 text-sm text-[#a7a5a5] italic">
+                            Create new category: "{category}"
+                          </li>
+                        )}
+                      </ul>
+                    )}
                   </div>
                 </section>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
