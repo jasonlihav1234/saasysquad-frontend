@@ -1,3 +1,6 @@
+import PurchaseOrderItem, {
+  type PurchaseOrderItemProps,
+} from "@/components/purchases/PurchaseOrderItem";
 import Sidebar from "@/components/settings/Sidebar";
 import Footer from "@/components/universal/Footer";
 import PageSectionHeading from "@/components/universal/PageSectionHeading";
@@ -24,6 +27,36 @@ const STATUS_TABS = [
   "Processing",
   "In Transit",
   "Delivered",
+];
+
+const SAMPLE_ORDERS: PurchaseOrderItemProps[] = [
+  {
+    imageSrc: "",
+    status: "delivered",
+    productTitle: "Height Adjusting Desk",
+    orderNumber: "AT-89012",
+    dateLabel: "October 12, 2026",
+    price: "$1,240.00",
+    actionLabel: "View Details",
+  },
+  {
+    imageSrc: "",
+    status: "in_transit",
+    productTitle: "Lounge Chair",
+    orderNumber: "AT-90234",
+    dateLabel: "October 28, 2026",
+    price: "$4,850.00",
+    actionLabel: "View Details",
+  },
+  {
+    imageSrc: "",
+    status: "processing",
+    productTitle: "Floor Lamp",
+    orderNumber: "AT-91442",
+    dateLabel: "November 02, 2026",
+    price: "$890.00",
+    actionLabel: "View Details",
+  },
 ];
 
 export default function PurchasesPage() {
@@ -85,7 +118,13 @@ export default function PurchasesPage() {
             </div>
           </nav>
 
-          <section className="purchases-orders" />
+          <section
+            className="px-12 py-12 max-w-[1400px] w-full mx-auto space-y-12"
+          >
+            {SAMPLE_ORDERS.map((order) => (
+              <PurchaseOrderItem key={order.orderNumber} {...order} />
+            ))}
+          </section>
 
           <div className="p-8 md:p-12 lg:p-16 max-w-4xl">
             <Footer />
