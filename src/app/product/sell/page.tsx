@@ -24,7 +24,7 @@ export default function SellProducePage() {
   return (
     <div className="flex">
       <aside
-        className={`w-64 bg-[#F5F3EF] text-[#2D2D2D] ${roboto.className} h-screen flex overflow-hidden`}
+        className={`w-64 bg-[#F5F3EF] text-[#2D2D2D] ${roboto.className} h-screen flex overflow-hidden flex-col justify_between border-r border-[#D1CFC9]/50 shrink-0`}
       >
         <div className="p-8 pt-10">
           <h1
@@ -32,10 +32,47 @@ export default function SellProducePage() {
           >
             Member Dashboard
           </h1>
-          <p>
-            
-          </p>
         </div>
+        <nav className="mt-8 px-4">
+          <ul className="space-y-2">
+            <Link
+              href="/catalog"
+              className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
+            >
+              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none -translate-y-[2px]">
+                shopping_bag
+              </span>
+              Catalog
+            </Link>
+            <Link
+              href="/catalog"
+              className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
+            >
+              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
+                sell
+              </span>
+              Purchases
+            </Link>
+            <Link
+              href="/catalog"
+              className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
+            >
+              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
+                Orders
+              </span>
+              Sales
+            </Link>
+            <Link
+              href="/catalog"
+              className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
+            >
+              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
+                Forum
+              </span>
+              Messages
+            </Link>
+          </ul>
+        </nav>
       </aside>
       <div className="flex flex-col">
         <header
