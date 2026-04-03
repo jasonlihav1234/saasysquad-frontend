@@ -109,6 +109,35 @@ export default function SellProducePage() {
                   >
                     Item Name
                   </label>
+                  <input
+                    className={`bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0`}
+                    placeholder="e.g.Mid-Century Oak Table"
+                    type="text"
+                  ></input>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label
+                    className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                  >
+                    Listing Price
+                  </label>
+                  <input
+                    className={`bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0`}
+                    placeholder="0.00"
+                    type="number"
+                  ></input>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <label
+                    className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                  >
+                    Description
+                  </label>
+                  <textarea
+                    rows={4}
+                    className={`bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 resize-none`}
+                    placeholder="Describe the materials, history, and craftmanship..."
+                  ></textarea>
                 </div>
               </div>
             </form>
