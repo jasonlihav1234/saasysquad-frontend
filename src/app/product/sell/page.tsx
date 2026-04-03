@@ -25,7 +25,10 @@ export default function SellProducePage() {
   const [category, setCategory] = useState<string>("");
   const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [toGeneratePrice, setToGeneratePrice] = useState(true);
+  const [toGeneratePrice, setToGeneratePrice] = useState(false);
+  const [insightState, setInsightState] = useState<
+    "awaiting" | "loading" | "complete"
+  >("awaiting");
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -76,6 +79,14 @@ export default function SellProducePage() {
   const filteredCategories = dbCategories.filter((cat) =>
     cat.toLowerCase().includes(category.toLowerCase()),
   );
+
+  const handleGenerateEstimate = () => {
+    setInsightState("loading");
+
+    setTimeout(() => {
+      setInsightState("complete");
+    }, 2000);
+  };
 
   const handleImageChange = (e: any) => {
     const file = e.target.files?.[0];
@@ -408,7 +419,7 @@ export default function SellProducePage() {
             </div>
             <aside className="lg:col-span-5 pt-30.5">
               <div className="sticky top-32 space-y-8">
-                {toGeneratePrice ? (
+                {insightState === "complete" && (
                   <section className="bg-[#ffffff] p-10 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                       <span className="material-symbols-outlined !text-8xl">
@@ -471,14 +482,79 @@ export default function SellProducePage() {
                       </div>
                       <button
                         type="button"
+                        onClick={() => handleGenerateEstimate()}
                         className={`flex-1 bg-[#5f5e5e] text-[#ffffff] px-12 py-5 ${roboto.className} text-xs uppercase tracking-[0.2em] hover:bg-[#1a1c1b] transition-all cursor-pointer w-full`}
                       >
                         Regenerate Estimate
                       </button>
                     </div>
                   </section>
-                ) : (
-                  <section className="bg-[#f4f3f1] p-10 relative overflow-hidden">
+                )}
+
+                {insightState === "loading" && (
+                  <section className="bg-[#ffffff] p-10 relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-4 opacity-10">
+                      <span className="material-symbols-outlined !text-8xl animate-pulse">
+                        auto_awesome
+                      </span>
+                    </div>
+                    <div className="relative z-10 space-y-6">
+                      <h3
+                        className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}
+                      >
+                        Atelier Insights
+                      </h3>
+
+                      <div>
+                        <p
+                          className={`${roboto.className} block text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
+                          Suggested Range
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <div className="h-9 w-24 bg-[#e9e8e6] animate-pulse rounded-sm"></div>
+                          <span className="text-[#5f5e5e] font-light">—</span>
+                          <div className="h-9 w-24 bg-[#e9e8e6] animate-pulse rounded-sm"></div>
+                        </div>
+                      </div>
+
+                      <div className="mb-12">
+                        <p
+                          className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
+                          Estimated Volume
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-baseline gap-2">
+                            <div className="h-10 w-16 bg-[#e9e8e6] animate-pulse rounded-sm"></div>
+                            <div className="h-4 w-12 bg-[#e9e8e6] animate-pulse rounded-sm"></div>
+                          </div>
+
+                          <div className="flex items-end gap-1 h-12">
+                            <div className="w-1 bg-[#e9e8e6] h-4 animate-pulse"></div>
+                            <div className="w-1 bg-[#e9e8e6] h-6 animate-pulse delay-75"></div>
+                            <div className="w-1 bg-[#e9e8e6] h-10 animate-pulse delay-150"></div>
+                            <div className="w-1 bg-[#e9e8e6] h-8 animate-pulse delay-200"></div>
+                            <div className="w-1 bg-[#e9e8e6] h-5 animate-pulse delay-[250ms]"></div>
+                            <div className="w-1 bg-[#e9e8e6] h-3 animate-pulse delay-300"></div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        disabled
+                        className={`flex-1 bg-[#f4f3f1] text-[#a7a5a5] px-12 py-5 ${roboto.className} text-xs uppercase tracking-[0.2em] transition-all cursor-not-allowed w-full flex justify-center items-center gap-2`}
+                      >
+                        <span className="w-3 h-3 border-2 border-[#a7a5a5] border-t-transparent rounded-full animate-spin"></span>
+                        Calculating
+                      </button>
+                    </div>
+                  </section>
+                )}
+
+                {insightState === "awaiting" && (
+                  <section className="bg-[#ffffff] p-10 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
                       <span className="material-symbols-outlined !text-8xl">
                         auto_awesome
@@ -496,7 +572,7 @@ export default function SellProducePage() {
                         Utilize our machine learning model to determine the
                         optimal market value based on historical sales
                       </p>
-                      <div className="bg-[#ffffff] border border-[#d1c5b4] p-8 flex flex-col items-center text-center space-y-4">
+                      <div className="bg-[#f4f3f1] border border-[#d1c5b4] p-8 flex flex-col items-center text-center space-y-4">
                         <span className="material-symbols-outlined text-[#775a19] !text-4xl">
                           analytics
                         </span>
@@ -512,6 +588,7 @@ export default function SellProducePage() {
                           estimation.
                         </p>
                         <button
+                          onClick={() => handleGenerateEstimate()}
                           className={`w-full bg-[#775a19] text-[#ffffff] px-6 py-4 ${roboto.className} text-[0.7rem] uppercase tracking-[0.15em] hover:opacity-90 transition-all flex items-center justify-center gap-2 group cursor-pointer`}
                         >
                           Estimate Market Value
