@@ -16,7 +16,7 @@ export default function SettingsPage() {
       <SubpageHeader title="Account Details" />
 
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar />
+        <Sidebar activePage="account" />
 
         <div className="flex-1 overflow-y-auto p-8 md:p-12 lg:p-16 max-w-4xl">
           <AccountForm />
