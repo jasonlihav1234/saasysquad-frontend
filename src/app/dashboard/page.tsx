@@ -41,6 +41,7 @@ function DashboardContent() {
   const [aiState, setAiState] = useState<"awaiting" | "loading" | "completed">(
     "awaiting",
   );
+  const [message, setMessage] = useState("");
   const topRef = useRef<HTMLElement>(null);
   const itemsPerPage = 6;
   const searchParams = useSearchParams();
@@ -60,7 +61,7 @@ function DashboardContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const authKey =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiNTRmNjA0MTgtYmFiOC00NDE5LWFhNTktMDM3MmE0NDJlMTYwIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiIxMDUyNDQyOC1lZDBiLTRiNGYtOGYyZS1kOTYxM2UxNjdhYmQiLCJpYXQiOjE3NzUyODg5NTgsImV4cCI6MTc3NTI4OTg1OCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.JgDSTHcFb6opHufyWLuZlvEhHqfhHFG-0dTkBaI1Qc4";
+    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiNTRmNjA0MTgtYmFiOC00NDE5LWFhNTktMDM3MmE0NDJlMTYwIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiIzZDgwYjg1My1mNzhmLTQxNWUtYjU4NC0zZGNiYjY1YTg0YjIiLCJpYXQiOjE3NzUyOTAzNTQsImV4cCI6MTc3NTI5MTI1NCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.38qqBokmClExUvWvwbPNXG0FhJuQ69A0FaOsvobsVJI";
 
   useEffect(() => {
     const fetchItems = async (isRetry: boolean = false) => {
@@ -231,6 +232,9 @@ function DashboardContent() {
     setAiState("loading");
     setTimeout(() => {
       setAiState("completed");
+      // setMessage(
+      //   "I couldn't find exact matches in our current catalog, but I think Muted Sage, Ottoman would fit this space perfectly :).",
+      // );
       setAiItems([
         {
           item_id: "0033719a-8112-4179-9deb-cbae3a3e006e",
@@ -592,7 +596,10 @@ function DashboardContent() {
 
           {isAiSidebarOpen && (
             <div
-              onClick={closeSidebar}
+              onClick={() => {
+                closeSidebar();
+                setAiState("awaiting");
+              }}
               className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm transition-opacity"
               aria-hidden="true"
             ></div>
@@ -606,7 +613,10 @@ function DashboardContent() {
                 AI Curator
               </h2>
               <button
-                onClick={closeSidebar}
+                onClick={() => {
+                  closeSidebar();
+                  setAiState("awaiting");
+                }}
                 className="material-symbols-outlined hover:text-[#775a19] transition-colors cursor-pointer"
               >
                 close
@@ -618,13 +628,13 @@ function DashboardContent() {
                 onClick={() => setAIChoice("category")}
                 className={`flex-1 px-4 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors cursor-pointer ${aiChoice === "category" ? "border-b-2 border-b-[#775A19]" : ""}`}
               >
-                Category
+                By Category
               </button>
               <button
                 onClick={() => setAIChoice("past-purchases")}
                 className={`flex-1 px-4 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors cursor-pointer ${aiChoice === "past-purchases" ? "border-b-2 border-b-[#775A19]" : ""}`}
               >
-                Past Purchases
+                By Past Purchases
               </button>
             </div>
 
@@ -742,35 +752,69 @@ function DashboardContent() {
               )}
 
               {aiState === "completed" && (
-                <div className="grid grid-cols-2 gap-6">
-                  {aiItems.map((item) => (
-                    <div key={item.item_id} className="group cursor-pointer">
-                      <div className="relative aspect-[1/1] bg-[#efeeec] overflow-hidden mb-4 rounded-sm">
-                        <img
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                          alt="store product image"
-                          src={`${item.image_url}`}
-                        ></img>
-                      </div>
-                      <div className="flex justify-between items-baseline gap-4">
-                        <div>
-                          <h3
-                            className={`text-sm ${gelasio.className} antialiased mb-1 truncate`}
-                          >
-                            {item.item_name}
-                          </h3>
+                <>
+                  {aiItems.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-6">
+                      {aiItems.map((item) => (
+                        <div
+                          key={item.item_id}
+                          className="group cursor-pointer"
+                        >
+                          <div className="relative aspect-[1/1] bg-[#efeeec] overflow-hidden mb-4 rounded-sm">
+                            <img
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                              alt="store product image"
+                              src={`${item.image_url}`}
+                            ></img>
+                          </div>
+                          <div className="flex justify-between items-baseline gap-4">
+                            <div>
+                              <h3
+                                className={`text-sm ${gelasio.className} antialiased mb-1 truncate`}
+                              >
+                                {item.item_name}
+                              </h3>
+                            </div>
+                            <div>
+                              <span
+                                className={`text-sm ${gelasio.className} text-[#775a19] whitespace-nowrap`}
+                              >
+                                ${item.price}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <span
-                            className={`text-sm ${gelasio.className} text-[#775a19] whitespace-nowrap`}
-                          >
-                            ${item.price}
-                          </span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-center p-8 bg-[#f9f8f6] border border-[#d1c5b4]/30 rounded-sm">
+                      <span className="material-symbols-outlined text-4xl text-[#d1c5b4] mb-4">
+                        search_off
+                      </span>
+                      <h3
+                        className={`text-lg ${gelasio.className} text-[#1a1c1b] mb-2`}
+                      >
+                        No Exact Matches
+                      </h3>
+                      <p
+                        className={`text-sm ${roboto.className} text-[#5f5e5e] leading-relaxed italic`}
+                      >
+                        {message}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="p-8 border-t border-[#d1c5b4]/10">
+                    <button
+                      onClick={() => {
+                        setAiState("awaiting");
+                      }}
+                      className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer disabled:bg-[#5f5e5e] disabled:cursor-not-allowed"
+                    >
+                      Start New Search
+                    </button>
+                  </div>
+                </>
               )}
             </div>
           </aside>
