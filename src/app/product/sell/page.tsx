@@ -53,7 +53,7 @@ export default function SellProducePage() {
   const isSubmittingRef = useRef<boolean>(false);
   const router = useRouter();
   const authKey =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI0YWI3ZTU5OS00YTgzLTQxMzktOGI1Ny0yM2JkNWMxNDI5ODkiLCJpYXQiOjE3NzUyODIzMDUsImV4cCI6MTc3NTI4MzIwNSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.icu1O1jREsFZ9yz6EW6yRtrVmbdtpB_Szim-Mi-8Aug";
+    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJlNGI1NWFmNy0xZjM5LTQ1ZmYtYmRjYi04MjJiZWMwZjc1MDYiLCJpYXQiOjE3NzUyODM4MDUsImV4cCI6MTc3NTI4NDcwNSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.YxPBPaIAwffzMR2SXEK7U0Slg29ucBKXAphqkPDCH_k";
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -177,6 +177,7 @@ export default function SellProducePage() {
         console.log("here", body);
       } else if (response.status === 401) {
         // renew tokens
+        // this will infinite loop if there is a serious issue, fix this later
         const responseRefresh = await fetch(
           "https://sassysquad-backend.vercel.app/auth/refresh",
           {
@@ -192,8 +193,8 @@ export default function SellProducePage() {
 
         if (responseRefresh.status === 200) {
           const refreshBody = await responseRefresh.json();
-          localStorage.setItem("accessToken", body.accessToken);
-          localStorage.setItem("refreshToken", body.refreshToken);
+          localStorage.setItem("accessToken", refreshBody.accessToken);
+          localStorage.setItem("refreshToken", refreshBody.refreshToken);
 
           await handleGenerateEstimate();
         }
@@ -258,7 +259,7 @@ export default function SellProducePage() {
     setSelectedTags(selectedTags.filter((_, i) => i !== index));
   };
 
-  const handleFormSubmit = (e: any) => {
+  const handleFormSubmit = async (e: any) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
 
@@ -276,20 +277,18 @@ export default function SellProducePage() {
       return;
     }
 
-    // console.log(category, selectedTags);
     const formattedCategory = category.toLowerCase().split(" ").join("-");
     const formattedTags = selectedTags.map((tag) =>
       tag.toLowerCase().split(" ").join("-"),
     );
     const itemName = formData.get("item-name");
     const price = formData.get("listing-price");
-    const quanttiy = formData.get("quantity");
+    const quantity = formData.get("quantity");
 
-    // console.log(formattedCategory, formattedTags);
     console.log(
       itemName,
       price,
-      quanttiy,
+      quantity,
       description,
       formattedCategory,
       formattedTags,
@@ -298,19 +297,63 @@ export default function SellProducePage() {
     try {
       // transform the tag and category to be lowercase
       // need the item name, price, quantity, description, and image, also need tags, and category
-      console.log();
-      // const submitResponse = await fetch(
-      //   "https://sassysquad-backend.vercel.app/v2/items",
-      //   {
-      //     method: "POST",
-      //     headers: {
-      //       "Content-Type": "application/json",
-      //     },
-      //     body: JSON.stringify({
+      const submitResponse = await fetch(
+        "https://sassysquad-backend.vercel.app/v2/items",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authKey}`,
+          },
+          body: JSON.stringify({
+            itemName: itemName,
+            description: description,
+            price: Number(price),
+            quantityAvailable: Number(quantity),
+            imageUrl: imageBase64,
+            categoryName: formattedCategory,
+            tags: formattedTags,
+          }),
+        },
+      );
 
-      //     }),
-      //   },
-      // );
+      if (submitResponse.status === 201) {
+        alert("Item successfully created");
+
+        e.target.reset();
+        setSelectedTags([]);
+        setCategory("");
+        setImageBase64(null);
+        setInsightState("awaiting");
+        setDescription("");
+        categoryDropdownRef.current = null;
+        tagDropdownRef.current = null;
+        isSubmittingRef.current = false;
+      } else if (submitResponse.status === 401) {
+        const responseRefresh = await fetch(
+          "https://sassysquad-backend.vercel.app/auth/refresh",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              refreshToken: localStorage.getItem("refreshToken"),
+            }),
+          },
+        );
+
+        if (responseRefresh.status === 200) {
+          const refreshBody = await responseRefresh.json();
+          localStorage.setItem("accessToken", refreshBody.accessToken);
+          localStorage.setItem("refreshToken", refreshBody.refreshToken);
+
+          alert("Token expired, submit forum again");
+        }
+      } else {
+        console.log(await submitResponse.json());
+        alert("fatal error in submission");
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -670,7 +713,7 @@ export default function SellProducePage() {
                       Inventory Count
                     </label>
                     <input
-                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${roboto.className} focus:ring-0 focus:outline-0`}
+                      className={`italic pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${gelasio.className} focus:ring-0 focus:outline-0`}
                       type="number"
                       name="quantity"
                     ></input>
