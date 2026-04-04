@@ -3,6 +3,9 @@ import Sidebar from "@/components/user-settings/shared-components/Sidebar";
 import Footer from "@/components/universal/Footer";
 import PageSectionHeading from "@/components/user-settings/shared-components/PageSectionHeading";
 import SubpageHeader from "@/components/user-settings/shared-components/SubpageHeader";
+import ActiveListingCard, {
+  type ActiveListingCardProps,
+} from "@/components/user-settings/sales/ActiveListingCard";
 import SalesTableRow, {
   type SaleRowItem,
 } from "@/components/user-settings/sales/SalesTableRow";
@@ -22,6 +25,34 @@ const statCardShell =
   "bg-[#efeeec] p-10 flex flex-col justify-center items-center text-center";
 
 const statCardCaption = `${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60`;
+
+const ACTIVE_LISTINGS: ActiveListingCardProps[] = [
+  {
+    title: "Oak dining chair",
+    price: "$850.00",
+    stock: 2,
+    imageSrc:
+      "",
+    imageAlt: "Oak dining chair",
+    showQuickManageOverlay: true,
+  },
+  {
+    title: "Marble Bowl",
+    price: "$310.00",
+    stock: 1,
+    imageSrc:
+      "",
+    imageAlt: "Marble Bowl",
+  },
+  {
+    title: "Amber Glass Decanter",
+    price: "$145.00",
+    stock: 5,
+    imageSrc:
+      "",
+    imageAlt: "Amber Glass Decanter",
+  },
+];
 
 const SALES_ROWS: SaleRowItem[] = [
   {
@@ -155,8 +186,56 @@ export default function SalesPage() {
                 </table>
               </div>
             </section>
-          </div>
+            <section className="pb-24">
+              <div className="flex justify-between items-center mb-10">
+                <h3 className={`${gelasio.className} text-3xl`}>
+                  Active Listings
+                </h3>
+                <div className="flex gap-4">
+                  <div className="relative group">
+                    <label htmlFor="sales-inventory-search" className="sr-only">
+                      Search inventory
+                    </label>
+                    <input
+                      id="sales-inventory-search"
+                      type="search"
+                      placeholder="Search inventory..."
+                      className={`${roboto.className} bg-[#f4f3f1] border-b border-[#d1c5b4]/30 px-4 py-2 text-xs focus:outline-none focus:border-[#775a19] w-64 transition-all`}
+                    />
+                    <span className="material-symbols-outlined absolute right-2 top-2 text-[#5f5e5e] opacity-40 pointer-events-none">
+                      search
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                {ACTIVE_LISTINGS.map((listing) => (
+                  <ActiveListingCard key={listing.title} {...listing} />
+                ))}
 
+                <button
+                  type="button"
+                  className="group cursor-pointer border-2 border-dashed border-[#d1c5b4]/30 hover:border-[#775a19]/50 transition-colors text-left w-full"
+                >
+                  <div className="aspect-[4/5] flex flex-col items-center justify-center text-center p-8">
+                    <span className="material-symbols-outlined text-4xl text-[#5f5e5e]/30 group-hover:text-[#775a19] transition-colors mb-4">
+                      add_circle
+                    </span>
+                    <p
+                      className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#5f5e5e]/60`}
+                    >
+                      New Listing
+                    </p>
+                    <p
+                      className={`${roboto.className} text-[0.6rem] text-[#5f5e5e]/40 mt-2 px-4`}
+                    >
+                      Description here (Upload Image here).
+                    </p>
+                  </div>
+                </button>
+              </div>
+            </section>
+          </div>
           <div className="p-8 md:p-12 lg:p-16 max-w">
             <Footer />
           </div>
