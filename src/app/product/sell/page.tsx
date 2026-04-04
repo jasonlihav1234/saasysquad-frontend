@@ -40,6 +40,10 @@ export default function SellProducePage() {
   const [insightState, setInsightState] = useState<
     "awaiting" | "loading" | "complete"
   >("awaiting");
+  const [expectedMonthlyVolume, setExpectedMonthlyVolume] = useState([]);
+  const [maxExpectedRevenue, setMaxExpectedRevenue] = useState(0);
+  const [optimalPrice, setOptimalPrice] = useState(0);
+  const [suggestedPriceRange, setSuggestedPriceRange] = useState([]);
 
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const tagDropdownRef = useRef<HTMLDivElement>(null);
@@ -53,7 +57,7 @@ export default function SellProducePage() {
             method: "GET",
             headers: {
               // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3MmZkMmE2OC1kNmU4LTRmOTQtYTg1MS1kODE2YjA0NjBhYjAiLCJpYXQiOjE3NzUyNzY1NTksImV4cCI6MTc3NTI3NzQ1OSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.375JppqOAPky5aYu0xNP6N7MZF4yu5WaR0UvCv1DMfA`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJjZDJkMTQ3Yi1kZDBmLTRkNTAtODA2OC00ZTM4OTQxMTZmODgiLCJpYXQiOjE3NzUyNzgyNjAsImV4cCI6MTc3NTI3OTE2MCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.Ws-OZZIL-N2-KFhEDE8ff2zlFeKEisQZUpnUDbOQSFo`,
             },
           },
         );
@@ -74,7 +78,7 @@ export default function SellProducePage() {
             method: "GET",
             headers: {
               // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3MmZkMmE2OC1kNmU4LTRmOTQtYTg1MS1kODE2YjA0NjBhYjAiLCJpYXQiOjE3NzUyNzY1NTksImV4cCI6MTc3NTI3NzQ1OSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.375JppqOAPky5aYu0xNP6N7MZF4yu5WaR0UvCv1DMfA`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJjZDJkMTQ3Yi1kZDBmLTRkNTAtODA2OC00ZTM4OTQxMTZmODgiLCJpYXQiOjE3NzUyNzgyNjAsImV4cCI6MTc3NTI3OTE2MCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.Ws-OZZIL-N2-KFhEDE8ff2zlFeKEisQZUpnUDbOQSFo`,
             },
           },
         );
@@ -134,8 +138,50 @@ export default function SellProducePage() {
       !selectedTags.includes(tag),
   );
 
-  const handleGenerateEstimate = () => {
+  const handleGenerateEstimate = async () => {
     setInsightState("loading");
+
+    // make the categories lowercase with spaces changed to -
+    // join the words in each entry, spaces changed to - all lowercase
+    const formattedCategory = category.toLowerCase().replace(/\s+/g, "-");
+    const formattedTags = selectedTags
+      .map((tag) => tag.toLowerCase().replace(/\s+/g, "-"))
+      .join(",");
+
+    console.log(formattedCategory, formattedTags);
+
+    try {
+      const response = await fetch(
+        "https://sassysquad-backend.vercel.app/v1/pricing/estimate",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            // "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJjZDJkMTQ3Yi1kZDBmLTRkNTAtODA2OC00ZTM4OTQxMTZmODgiLCJpYXQiOjE3NzUyNzgyNjAsImV4cCI6MTc3NTI3OTE2MCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.Ws-OZZIL-N2-KFhEDE8ff2zlFeKEisQZUpnUDbOQSFo`,
+          },
+          body: JSON.stringify({
+            tags: formattedTags,
+            category: formattedCategory,
+          }),
+        },
+      );
+      const body = await response.json();
+
+      if (response.ok) {
+        setExpectedMonthlyVolume(body.expected_monthly_volume);
+        setMaxExpectedRevenue(body.max_expected_revenue);
+        setOptimalPrice(body.optimal_price);
+        setSuggestedPriceRange(body.suggested_price_range);
+      } else if (response.status === 401) {
+        // renew tokens
+        
+      }
+
+      console.log("Exact error: ", body);
+    } catch (error) {
+      console.log(error);
+    }
 
     setTimeout(() => {
       setInsightState("complete");
@@ -388,7 +434,9 @@ export default function SellProducePage() {
                     className={`pt-4 ${gelasio.className}`}
                     ref={categoryDropdownRef}
                   >
-                    <label className="block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2">
+                    <label
+                      className={`block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2 ${roboto.className}`}
+                    >
                       select an existing category or specify a unique
                       classification
                     </label>
@@ -440,7 +488,7 @@ export default function SellProducePage() {
                       Item Name
                     </label>
                     <input
-                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg italic ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
+                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg italic ${gelasio.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
                       placeholder="e.g. Mid-Century Oak Table"
                       type="text"
                     ></input>
@@ -452,7 +500,7 @@ export default function SellProducePage() {
                       Listing Price
                     </label>
                     <input
-                      className={`pl-4 italic bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
+                      className={`pl-4 italic bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${gelasio.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
                       placeholder="0.00"
                       type="number"
                     ></input>
@@ -464,7 +512,7 @@ export default function SellProducePage() {
                       Search Tags
                     </label>
 
-                    <div className="relative flex flex-wrap items-center gap-2 bg-[#e9e8e6] border-0 border-b border-[#d1c5b4] px-0 py-3 pb-2.5 pl-3">
+                    <div className="relative flex flex-wrap items-center gap-2 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 pb-3 pl-3">
                       {selectedTags.map((tag, index) => (
                         <span
                           key={index}
@@ -489,7 +537,7 @@ export default function SellProducePage() {
                         }}
                         onFocus={() => setIsTagOpen(true)}
                         onKeyDown={handleKeyDown}
-                        className={`italic pl-2 bg-transparent border-0 focus:ring-0 focus:outline-0 text-sm p-0 flex-grow pt-1.25 pb-1.25 placeholder:text-[#a7a5a5]`}
+                        className={`${gelasio.className} italic pl-2 bg-transparent border-0 focus:ring-0 focus:outline-0 text-sm p-0 flex-grow pt-1.25 pb-1.25 placeholder:text-[#a7a5a5]`}
                         placeholder="Add tags..."
                         type="text"
                       />
@@ -539,7 +587,7 @@ export default function SellProducePage() {
                     </label>
                     <textarea
                       rows={4}
-                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${roboto.className} placeholder:text-[#d1c5b4] focus:ring-0 resize-none focus:outline-0`}
+                      className={`pl-4 italic bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${gelasio.className} placeholder:text-[#d1c5b4] focus:ring-0 resize-none focus:outline-0`}
                       placeholder="Describe the materials, history, and craftmanship..."
                     ></textarea>
                   </div>
