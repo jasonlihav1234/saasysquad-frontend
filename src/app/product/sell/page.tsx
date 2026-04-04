@@ -1,7 +1,7 @@
 "use client";
 
 import Footer from "@/components/universal/Footer";
-import { Roboto, Gelasio } from "next/font/google";
+import { Roboto, Gelasio, PT_Sans_Narrow } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import "material-symbols";
@@ -57,7 +57,7 @@ export default function SellProducePage() {
             method: "GET",
             headers: {
               // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJjZDJkMTQ3Yi1kZDBmLTRkNTAtODA2OC00ZTM4OTQxMTZmODgiLCJpYXQiOjE3NzUyNzgyNjAsImV4cCI6MTc3NTI3OTE2MCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.Ws-OZZIL-N2-KFhEDE8ff2zlFeKEisQZUpnUDbOQSFo`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3YzVkYTE4YS0yOTY3LTQyZDEtYjVmNC03ZTI1MmI0OTY4ZGYiLCJpYXQiOjE3NzUyNzk2MDcsImV4cCI6MTc3NTI4MDUwNywiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.vTgc9A5YC8hv8Mwx2SCgL-87ZePcsLnpSzFm9l2vjsg`,
             },
           },
         );
@@ -78,7 +78,7 @@ export default function SellProducePage() {
             method: "GET",
             headers: {
               // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJjZDJkMTQ3Yi1kZDBmLTRkNTAtODA2OC00ZTM4OTQxMTZmODgiLCJpYXQiOjE3NzUyNzgyNjAsImV4cCI6MTc3NTI3OTE2MCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.Ws-OZZIL-N2-KFhEDE8ff2zlFeKEisQZUpnUDbOQSFo`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3YzVkYTE4YS0yOTY3LTQyZDEtYjVmNC03ZTI1MmI0OTY4ZGYiLCJpYXQiOjE3NzUyNzk2MDcsImV4cCI6MTc3NTI4MDUwNywiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.vTgc9A5YC8hv8Mwx2SCgL-87ZePcsLnpSzFm9l2vjsg`,
             },
           },
         );
@@ -158,7 +158,7 @@ export default function SellProducePage() {
           headers: {
             "Content-Type": "application/json",
             // "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJjZDJkMTQ3Yi1kZDBmLTRkNTAtODA2OC00ZTM4OTQxMTZmODgiLCJpYXQiOjE3NzUyNzgyNjAsImV4cCI6MTc3NTI3OTE2MCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.Ws-OZZIL-N2-KFhEDE8ff2zlFeKEisQZUpnUDbOQSFo`,
+            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3YzVkYTE4YS0yOTY3LTQyZDEtYjVmNC03ZTI1MmI0OTY4ZGYiLCJpYXQiOjE3NzUyNzk2MDcsImV4cCI6MTc3NTI4MDUwNywiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.vTgc9A5YC8hv8Mwx2SCgL-87ZePcsLnpSzFm9l2vjsg`,
           },
           body: JSON.stringify({
             tags: formattedTags,
@@ -168,24 +168,44 @@ export default function SellProducePage() {
       );
       const body = await response.json();
 
-      if (response.ok) {
-        setExpectedMonthlyVolume(body.expected_monthly_volume);
-        setMaxExpectedRevenue(body.max_expected_revenue);
-        setOptimalPrice(body.optimal_price);
-        setSuggestedPriceRange(body.suggested_price_range);
+      if (response.status === 200) {
+        setExpectedMonthlyVolume(body.prediction.expected_monthly_volume);
+        setMaxExpectedRevenue(body.prediction.max_expected_revenue);
+        setOptimalPrice(body.prediction.optimal_price);
+        setSuggestedPriceRange(body.prediction.suggested_price_range);
+        console.log("here", body);
       } else if (response.status === 401) {
         // renew tokens
-        
+        const responseRefresh = await fetch(
+          "https://sassysquad-backend.vercel.app/auth/refresh",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              refreshToken: localStorage.getItem("refreshToken"),
+            }),
+          },
+        );
+
+        if (responseRefresh.status === 200) {
+          const refreshBody = await responseRefresh.json();
+          localStorage.setItem("accessToken", body.accessToken);
+          localStorage.setItem("refreshToken", body.refreshToken);
+
+          await handleGenerateEstimate();
+        }
+      } else {
+        throw new Error("Critical Error");
       }
 
       console.log("Exact error: ", body);
+      setInsightState("complete");
     } catch (error) {
+      setInsightState("awaiting");
       console.log(error);
     }
-
-    setTimeout(() => {
-      setInsightState("complete");
-    }, 2000);
   };
 
   const handleImageChange = (e: any) => {
@@ -614,27 +634,46 @@ export default function SellProducePage() {
                       <h3
                         className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}
                       >
-                        Atelier Insights
+                        Althaïr Insights
                       </h3>
+                      <div>
+                        <p
+                          className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
+                          Optimal Price
+                        </p>
+                        <span
+                          className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                        >
+                          ${optimalPrice}
+                        </span>
+                      </div>
                       <p
                         className={`${roboto.className} block text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
                       >
                         Suggested Range
                       </p>
                       <div className="flex items-center gap-2">
-                        <span
-                          className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
-                        >
-                          $1200
-                        </span>
-                        <span className="text-[#5f5e5e] font-light">—</span>
-                        <span
-                          className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
-                        >
-                          $1500
-                        </span>
+                        {suggestedPriceRange &&
+                          suggestedPriceRange.length >= 2 && (
+                            <>
+                              <span
+                                className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                              >
+                                ${suggestedPriceRange[0]}
+                              </span>
+                              <span className="text-[#5f5e5e] font-light">
+                                —
+                              </span>
+                              <span
+                                className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                              >
+                                ${suggestedPriceRange[1]}
+                              </span>
+                            </>
+                          )}
                       </div>
-                      <div className="mb-12">
+                      <div>
                         <p
                           className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
                         >
@@ -645,7 +684,14 @@ export default function SellProducePage() {
                             <span
                               className={`text-4xl ${gelasio.className} font-black text-[#775a19]`}
                             >
-                              2-4
+                              {expectedMonthlyVolume &&
+                                expectedMonthlyVolume.length >= 2 && (
+                                  <span
+                                    className={`text-4xl ${gelasio.className} font-black text-[#775a19]`}
+                                  >
+                                    {`${expectedMonthlyVolume[1]}-${expectedMonthlyVolume[0]}`}
+                                  </span>
+                                )}
                             </span>
                             <span
                               className={`text-[0.75rem] uppercase tracking-widest font-bold ${roboto.className}`}
@@ -663,6 +709,18 @@ export default function SellProducePage() {
                             <div className="w-1 bg-[#e3e2e0] h-3"></div>
                           </div>
                         </div>
+                      </div>
+                      <div className="mb-12">
+                        <p
+                          className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
+                          Maximum Expected Revenue
+                        </p>
+                        <span
+                          className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                        >
+                          ${maxExpectedRevenue}
+                        </span>
                       </div>
                       <button
                         type="button"
