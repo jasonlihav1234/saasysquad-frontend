@@ -52,8 +52,6 @@ export default function SellProducePage() {
   const tagDropdownRef = useRef<HTMLDivElement>(null);
   const isSubmittingRef = useRef<boolean>(false);
   const router = useRouter();
-  const authKey =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJlNGI1NWFmNy0xZjM5LTQ1ZmYtYmRjYi04MjJiZWMwZjc1MDYiLCJpYXQiOjE3NzUyODM4MDUsImV4cCI6MTc3NTI4NDcwNSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.YxPBPaIAwffzMR2SXEK7U0Slg29ucBKXAphqkPDCH_k";
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -63,13 +61,46 @@ export default function SellProducePage() {
           {
             method: "GET",
             headers: {
-              // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer ${authKey}`,
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           },
         );
 
-        const body = await response.json();
+        let body = null;
+
+        if (response.status === 401) {
+          const refreshResponse = await fetch(
+            "https://sassysquad-backend.vercel.app/auth/refresh",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                refreshToken: localStorage.getItem("refreshToken"),
+              }),
+            },
+          );
+
+          const refreshBody = await refreshResponse.json();
+          localStorage.setItem("accessToken", refreshBody.accessToken);
+          localStorage.setItem("refreshToken", refreshBody.refreshToken);
+
+          const categoryResponse = await fetch(
+            "https://sassysquad-backend.vercel.app/categories",
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+            },
+          );
+
+          body = await categoryResponse.json();
+        } else {
+          body = await response.json();
+        }
+
         const filteredCategories = body.categories.map((entry: any) => {
           return entry.category_name.split("-").join(" ").toUpperCase();
         });
@@ -81,13 +112,44 @@ export default function SellProducePage() {
           {
             method: "GET",
             headers: {
-              // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer ${authKey}`,
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           },
         );
+        let tagBody = null;
 
-        const tagBody = await tagResponse.json();
+        if (tagResponse.status === 401) {
+          const refreshResponse2 = await fetch(
+            "https://sassysquad-backend.vercel.app/auth/refresh",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                refreshToken: localStorage.getItem("refreshToken"),
+              }),
+            },
+          );
+
+          const refreshBody2 = await refreshResponse2.json();
+          localStorage.setItem("accessToken", refreshBody2.accessToken);
+          localStorage.setItem("refreshToken", refreshBody2.refreshToken);
+
+          const tagNewResponse = await fetch(
+            "https://sassysquad-backend.vercel.app/tags",
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+            },
+          );
+
+          tagBody = await tagNewResponse.json();
+        } else {
+          tagBody = await tagResponse.json();
+        }
         const filteredTags = tagBody.tags.map((tag: any) => {
           return tag.tag_name.split("-").join(" ").toUpperCase();
         });
@@ -158,8 +220,7 @@ export default function SellProducePage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            // "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-            Authorization: `Bearer ${authKey}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: JSON.stringify({
             tags: formattedTags,
@@ -303,7 +364,7 @@ export default function SellProducePage() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${authKey}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
           body: JSON.stringify({
             itemName: itemName,
