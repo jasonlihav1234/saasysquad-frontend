@@ -226,7 +226,7 @@ export default function SellProducePage() {
                 <section className="space-y-8">
                   <div className="flex justify-between items-end">
                     <h3 className={`${gelasio.className} text-2xl`}>
-                      Categorization
+                      Category
                     </h3>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -298,7 +298,7 @@ export default function SellProducePage() {
                       </span>
                     </button>
                   </div>
-                  <div className={`pt-4 ${roboto.className}`}>
+                  <div className={`pt-4 ${gelasio.className}`}>
                     <label className="block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2">
                       select an existing category or specify a unique
                       classification
