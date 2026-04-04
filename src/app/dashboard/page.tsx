@@ -7,6 +7,7 @@ import Image from "next/image";
 import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, Suspense } from "react";
+import { Tracing } from "trace_events";
 
 // probably should make this user/dashboard
 
@@ -26,6 +27,7 @@ function DashboardContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [category, setCategory] = useState("new-arrival");
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
   const topRef = useRef<HTMLElement>(null);
   const itemsPerPage = 6;
   const searchParams = useSearchParams();
@@ -37,10 +39,15 @@ function DashboardContent() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   // useful - item_name, price, image_url, item_id
   const [items, setItems] = useState<any[]>();
+  const [aiChoice, setAIChoice] = useState(category);
   const router = useRouter();
   const isAiSidebarOpen = searchParams.get("sidebar") === "ai";
   const openSidebar = () => router.push("?sidebar=ai");
   const closeSidebar = () => router.push("?");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const authKey =
+    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI0ZmNlZTJjNy05YzkwLTRmM2MtYTc5OS01NTg4NDBlNWJjOWQiLCJpYXQiOjE3NzUyODU1MjIsImV4cCI6MTc3NTI4NjQyMiwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.6fH581PdoLMQ1zZKTBtUer_fw-U9KC6X45ntc9XiLuM";
 
   useEffect(() => {
     const fetchItems = async (isRetry: boolean = false) => {
@@ -51,7 +58,8 @@ function DashboardContent() {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer ${authKey}`,
             },
           },
         );
@@ -122,6 +130,25 @@ function DashboardContent() {
 
   const handleInputChange = (e: any) => {
     setSearchTerm(e.target.value.toLowerCase());
+  };
+
+  const handleFileChange = (e: any) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setImageBase64(base64String);
+
+      console.log(base64String);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleSearchSubmit = async (e: any) => {
@@ -338,6 +365,20 @@ function DashboardContent() {
                 close
               </button>
             </div>
+            <div className="flex w-full mb-8">
+              <button
+                onClick={() => setAIChoice("category")} // Update with your actual handler
+                className={`flex-1 px-4 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors cursor-pointer ${aiChoice === "category" ? "border-b-2 border-b-[#775A19]" : ""}`}
+              >
+                Category
+              </button>
+              <button
+                onClick={() => setAIChoice("past-purchases")} // Update with your actual handler
+                className={`flex-1 px-4 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors cursor-pointer ${aiChoice === "past-purchases" ? "border-b-2 border-b-[#775A19]" : ""}`}
+              >
+                Past Purchases
+              </button>
+            </div>
             <div className="p-8 flex-1 overflow-y-auto">
               <div className="mb-8">
                 <p
@@ -347,20 +388,47 @@ function DashboardContent() {
                   image of a space, a texture, or an inspiration to find
                   matching artisanal items from our collection.
                 </p>
-                <div className="border-2 border-dashed border-[#d1c5b4]/50 aspect-[4/3] flex flex-col items-center justify-center p-8 text-center group hover:border-[#775a19] transition-colors cursor-pointer bg-[#ffffff]">
-                  <span className="material-symbols-outlined text-4xl text-[#5f5e5e] mb-4 group-hover:scale-110 transition-transform">
-                    image_arrow_up
-                  </span>
-                  <span
-                    className={`text-sm ${roboto.className} font-medium uppercase tracking-widest mb-2 text-[#775a19]]`}
-                  >
-                    Upload Image
-                  </span>
-                  <span
-                    className={`text-[10px] text-[#5f5e5e]/60 uppercase tracking-tighter`}
-                  >
-                    JPG, PNG up to 10MB
-                  </span>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="relative border-2 border-dashed border-[#d1c5b4]/50 aspect-[4/3] flex flex-col items-center justify-center p-8 text-center group hover:border-[#775a19] transition-colors cursor-pointer bg-[#ffffff]"
+                >
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/png, image/jpeg"
+                    className="hidden"
+                  ></input>
+                  {imageBase64 ? (
+                    <>
+                      <img
+                        src={imageBase64}
+                        alt="Preview"
+                        className="absolute inset-0 w-full h-full object-cover"
+                      ></img>
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="text-white text-sm tracking-widest uppercase font-medium">
+                          Change Image
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-4xl text-[#5f5e5e] mb-4 group-hover:scale-110 transition-transform">
+                        image_arrow_up
+                      </span>
+                      <span
+                        className={`text-sm ${roboto.className} font-medium uppercase tracking-widest mb-2 text-[#775a19]]`}
+                      >
+                        Upload Image
+                      </span>
+                      <span
+                        className={`text-[10px] text-[#5f5e5e]/60 uppercase tracking-tighter`}
+                      >
+                        JPG, PNG up to 10MB
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
               <div className="space-y-6">
