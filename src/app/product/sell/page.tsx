@@ -6,7 +6,14 @@ import Link from "next/link";
 import Image from "next/image";
 import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useRef, Suspense, use } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+  Suspense,
+  use,
+  KeyboardEvent,
+} from "react";
 
 // probably should make this user/dashboard
 
@@ -25,13 +32,17 @@ export default function SellProducePage() {
   const [category, setCategory] = useState<string>("");
   const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [tags, setTags] = useState<string[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [tagInput, setTagInput] = useState<string>("");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const [isTagOpen, setIsTagOpen] = useState(false);
   const [toGeneratePrice, setToGeneratePrice] = useState(false);
   const [insightState, setInsightState] = useState<
     "awaiting" | "loading" | "complete"
   >("awaiting");
 
-  const dropdownRef = useRef<HTMLDivElement>(null);
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
+  const tagDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -42,7 +53,7 @@ export default function SellProducePage() {
             method: "GET",
             headers: {
               // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJmMjM4OTY0My1iNDg2LTQyYWEtYWZhZS0yNGJkYzVkYTU0Y2YiLCJpYXQiOjE3NzUyNjIwMTksImV4cCI6MTc3NTI2MjkxOSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.5zHqGyO6dK6KQoOsuyjhOCtuVdP-QhuWb4P8wxGdrlw`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3MmZkMmE2OC1kNmU4LTRmOTQtYTg1MS1kODE2YjA0NjBhYjAiLCJpYXQiOjE3NzUyNzY1NTksImV4cCI6MTc3NTI3NzQ1OSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.375JppqOAPky5aYu0xNP6N7MZF4yu5WaR0UvCv1DMfA`,
             },
           },
         );
@@ -63,17 +74,18 @@ export default function SellProducePage() {
             method: "GET",
             headers: {
               // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJmMjM4OTY0My1iNDg2LTQyYWEtYWZhZS0yNGJkYzVkYTU0Y2YiLCJpYXQiOjE3NzUyNjIwMTksImV4cCI6MTc3NTI2MjkxOSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.5zHqGyO6dK6KQoOsuyjhOCtuVdP-QhuWb4P8wxGdrlw`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3MmZkMmE2OC1kNmU4LTRmOTQtYTg1MS1kODE2YjA0NjBhYjAiLCJpYXQiOjE3NzUyNzY1NTksImV4cCI6MTc3NTI3NzQ1OSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.375JppqOAPky5aYu0xNP6N7MZF4yu5WaR0UvCv1DMfA`,
             },
           },
         );
 
         const tagBody = await tagResponse.json();
         const filteredTags = tagBody.tags.map((tag: any) => {
-          return tag.tag_name.split("-").map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
-        })
-
-        console.log(filteredTags);
+          return tag.tag_name
+            .split("-")
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+        });
 
         setTags(filteredTags);
       } catch (error) {
@@ -87,18 +99,39 @@ export default function SellProducePage() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
+        categoryDropdownRef.current &&
+        !categoryDropdownRef.current.contains(event.target as Node)
       ) {
-        setIsOpen(false);
+        setIsCategoryOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleTagClickOutside = (event: MouseEvent) => {
+      if (
+        tagDropdownRef.current &&
+        !tagDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsTagOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleTagClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleTagClickOutside);
+  }, []);
+
   const filteredCategories = dbCategories.filter((cat) =>
     cat.toLowerCase().includes(category.toLowerCase()),
+  );
+
+  const filteredTags = tags.filter(
+    (tag) =>
+      tag.toLowerCase().includes(tagInput.toLowerCase()) &&
+      !selectedTags.includes(tag),
   );
 
   const handleGenerateEstimate = () => {
@@ -125,6 +158,34 @@ export default function SellProducePage() {
     };
 
     reader.readAsDataURL(file);
+  };
+
+  const addTag = (newTag: string) => {
+    const formattedTag = newTag.trim().toUpperCase();
+    if (formattedTag !== "" && !selectedTags.includes(formattedTag)) {
+      setSelectedTags([...selectedTags, formattedTag]);
+    }
+
+    setTagInput("");
+    setIsTagOpen(false);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter" && tagInput.trim() !== "") {
+      e.preventDefault();
+
+      const newTag = tagInput.trim().toUpperCase();
+
+      if (!tags.includes(newTag)) {
+        setTags([...tags, newTag]);
+      }
+
+      setTagInput("");
+    }
+  };
+
+  const removeTag = (index: number) => {
+    setSelectedTags(selectedTags.filter((_, i) => i !== index));
   };
 
   const handleFormSubmit = (e: any) => {};
@@ -323,7 +384,10 @@ export default function SellProducePage() {
                       </span>
                     </button>
                   </div>
-                  <div className={`pt-4 ${gelasio.className}`}>
+                  <div
+                    className={`pt-4 ${gelasio.className}`}
+                    ref={categoryDropdownRef}
+                  >
                     <label className="block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2">
                       select an existing category or specify a unique
                       classification
@@ -338,21 +402,22 @@ export default function SellProducePage() {
                       value={category}
                       onChange={(e) => {
                         setCategory(e.target.value);
-                        setIsOpen(true);
+                        setIsCategoryOpen(true);
                       }}
-                      onFocus={() => setIsOpen(true)}
+                      onFocus={() => setIsCategoryOpen(true)}
                     ></input>
 
-                    {isOpen && (
+                    {isCategoryOpen && (
                       <ul className="z-10 w-full mt-1 bg-white border border-[#d1c5b4] shadow-lg max-h-48 overflow-y-auto">
                         {filteredCategories.length > 0 ? (
                           filteredCategories.map((cat, index) => (
                             <li
                               key={index}
                               className="px-4 py-3 text-sm text-[#5f5e5e] hover:bg-[#775a19]/5 hover:text-[#775a19] cursor-pointer transition-colors"
-                              onClick={() => {
+                              onMouseDown={(e) => {
+                                e.preventDefault();
                                 setCategory(cat);
-                                setIsOpen(false);
+                                setIsCategoryOpen(false);
                               }}
                             >
                               {cat}
@@ -392,19 +457,67 @@ export default function SellProducePage() {
                       type="number"
                     ></input>
                   </div>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2" ref={tagDropdownRef}>
                     <label
                       className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
                     >
                       Search Tags
                     </label>
-                    {/* <div>mapp some tags here</div> */}
-                    <div className="flex items-center bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3">
+
+                    <div className="relative flex flex-wrap items-center gap-2 bg-[#e9e8e6] border-0 border-b border-[#d1c5b4] px-0 py-3 pb-2.5 pl-3">
+                      {selectedTags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="flex items-center bg-[#e8e2d9] text-[#1d1b16] text-[10px] px-2 py-1 tracking-tighter"
+                        >
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => removeTag(index)}
+                            className="ml-1 material-symbols-outlined !text-[13px] cursor-pointer hover:text-[#775a19] transition-colors"
+                          >
+                            close
+                          </button>
+                        </span>
+                      ))}
+
                       <input
-                        className={`${roboto.className} italic pl-4 bg-transparent border-0 focus:ring-0 text-sm p-0 flex-grow focus:outline-0`}
-                        placeholder="Add more..."
+                        value={tagInput}
+                        onChange={(e) => {
+                          setTagInput(e.target.value);
+                          setIsTagOpen(true);
+                        }}
+                        onFocus={() => setIsTagOpen(true)}
+                        onKeyDown={handleKeyDown}
+                        className={`italic pl-2 bg-transparent border-0 focus:ring-0 focus:outline-0 text-sm p-0 flex-grow pt-1.25 pb-1.25 placeholder:text-[#a7a5a5]`}
+                        placeholder="Add tags..."
                         type="text"
-                      ></input>
+                      />
+                      {isTagOpen && (
+                        <ul className="absolute top-full z-10 w-full mt-1 bg-white border border-[#d1c5b4] shadow-lg max-h-48 overflow-y-auto">
+                          {filteredTags.length > 0
+                            ? filteredTags.map((tag, index) => (
+                                <li
+                                  key={index}
+                                  className="px-4 py-3 text-sm text-[#5f5e5e] hover:bg-[#775a19]/5 hover:text-[#775a19] cursor-pointer transition-colors"
+                                  // prevent onMouseDown from stealing focus before onClick fires
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => addTag(tag)}
+                                >
+                                  {tag}
+                                </li>
+                              ))
+                            : tagInput.trim() !== "" && (
+                                <li
+                                  className="px-4 py-3 text-sm text-[#5f5e5e] hover:bg-[#775a19]/5 hover:text-[#775a19] cursor-pointer transition-colors"
+                                  onMouseDown={(e) => e.preventDefault()}
+                                  onClick={() => addTag(tagInput)}
+                                >
+                                  Create new tag: "{tagInput}"
+                                </li>
+                              )}
+                        </ul>
+                      )}
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -414,7 +527,7 @@ export default function SellProducePage() {
                       Inventory Count
                     </label>
                     <input
-                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 tex-tlg ${roboto.className} focus:ring-0 focus:outline-0`}
+                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${roboto.className} focus:ring-0 focus:outline-0`}
                       type="number"
                     ></input>
                   </div>
