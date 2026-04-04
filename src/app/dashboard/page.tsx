@@ -30,6 +30,7 @@ function DashboardContent() {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [itemCategory, setItemCategory] = useState("");
   const [dbCategories, setDbCategories] = useState([]);
+  const [aiItems, setAiItems] = useState([]);
   const topRef = useRef<HTMLElement>(null);
   const itemsPerPage = 6;
   const searchParams = useSearchParams();
@@ -205,9 +206,9 @@ function DashboardContent() {
     });
   };
 
-  const handleGenerateAIItems = () => {
+  const handleGenerateAIItems = async () => {
     try {
-      const itemResponse = fetch(
+      const itemResponse = await fetch(
         "https://sassysquad-backend.vercel.app/items/recommendations",
         {
           method: "POST",
@@ -221,7 +222,60 @@ function DashboardContent() {
           }),
         },
       );
-    } catch (error) {}
+
+      if (itemResponse.status === 200) {
+        const itemBody = await itemResponse.json();
+
+        if (itemBody.items && itemBody.items.length !== 0) {
+          setAiItems(itemBody.items);
+        }
+      } else if (itemResponse.status === 401) {
+        const responseRefresh = await fetch(
+          "https://sassysquad-backend.vercel.app/auth/refresh",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              refreshToken: localStorage.getItem("refreshToken"),
+            }),
+          },
+        );
+
+        if (responseRefresh.status === 200) {
+          const body = await responseRefresh.json();
+          localStorage.setItem("accessToken", body.accessToken);
+          localStorage.setItem("refreshToken", body.refreshToken);
+
+          const itemResponse2 = await fetch(
+            "https://sassysquad-backend.vercel.app/items/recommendations",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+              body: JSON.stringify({
+                category: itemCategory,
+                image: imageBase64,
+              }),
+            },
+          );
+
+          const data = await itemResponse2.json();
+          setAiItems(data);
+        } else {
+          localStorage.clear();
+          router.push("/login");
+        }
+      } else {
+        alert(await itemResponse.json());
+      }
+    } catch (error) {
+      console.log(error);
+      alert(error);
+    }
   };
 
   const handleInputChange = (e: any) => {
