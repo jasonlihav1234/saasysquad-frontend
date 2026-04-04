@@ -67,7 +67,7 @@ export default function SalesTableRow({ item }: { item: SaleRowItem }) {
       <td className="px-6 py-8 text-right">
         <button
           type="button"
-          className="material-symbols-outlined text-[#5f5e5e]"
+          className="material-symbols-outlined text-[#5f5e5e] cursor-pointer"
         >
           more_vert
         </button>
