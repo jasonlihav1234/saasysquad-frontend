@@ -24,7 +24,7 @@ function DashboardContent() {
   const [hasItems, setHasItems] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(2);
+  const [totalPages, setTotalPages] = useState(0);
   const [category, setCategory] = useState("new-arrival");
   const topRef = useRef<HTMLElement>(null);
   const itemsPerPage = 6;
@@ -51,7 +51,9 @@ function DashboardContent() {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              Authorization:
+                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJmMjM4OTY0My1iNDg2LTQyYWEtYWZhZS0yNGJkYzVkYTU0Y2YiLCJpYXQiOjE3NzUyNjIwMTksImV4cCI6MTc3NTI2MjkxOSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.5zHqGyO6dK6KQoOsuyjhOCtuVdP-QhuWb4P8wxGdrlw",
             },
           },
         );
@@ -59,6 +61,7 @@ function DashboardContent() {
         if (response.status === 200) {
           const data = await response.json();
           setItems(data.items);
+          setTotalPages(Math.ceil(data.items.length / 6));
         } else if (response.status === 401) {
           if (isRetry) {
             throw new Error("Refresh token was also rejected");
@@ -84,8 +87,8 @@ function DashboardContent() {
 
             await fetchItems(true);
           } else {
-            localStorage.clear();
-            router.push("/login");
+            // localStorage.clear();
+            // router.push("/login");
           }
         } else {
           throw new Error("Critical failure");
@@ -193,6 +196,44 @@ function DashboardContent() {
     }
   };
 
+  const getPaginationItems = () => {
+    if (totalPages <= 10) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+
+    if (currentPage <= 6) {
+      return [1, 2, 3, 4, 5, 6, 7, 8, 9, "...", totalPages];
+    }
+
+    if (currentPage >= totalPages - 5) {
+      return [
+        1,
+        "...",
+        totalPages - 8,
+        totalPages - 7,
+        totalPages - 6,
+        totalPages - 5,
+        totalPages - 4,
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      ];
+    }
+
+    return [
+      1,
+      "...",
+      currentPage - 2,
+      currentPage - 1,
+      currentPage,
+      currentPage + 1,
+      currentPage + 2,
+      "...",
+      totalPages,
+    ];
+  };
+
   const handleNewArrival = () => {
     setCategory("new-arrival");
   };
@@ -240,6 +281,12 @@ function DashboardContent() {
               className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
             >
               Messages
+            </Link>
+            <Link
+              href="/product/sell"
+              className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
+            >
+              Sell Items
             </Link>
           </div>
         </div>
@@ -467,16 +514,31 @@ function DashboardContent() {
               <div
                 className={`flex gap-8 ${roboto.className} text-sm tracking-widest`}
               >
-                {pageNumbers.map((number) => (
-                  <button
-                    key={number}
-                    onClick={() => handlePageChange(number)}
-                    disabled={number === currentPage}
-                    className={`${number === currentPage ? "text-[#1A1C1B] font-bold border-b border-[#1A1C1B]" : "text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors cursor-pointer"}`}
-                  >
-                    {number >= 10 ? number : `0${number}`}
-                  </button>
-                ))}
+                {getPaginationItems().map((item, index) => {
+                  if (item === "...") {
+                    return (
+                      <span
+                        key={`ellipses-${index}`}
+                        className="text-[#5f5e5e] tracking-widest"
+                      >
+                        ...
+                      </span>
+                    );
+                  }
+                  
+                  const number = item as number;
+
+                  return (
+                    <button
+                      key={`page-${number}`}
+                      onClick={() => handlePageChange(number)}
+                      disabled={number === currentPage}
+                      className={`${number === currentPage ? "text-[#1A1C1B] font-bold border-b border-[#1A1C1B]" : "text-[#5F5E5E] hover:text-[#1A1C1B] transition-colors cursor-pointer"}`}
+                    >
+                      {number >= 10 ? number : `0${number}`}
+                    </button>
+                  );
+                })}
               </div>
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
@@ -527,7 +589,13 @@ function DashboardContent() {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
       <DashboardContent />
     </Suspense>
   );
