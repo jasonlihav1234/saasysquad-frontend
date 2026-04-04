@@ -28,6 +28,8 @@ function DashboardContent() {
   const [totalPages, setTotalPages] = useState(0);
   const [category, setCategory] = useState("new-arrival");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [itemCategory, setItemCategory] = useState("");
+  const [dbCategories, setDbCategories] = useState([]);
   const topRef = useRef<HTMLElement>(null);
   const itemsPerPage = 6;
   const searchParams = useSearchParams();
@@ -91,10 +93,85 @@ function DashboardContent() {
             localStorage.setItem("accessToken", body.accessToken);
             localStorage.setItem("refreshToken", body.refreshToken);
 
-            await fetchItems(true);
+            const response2 = await fetch(
+              "https://sassysquad-backend.vercel.app/items",
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                  Authorization: `Bearer ${authKey}`,
+                },
+              },
+            );
+
+            if (response2.status === 200) {
+              const data = await response.json();
+              setItems(data.items);
+              setTotalPages(Math.ceil(data.items.length / 6));
+            } else {
+              localStorage.clear();
+              router.push("/login");
+            }
           } else {
             // localStorage.clear();
             // router.push("/login");
+          }
+        } else {
+          throw new Error("Critical failure");
+        }
+
+        const categoryResponse = await fetch(
+          "https://sassysquad-backend.vercel.app/categories",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          },
+        );
+
+        if (categoryResponse.status === 200) {
+          const data = await categoryResponse.json();
+          setDbCategories(data);
+        } else if (categoryResponse.status === 401) {
+          if (isRetry) {
+            throw new Error("Refresh token was also rejected");
+          }
+
+          const responseRefresh = await fetch(
+            "https://sassysquad-backend.vercel.app/auth/refresh",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                refreshToken: localStorage.getItem("refreshToken"),
+              }),
+            },
+          );
+
+          if (responseRefresh.status === 200) {
+            const body = await responseRefresh.json();
+            localStorage.setItem("accessToken", body.accessToken);
+            localStorage.setItem("refreshToken", body.refreshToken);
+
+            const categoryResponse2 = await fetch(
+              "https://sassysquad-backend.vercel.app/categories",
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                },
+              },
+            );
+
+            const data = await categoryResponse.json();
+            setDbCategories(data);
+          } else {
+            localStorage.clear();
+            router.push("/login");
           }
         } else {
           throw new Error("Critical failure");
@@ -126,6 +203,25 @@ function DashboardContent() {
         });
       }
     });
+  };
+
+  const handleGenerateAIItems = () => {
+    try {
+      const itemResponse = fetch(
+        "https://sassysquad-backend.vercel.app/items/recommendations",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({
+            category: itemCategory,
+            image: imageBase64,
+          }),
+        },
+      );
+    } catch (error) {}
   };
 
   const handleInputChange = (e: any) => {
