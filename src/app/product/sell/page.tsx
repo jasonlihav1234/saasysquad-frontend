@@ -24,6 +24,7 @@ export default function SellProducePage() {
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [category, setCategory] = useState<string>("");
   const [dbCategories, setDbCategories] = useState<string[]>([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [toGeneratePrice, setToGeneratePrice] = useState(false);
   const [insightState, setInsightState] = useState<
@@ -34,26 +35,50 @@ export default function SellProducePage() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const response = await fetch(
-        "https://sassysquad-backend.vercel.app/categories",
-        {
-          method: "GET",
-          headers: {
-            // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiIyMTNiMTNkZS03MjMzLTRlYTUtOTE5Yi02ODNhMzdjYWM1ZjUiLCJpYXQiOjE3NzUyMjQyMTAsImV4cCI6MTc3NTIyNTExMCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.ncw3aCn02u7AlYTp0fjGc8cG0utSqP5e0ayrEFiiIeY`,
+      try {
+        const response = await fetch(
+          "https://sassysquad-backend.vercel.app/categories",
+          {
+            method: "GET",
+            headers: {
+              // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJmMjM4OTY0My1iNDg2LTQyYWEtYWZhZS0yNGJkYzVkYTU0Y2YiLCJpYXQiOjE3NzUyNjIwMTksImV4cCI6MTc3NTI2MjkxOSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.5zHqGyO6dK6KQoOsuyjhOCtuVdP-QhuWb4P8wxGdrlw`,
+            },
           },
-        },
-      );
+        );
 
-      const body = await response.json();
-      const filteredCategories = body.categories.map((entry: any) => {
-        return entry.category_name
-          .split("-")
-          .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(" ");
-      });
+        const body = await response.json();
+        const filteredCategories = body.categories.map((entry: any) => {
+          return entry.category_name
+            .split("-")
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+        });
 
-      setDbCategories(filteredCategories);
+        setDbCategories(filteredCategories);
+
+        const tagResponse = await fetch(
+          "https://sassysquad-backend.vercel.app/tags",
+          {
+            method: "GET",
+            headers: {
+              // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJmMjM4OTY0My1iNDg2LTQyYWEtYWZhZS0yNGJkYzVkYTU0Y2YiLCJpYXQiOjE3NzUyNjIwMTksImV4cCI6MTc3NTI2MjkxOSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.5zHqGyO6dK6KQoOsuyjhOCtuVdP-QhuWb4P8wxGdrlw`,
+            },
+          },
+        );
+
+        const tagBody = await tagResponse.json();
+        const filteredTags = tagBody.tags.map((tag: any) => {
+          return tag.tag_name.split("-").map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+        })
+
+        console.log(filteredTags);
+
+        setTags(filteredTags);
+      } catch (error) {
+        alert(error);
+      }
     };
 
     fetchCategories();
