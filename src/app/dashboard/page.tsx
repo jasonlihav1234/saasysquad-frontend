@@ -51,9 +51,7 @@ function DashboardContent() {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
-              // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization:
-                "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJmMjM4OTY0My1iNDg2LTQyYWEtYWZhZS0yNGJkYzVkYTU0Y2YiLCJpYXQiOjE3NzUyNjIwMTksImV4cCI6MTc3NTI2MjkxOSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.5zHqGyO6dK6KQoOsuyjhOCtuVdP-QhuWb4P8wxGdrlw",
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           },
         );
@@ -525,7 +523,7 @@ function DashboardContent() {
                       </span>
                     );
                   }
-                  
+
                   const number = item as number;
 
                   return (
