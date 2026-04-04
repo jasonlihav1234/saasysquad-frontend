@@ -14,6 +14,7 @@ import {
   use,
   KeyboardEvent,
 } from "react";
+import { getFallbackRouteParams } from "next/dist/server/request/fallback-params";
 
 // probably should make this user/dashboard
 
@@ -44,9 +45,15 @@ export default function SellProducePage() {
   const [maxExpectedRevenue, setMaxExpectedRevenue] = useState(0);
   const [optimalPrice, setOptimalPrice] = useState(0);
   const [suggestedPriceRange, setSuggestedPriceRange] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [description, setDescription] = useState("");
 
   const categoryDropdownRef = useRef<HTMLDivElement>(null);
   const tagDropdownRef = useRef<HTMLDivElement>(null);
+  const isSubmittingRef = useRef<boolean>(false);
+  const router = useRouter();
+  const authKey =
+    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI0YWI3ZTU5OS00YTgzLTQxMzktOGI1Ny0yM2JkNWMxNDI5ODkiLCJpYXQiOjE3NzUyODIzMDUsImV4cCI6MTc3NTI4MzIwNSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.icu1O1jREsFZ9yz6EW6yRtrVmbdtpB_Szim-Mi-8Aug";
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -57,17 +64,14 @@ export default function SellProducePage() {
             method: "GET",
             headers: {
               // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3YzVkYTE4YS0yOTY3LTQyZDEtYjVmNC03ZTI1MmI0OTY4ZGYiLCJpYXQiOjE3NzUyNzk2MDcsImV4cCI6MTc3NTI4MDUwNywiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.vTgc9A5YC8hv8Mwx2SCgL-87ZePcsLnpSzFm9l2vjsg`,
+              Authorization: `Bearer ${authKey}`,
             },
           },
         );
 
         const body = await response.json();
         const filteredCategories = body.categories.map((entry: any) => {
-          return entry.category_name
-            .split("-")
-            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
+          return entry.category_name.split("-").join(" ").toUpperCase();
         });
 
         setDbCategories(filteredCategories);
@@ -78,17 +82,14 @@ export default function SellProducePage() {
             method: "GET",
             headers: {
               // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3YzVkYTE4YS0yOTY3LTQyZDEtYjVmNC03ZTI1MmI0OTY4ZGYiLCJpYXQiOjE3NzUyNzk2MDcsImV4cCI6MTc3NTI4MDUwNywiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.vTgc9A5YC8hv8Mwx2SCgL-87ZePcsLnpSzFm9l2vjsg`,
+              Authorization: `Bearer ${authKey}`,
             },
           },
         );
 
         const tagBody = await tagResponse.json();
         const filteredTags = tagBody.tags.map((tag: any) => {
-          return tag.tag_name
-            .split("-")
-            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
+          return tag.tag_name.split("-").join(" ").toUpperCase();
         });
 
         setTags(filteredTags);
@@ -158,7 +159,7 @@ export default function SellProducePage() {
           headers: {
             "Content-Type": "application/json",
             // "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-            Authorization: `Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiZTc5MDVlOTQtOGRiMS00ZTIxLTg0OGQtNDA3ZDk0Nzc4YWNjIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiI3YzVkYTE4YS0yOTY3LTQyZDEtYjVmNC03ZTI1MmI0OTY4ZGYiLCJpYXQiOjE3NzUyNzk2MDcsImV4cCI6MTc3NTI4MDUwNywiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.vTgc9A5YC8hv8Mwx2SCgL-87ZePcsLnpSzFm9l2vjsg`,
+            Authorization: `Bearer ${authKey}`,
           },
           body: JSON.stringify({
             tags: formattedTags,
@@ -227,26 +228,29 @@ export default function SellProducePage() {
   };
 
   const addTag = (newTag: string) => {
+    // Force it to be trimmed and uppercase immediately
     const formattedTag = newTag.trim().toUpperCase();
-    if (formattedTag !== "" && !selectedTags.includes(formattedTag)) {
+
+    if (formattedTag === "") return;
+
+    // Since everything is uppercase, a simple .includes() works perfectly again!
+    if (!selectedTags.includes(formattedTag)) {
       setSelectedTags([...selectedTags, formattedTag]);
     }
 
+    // Reset the input
     setTagInput("");
     setIsTagOpen(false);
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && tagInput.trim() !== "") {
-      e.preventDefault();
+    if (e.key === "Enter") {
+      e.preventDefault(); // Prevents form submission/page reload
 
-      const newTag = tagInput.trim().toUpperCase();
-
-      if (!tags.includes(newTag)) {
-        setTags([...tags, newTag]);
+      // Only try to add a tag if the input isn't empty
+      if (tagInput.trim() !== "") {
+        addTag(tagInput); // Pass the heavy lifting to your main function!
       }
-
-      setTagInput("");
     }
   };
 
@@ -254,7 +258,66 @@ export default function SellProducePage() {
     setSelectedTags(selectedTags.filter((_, i) => i !== index));
   };
 
-  const handleFormSubmit = (e: any) => {};
+  const handleFormSubmit = (e: any) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+
+    if (isSubmittingRef.current) {
+      return;
+    }
+
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+
+    if (!category || !selectedTags || selectedTags.length === 0) {
+      setIsSubmitting(false);
+      isSubmittingRef.current = false;
+
+      return;
+    }
+
+    // console.log(category, selectedTags);
+    const formattedCategory = category.toLowerCase().split(" ").join("-");
+    const formattedTags = selectedTags.map((tag) =>
+      tag.toLowerCase().split(" ").join("-"),
+    );
+    const itemName = formData.get("item-name");
+    const price = formData.get("listing-price");
+    const quanttiy = formData.get("quantity");
+
+    // console.log(formattedCategory, formattedTags);
+    console.log(
+      itemName,
+      price,
+      quanttiy,
+      description,
+      formattedCategory,
+      formattedTags,
+    );
+
+    try {
+      // transform the tag and category to be lowercase
+      // need the item name, price, quantity, description, and image, also need tags, and category
+      console.log();
+      // const submitResponse = await fetch(
+      //   "https://sassysquad-backend.vercel.app/v2/items",
+      //   {
+      //     method: "POST",
+      //     headers: {
+      //       "Content-Type": "application/json",
+      //     },
+      //     body: JSON.stringify({
+
+      //     }),
+      //   },
+      // );
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsSubmitting(false);
+      isSubmittingRef.current = false;
+    }
+  };
 
   return (
     <div className="flex bg-[#faf9f7]">
@@ -349,6 +412,7 @@ export default function SellProducePage() {
                     type="file"
                     accept="image/jpeg, image/png"
                     className="hidden"
+                    name="item-image"
                     onChange={handleImageChange}
                   ></input>
                   {imageBase64 ? (
@@ -469,10 +533,17 @@ export default function SellProducePage() {
                       type="text"
                       value={category}
                       onChange={(e) => {
+                        e.preventDefault();
                         setCategory(e.target.value);
                         setIsCategoryOpen(true);
                       }}
                       onFocus={() => setIsCategoryOpen(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          setIsCategoryOpen(false);
+                        }
+                      }}
                     ></input>
 
                     {isCategoryOpen && (
@@ -511,6 +582,7 @@ export default function SellProducePage() {
                       className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg italic ${gelasio.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
                       placeholder="e.g. Mid-Century Oak Table"
                       type="text"
+                      name="item-name"
                     ></input>
                   </div>
                   <div className="flex flex-col gap-2">
@@ -523,6 +595,8 @@ export default function SellProducePage() {
                       className={`pl-4 italic bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${gelasio.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
                       placeholder="0.00"
                       type="number"
+                      step="0.01"
+                      name="listing-price"
                     ></input>
                   </div>
                   <div className="flex flex-col gap-2" ref={tagDropdownRef}>
@@ -560,6 +634,7 @@ export default function SellProducePage() {
                         className={`${gelasio.className} italic pl-2 bg-transparent border-0 focus:ring-0 focus:outline-0 text-sm p-0 flex-grow pt-1.25 pb-1.25 placeholder:text-[#a7a5a5]`}
                         placeholder="Add tags..."
                         type="text"
+                        name="tags"
                       />
                       {isTagOpen && (
                         <ul className="absolute top-full z-10 w-full mt-1 bg-white border border-[#d1c5b4] shadow-lg max-h-48 overflow-y-auto">
@@ -597,6 +672,7 @@ export default function SellProducePage() {
                     <input
                       className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${roboto.className} focus:ring-0 focus:outline-0`}
                       type="number"
+                      name="quantity"
                     ></input>
                   </div>
                   <div className="flex flex-col gap-2 col-span-2">
@@ -609,6 +685,8 @@ export default function SellProducePage() {
                       rows={4}
                       className={`pl-4 italic bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${gelasio.className} placeholder:text-[#d1c5b4] focus:ring-0 resize-none focus:outline-0`}
                       placeholder="Describe the materials, history, and craftmanship..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
                     ></textarea>
                   </div>
                 </div>
