@@ -36,12 +36,13 @@ function DashboardContent() {
   const [category, setCategory] = useState("new-arrival");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [itemCategory, setItemCategory] = useState("");
-  const [dbCategories, setDbCategories] = useState([]);
+  const [dbCategories, setDbCategories] = useState<string[]>([]);
   const [aiItems, setAiItems] = useState<Item[]>([]);
   const [aiState, setAiState] = useState<"awaiting" | "loading" | "completed">(
     "awaiting",
   );
   const [message, setMessage] = useState("");
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const topRef = useRef<HTMLElement>(null);
   const itemsPerPage = 6;
   const searchParams = useSearchParams();
@@ -61,7 +62,7 @@ function DashboardContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const authKey =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiNTRmNjA0MTgtYmFiOC00NDE5LWFhNTktMDM3MmE0NDJlMTYwIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiIzZDgwYjg1My1mNzhmLTQxNWUtYjU4NC0zZGNiYjY1YTg0YjIiLCJpYXQiOjE3NzUyOTAzNTQsImV4cCI6MTc3NTI5MTI1NCwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.38qqBokmClExUvWvwbPNXG0FhJuQ69A0FaOsvobsVJI";
+    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiNTRmNjA0MTgtYmFiOC00NDE5LWFhNTktMDM3MmE0NDJlMTYwIiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiJiZTE3NzJlNC1lMDA3LTRmN2MtOGU2ZS04OGEyMjUyZjE0NjQiLCJpYXQiOjE3NzUyOTEyOTksImV4cCI6MTc3NTI5MjE5OSwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.18FKySndwq65KliXk7Vp3snHET5ExOjr_mzrBXHziHI";
 
   useEffect(() => {
     const fetchItems = async (isRetry: boolean = false) => {
@@ -146,8 +147,13 @@ function DashboardContent() {
         );
 
         if (categoryResponse.status === 200) {
+          // console.log("HEre");
           const data = await categoryResponse.json();
-          setDbCategories(data);
+          const filteredCategories = data.categories.map((category: any) =>
+            category.category_name.toUpperCase().replace(/-+/g, " "),
+          );
+
+          setDbCategories(filteredCategories);
         } else if (categoryResponse.status === 401) {
           if (isRetry) {
             throw new Error("Refresh token was also rejected");
@@ -522,6 +528,10 @@ function DashboardContent() {
     setCategory("browse-all");
   };
 
+  const filteredCategories = dbCategories.filter((cat: string) =>
+    cat.startsWith(itemCategory),
+  );
+
   return (
     <>
       <nav
@@ -645,13 +655,71 @@ function DashboardContent() {
                     <p
                       className={`text-sm ${roboto.className} leading-relaxed mb-6`}
                     >
-                      Discover pieces that resonate with your vision. Upload an
-                      image of a space, a texture, or an inspiration to find
-                      matching artisanal items from our collection.
+                      Discover pieces that resonate with your vision. Select a
+                      category and upload an image of a space, a texture, or an
+                      inspiration.
                     </p>
+                    <div className="mb-6 relative">
+                      <label
+                        className={`block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2 ${roboto.className}`}
+                      >
+                        1. Select Category
+                      </label>
+                      <input
+                        name="ai-category"
+                        className="pl-4 focus:outline-0 w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50"
+                        placeholder="E.g., Seating, Lighting, Decor..."
+                        type="text"
+                        value={itemCategory}
+                        onChange={(e) => {
+                          e.preventDefault();
+                          setItemCategory(e.target.value.toUpperCase());
+                          setIsCategoryOpen(true);
+                        }}
+                        onFocus={() => setIsCategoryOpen(true)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+
+                            if (dbCategories.includes(itemCategory)) {
+                              setIsCategoryOpen(false);
+                            } else if (filteredCategories.length === 1) {
+                              setItemCategory(filteredCategories[0]);
+                              setIsCategoryOpen(false);
+                            }
+                          }
+                        }}
+                      />
+                      {isCategoryOpen && (
+                        <ul className="absolute z-20 w-full mt-1 bg-white border border-[#d1c5b4] shadow-lg max-h-48 overflow-y-auto">
+                          {filteredCategories.length > 0 ? (
+                            filteredCategories.map((cat, index) => (
+                              <li
+                                key={index}
+                                className="px-4 py-3 text-sm text-[#5f5e5e] hover:bg-[#775a19]/5 hover:text-[#775a19] cursor-pointer transition-colors"
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  setItemCategory(cat);
+                                  setIsCategoryOpen(false);
+                                }}
+                              >
+                                {cat}
+                              </li>
+                            ))
+                          ) : (
+                            <></>
+                          )}
+                        </ul>
+                      )}
+                    </div>
+                    <label
+                      className={`block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2 ${roboto.className}`}
+                    >
+                      2. Upload Inspiration
+                    </label>
                     <div
                       onClick={() => fileInputRef.current?.click()}
-                      className="relative border-2 border-dashed border-[#d1c5b4]/50 aspect-[4/3] flex flex-col items-center justify-center p-8 text-center group hover:border-[#775a19] transition-colors cursor-pointer bg-[#ffffff]"
+                      className="relative border-2 border-dashed border-[#d1c5b4]/50 aspect-[4/3] flex flex-col items-center justify-center p-8 text-center group hover:border-[#775a19] transition-colors cursor-pointer bg-[#ffffff] overflow-hidden"
                     >
                       <input
                         type="file"
@@ -659,14 +727,14 @@ function DashboardContent() {
                         onChange={handleFileChange}
                         accept="image/png, image/jpeg"
                         className="hidden"
-                      ></input>
+                      />
                       {imageBase64 ? (
                         <>
                           <img
                             src={imageBase64}
                             alt="Preview"
                             className="absolute inset-0 w-full h-full object-cover"
-                          ></img>
+                          />
                           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             <span className="text-white text-sm tracking-widest uppercase font-medium">
                               Change Image
@@ -725,14 +793,6 @@ function DashboardContent() {
                         specifically for your aesthetic.
                       </p>
                     </div>
-                  </div>
-                  <div className="p-8 border-t border-[#d1c5b4]/10">
-                    <button
-                      onClick={handleGenerateAIItems}
-                      className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer disabled:bg-[#5f5e5e] disabled:cursor-not-allowed"
-                    >
-                      Start Visual Search
-                    </button>
                   </div>
                 </>
               )}
