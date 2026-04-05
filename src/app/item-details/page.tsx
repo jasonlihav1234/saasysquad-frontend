@@ -15,6 +15,11 @@ const gelasio = Gelasio({
   style: ["normal", "italic"],
 });
 
+const reviewData = {
+  rating: 0.0,
+  count: 0,
+};
+
 export default function ItemDetails() {
   return (
     <div className={`min-h-screen bg-[#faf9f7] text-[#1a1c1b] ${roboto.className} selection:bg-[#fed488] selection:text-[#785a1a]`}>
@@ -56,6 +61,35 @@ export default function ItemDetails() {
                   Dimensions
                 </h4>
                 <p className="text-sm text-[#1a1c1b]">Place cm × Holder cm</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-[#f4f3f1] py-32 px-8 md:px-24">
+          <div className="max-w-6xl mx-auto">
+
+            <div className="flex flex-col md:flex-row justify-between items-end mb-24 border-b border-[#d1c5b4]/15 pb-12">
+              <div className="mb-8 md:mb-0">
+                <div className="h-9 w-52 bg-[white] mb-6">
+                    Collector Reviews
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="w-5 h-5 bg-[black]"></div>
+                    ))}
+                  </div>
+                  <div className="h-5 w-20 bg-[white]">
+                    {reviewData.rating.toFixed(1)}/5.0
+                  </div>
+                  <div className="h-4 w-24 bg-[white]">
+                    ({reviewData.count} Reviews)
+                  </div>
+                </div>
+              </div>
+              <div className="h-4 w-28 bg-[white]">
+                Write a Review
               </div>
             </div>
           </div>
