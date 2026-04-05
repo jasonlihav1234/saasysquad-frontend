@@ -148,7 +148,10 @@ export default function Login() {
                     CREATE AN ACCOUNT
                   </button>
                 </Link>
-                <Link href="https://sassysquad-backend.vercel.app/auth/google/login" className="z-10 w-full">
+                <Link
+                  href="https://sassysquad-backend.vercel.app/auth/google/login"
+                  className="z-10 w-full"
+                >
                   <button
                     type="button"
                     disabled={isSubmitting}
