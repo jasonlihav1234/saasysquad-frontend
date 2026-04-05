@@ -25,7 +25,7 @@ const navLinks = [
 interface TopNavBarProps {
   activeHref?: string;
   onSearch?: (term: string) => void;
-  onAiClick: () => void;
+  onAiClick?: () => void;
 }
 
 export default function TopNavBar({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
