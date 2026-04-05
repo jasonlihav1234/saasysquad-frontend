@@ -208,16 +208,14 @@ function DashboardContent() {
       return;
     }
 
+    if (topRef.current) {
+      topRef.current.scrollIntoView({
+        behavior: "auto",
+        block: "start"
+      });
+    }
+
     setCurrentPage(newPageNumber);
-    // race condition, need nextjs to finish rendering page first
-    setTimeout(() => {
-      if (topRef.current) {
-        topRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
-    });
   };
 
   const handleGenerateAIItems = async () => {
@@ -797,29 +795,7 @@ function DashboardContent() {
                 <ItemCard key={item.item_id} item={item} />
               ))}
               {currentItems.map((item) => (
-                <div key={item.item_id} className="group cursor-pointer">
-                  <div className="relative aspect-[1/1] bg-[#efeeec] overflow-hidden mb-6">
-                    <img
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transofrm duration-700 ease-out"
-                      alt="store product image"
-                      src={`${item.image_url}`}
-                    ></img>
-                  </div>
-                  <div className="flex justify-between items-baseline gap-4">
-                    <div>
-                      <h3
-                        className={`text-xl ${gelasio.className} antialiased mb-1`}
-                      >{`${item.item_name}`}</h3>
-                    </div>
-                    <div>
-                      <span
-                        className={`text-md ${gelasio.className} text-[#775a19] whitespace-nowrap`}
-                      >
-                        {`$${item.price}`}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                <ItemCard key={item.item_id} item={item} />
               ))}
 
               {Array.from({ length: emptySlots }).map((_, index) => (
