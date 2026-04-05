@@ -237,12 +237,12 @@ function DashboardContent() {
     <>
       <TopNavBar activeHref="/dashboard" onSearch={(term) => handleSearchSubmit(term)} />
       <main
-        className="bg-[#F9F8F6] pt-32 pb-24 px-12 mx-auto min-h-screen"
+        className="bg-[#F9F8F6] pb-24 px-12 mx-auto min-h-screen"
         ref={topRef}
       >
         {hasItems ? (
           <>
-            <header className="mb-20 flex flex-col md:flex-row justify-between items-end gap-8">
+            <header className="mb-20 -mx-12 px-12 pt-32 pb-32 bg-[#F4F3F1] flex flex-col md:flex-row justify-between items-end gap-8">
               <div className="max-w-2xl">
                 <h1
                   className={`text-6xl md:text-7xl ${gelasio.className} tracking-tighter text-[#1a1c1b]`}
