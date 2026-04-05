@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
 
-export default function ReturnPage() {
+function ReturnContent() {
   const [status, setStatus] = useState<string | null>(null);
   const [customerEmail, setCustomerEmail] = useState("");
   const searchParams = useSearchParams();
@@ -16,7 +16,7 @@ export default function ReturnPage() {
     if (!sessionId) {
       return;
     }
-    
+
     const fetchSessionStatus = async () => {
       try {
         const response = await fetch(`https://sassysquad-backend.vercel.app/checkout-session-status/${sessionId}`);
@@ -38,7 +38,15 @@ export default function ReturnPage() {
     return null;
   }
 
-  return (
+  // successful payment
+  if (status === "complete") {
+  }
+}
 
-  );
+export default function ReturnPage() {
+  return (
+    <Suspense>
+      <ReturnContent />
+    </Suspense>
+  )
 }
