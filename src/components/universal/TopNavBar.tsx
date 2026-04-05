@@ -25,9 +25,10 @@ const navLinks = [
 interface TopNavBarProps {
   activeHref?: string;
   onSearch?: (term: string) => void;
+  onAiClick?: () => void;
 }
 
-export default function TopNavBar({ activeHref, onSearch }: TopNavBarProps) {
+export default function TopNavBar({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
 
@@ -95,6 +96,13 @@ export default function TopNavBar({ activeHref, onSearch }: TopNavBarProps) {
       </div>
 
       <div className="flex items-center gap-6">
+        <button
+          onClick={onAiClick}
+          className="flex items-center gap-2 px-5 py-2 bg-[#5F5E5E] text-[#FFFFFF] text-xs uppercase tracking-widest hover:bg-[#1A1C1B] transition-colors cursor-pointer"
+        >
+          <span className="material-symbols-outlined text-sm">image_arrow_up</span>
+          <span className="hidden sm:inline">recommend with ai</span>
+        </button>
         <span className="material-symbols-outlined text-primary cursor-pointer hover:text-secondary transition-colors">
           shopping_cart
         </span>
