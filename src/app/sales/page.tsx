@@ -75,11 +75,6 @@ const SALES_ROWS: SaleRowItem[] = [
   },
 ];
 
-export const metadata = {
-  title: "Sales | The Curated Althaïr",
-  description: "View your sales performance and recent transactions.",
-};
-
 export default function SalesPage() {
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">

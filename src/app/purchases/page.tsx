@@ -12,11 +12,6 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
-export const metadata = {
-  title: "Purchases | The Curated Althaïr",
-  description: "View your order history and purchase status.",
-};
-
 const STATUS_TABS = ["All Orders", "Processing", "In Transit", "Delivered"];
 
 const SAMPLE_ORDERS: PurchaseOrderItemProps[] = [

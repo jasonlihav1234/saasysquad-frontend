@@ -5,25 +5,12 @@ import AccountForm from "@/components/user-settings/settings/AccountForm";
 import AestheticOptions from "@/components/user-settings/settings/AestheticOptions";
 import Footer from "@/components/universal/Footer";
 import SubpageHeader from "@/components/user-settings/shared-components/SubpageHeader";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { fetchUserProfile } from "@/app/settings/fetchProfile";
-
-export const metadata = {
-  title: "Settings & Preferences | The Curated Althaïr",
-  description:
-    "Manage your account details, visual preferences, and security settings.",
-};
+import { SettingsProfileFetch } from "@/app/settings/SettingsProfileFetch";
 
 export default function SettingsPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    fetchUserProfile(router);
-  }, [router]);
-
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
+      <SettingsProfileFetch />
       <SubpageHeader title="Account Details" />
 
       <div className="flex flex-1 overflow-hidden">
