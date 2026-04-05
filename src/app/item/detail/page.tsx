@@ -3,7 +3,7 @@
 import { Roboto, Gelasio } from "next/font/google";
 import "material-symbols";
 import TopNavBar from "@/components/universal/TopNavBar";
-import ReviewCard from "@/components/item-details/ReviewCard";
+import ReviewCard from "@/components/item/ReviewCard";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -95,7 +95,7 @@ export default function ItemDetails() {
                 </h2>
                 <div className="flex items-center gap-4">
                   <div className="flex text-[#775a19]">
-                    {[...Array(5)].map((_, i) => (
+                    {[...Array(5)].map((star, i) => (
                       <span
                         key={i}
                         className="material-symbols-outlined"
