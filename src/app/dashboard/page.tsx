@@ -9,7 +9,7 @@ import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, Suspense } from "react";
 import ItemCard from "@/components/dashboard/ItemCard";
-import { testItem1 } from "./pageData";
+import { testItems } from "./pageData";
 
 // probably should make this user/dashboard
 
@@ -280,10 +280,9 @@ function DashboardContent() {
               </div>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-              <ItemCard item={testItem1} />
-              <ItemCard item={testItem1} />
-              <ItemCard item={testItem1} />
-              <ItemCard item={testItem1} />
+              {testItems.map((item) => (
+                <ItemCard key={item.item_id} item={item} />
+              ))}
               {currentItems.map((item) => (
                 <div key={item.item_id} className="group cursor-pointer">
                   <div className="relative aspect-[1/1] bg-[#efeeec] overflow-hidden mb-6">

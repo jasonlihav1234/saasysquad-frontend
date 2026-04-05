@@ -17,6 +17,7 @@ interface Item {
   image_url: string;
   maker: string;
   date: string;
+  items_sold: number;
 }
 
 interface ItemCardProps {
@@ -25,6 +26,12 @@ interface ItemCardProps {
 
 export default function ItemCard({ item }: ItemCardProps) {
   const { item_id, item_name, price, image_url, maker, date } = item;
+
+  const formattedDate = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(new Date(date));
 
   return (
     <div className="group cursor-pointer transition-all duration-500 hover:bg-[#F4F3F1] p-4">
@@ -51,8 +58,8 @@ export default function ItemCard({ item }: ItemCardProps) {
         <div
           className={`${roboto.className} flex justify-between items-center text-[0.75rem] uppercase tracking-[0.05em] text-[#7f7667]`}
         >
-          <span>{maker || "Maison Minimaliste"}</span>
-          <span>{date || "Oct 12, 2024"}</span>
+          <span>{maker}</span>
+          <span>{formattedDate}</span>
         </div>
       </div>
     </div>
