@@ -1,4 +1,6 @@
+import { projectEntrypoints } from "next/dist/build/swc/generated-native";
 import { Gelasio, Roboto } from "next/font/google";
+import { useEffect, useRef, useState } from "react";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -16,7 +18,7 @@ interface Item {
   price: number;
   image_url: string;
   maker: string;
-  date: string;
+  last_updated: string;
   items_sold: number;
 }
 
@@ -25,16 +27,46 @@ interface ItemCardProps {
 }
 
 export default function ItemCard({ item }: ItemCardProps) {
-  const { item_id, item_name, price, image_url, maker, date } = item;
+  const { item_id, item_name, price, image_url, maker, last_updated } = item;
+
+  const [isVisible, setIsVisible] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.unobserve(entry.target);
+          } else {
+            setIsVisible(false);
+          }
+        },
+        {
+          threshold: 0.1,
+          rootMargin: "50px",
+        }
+      );
+
+      if (cardRef.current) {
+        observer.observe(cardRef.current);
+      }
+
+      return () => {
+        if (cardRef.current) observer.unobserve(cardRef.current);
+      };
+    }, []);
 
   const formattedDate = new Intl.DateTimeFormat("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(date));
+  }).format(new Date(last_updated));
 
   return (
-    <div className="group cursor-pointer transition-all duration-500 hover:bg-[#F4F3F1] p-4">
+    <div
+      ref={cardRef}
+      className={`group cursor-pointer transition-all duration-500 hover:bg-[#F4F3F1] p-4 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
       <div className="aspect-[4/5] overflow-hidden mb-8 bg-[#E9E8E6]">
         <img
           className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105 group-hover:opacity-90"
@@ -50,7 +82,9 @@ export default function ItemCard({ item }: ItemCardProps) {
           >
             {item_name}
           </h3>
-          <span className={`${roboto.className} text-sm font-medium text-[#1a1c1b]`}>
+          <span
+            className={`${roboto.className} text-sm font-medium text-[#1a1c1b]`}
+          >
             ${price}
           </span>
         </div>
