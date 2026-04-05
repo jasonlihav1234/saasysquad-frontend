@@ -17,15 +17,15 @@ interface SubpageHeaderProps {
 
 export default function SubpageHeader({ title }: SubpageHeaderProps) {
   return (
-    <header className="flex items-center justify-between bg-[#F1F1EF] border-b border-[#C5A059]/20 px-10 py-4">
+    <header className="flex items-center justify-between bg-[#191c1b] border-b border-[#C5A059]/20 px-10 py-4">
       <Link
-        href="/"
-        className={`${roboto.className} flex items-center gap-2 text-[#5F5E5E] hover:text-black transition-colors duration-200 tracking-widest text-sm uppercase`}
+        href="/dashboard"
+        className={`${roboto.className} flex items-center gap-2 text-[#F9F8F6] hover:text-black transition-colors duration-200 tracking-widest text-sm uppercase`}
       >
         ← Back to Main
       </Link>
       <h2
-        className={`${gelasio.className} text-black text-xl font-medium tracking-tight`}
+        className={`${gelasio.className} text-[#F9F8F6] text-xl font-medium tracking-tight`}
       >
         {title}
       </h2>
