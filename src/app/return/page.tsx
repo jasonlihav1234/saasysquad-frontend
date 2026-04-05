@@ -3,6 +3,12 @@
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { Gelasio, Roboto } from "next/font/google";
+
+const roboto = Roboto({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+});
 
 function ReturnContent() {
   const [status, setStatus] = useState<string | null>(null);
@@ -19,7 +25,7 @@ function ReturnContent() {
     const fetchSessionStatus = async () => {
       try {
         const response = await fetch(
-          `https://sassysquad-backend.vercel.app/checkout-session-status/${sessionId}`,
+          `https://sassysquad-backend.vercel.app/checkout-session-status?session_id=${sessionId}`,
         );
         const body = await response.json();
 
@@ -97,8 +103,16 @@ function ReturnContent() {
 
 export default function ReturnPage() {
   return (
-    <main>
-      <Suspense fallback={<h1>"Test suspense"</h1>}>
+    <main
+      className={`min-h-screen bg-neutral-50 flex flex-col items-center justify-center pt-20 pb-32 px-4 sm:px-6 lg:px-8 ${roboto.className}`}
+    >
+      <Suspense
+        fallback={
+          <div className="flex flex-col items-center justify-center space-y-6">
+            <div className="w-8 h-8 border-2 border-neutral-200 border-t-neutral-900 rounded-full animate-spin"></div>
+          </div>
+        }
+      >
         <ReturnContent />
       </Suspense>
     </main>
