@@ -47,11 +47,20 @@ export default function TopNavBar({ activeHref, onSearch }: TopNavBarProps) {
         className={`flex justify-between items-center top-0 z-50 px-12 h-20 fixed bg-[#F9F8F6] dark:bg-[#1a1c1b] ${roboto.className} antialiased tracking-tight w-full`}
       >
         <div className="flex items-center gap-8">
-          <span
-            className={`text-2xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}
-          >
-            The Curated Althaïr
-          </span>
+          {activeHref === "/dashboard" ? (
+            <span
+              className={`text-2xl ${gelasio.className} cursor-default tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}
+            >
+              The Curated Althaïr
+            </span>
+          ) : (
+            <Link
+              href="/dashboard"
+              className={`text-2xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7] hover:opacity-80 transition-opacity`}
+            >
+              The Curated Althaïr
+            </Link>
+          )}
           <div className="hidden md:flex gap-6 items-center">
             {navLinks.map(({ href, label }) => (
               <Link
