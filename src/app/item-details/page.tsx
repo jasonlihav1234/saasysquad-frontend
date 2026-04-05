@@ -69,7 +69,7 @@ export default function ItemDetails() {
             </div>
 
             <div className="space-y-4">
-              <button className={`w-full bg-[#5f5e5e] text-white py-6 text-[0.7rem] uppercase tracking-[0.2em] hover:bg-[#1a1c1b] ${roboto.className}`}>
+              <button className={`w-full bg-[#5f5e5e] cursor-pointer text-white py-6 text-[0.7rem] uppercase tracking-[0.2em] hover:bg-[#1a1c1b] ${roboto.className}`}>
                 Add to Cart
               </button>
             </div>
@@ -90,26 +90,32 @@ export default function ItemDetails() {
 
             <div className="flex flex-col md:flex-row justify-between items-end mb-24 border-b border-[#d1c5b4]/15 pb-12">
               <div className="mb-8 md:mb-0">
-                <div className="h-9 w-52 bg-[white] mb-6">
-                    Collector Reviews
-                </div>
+                <h2 className={`${gelasio.className} text-4xl text-[#1a1c1b] mb-4`}>
+                  Collector Reviews
+                </h2>
                 <div className="flex items-center gap-4">
-                  <div className="flex gap-1">
+                  <div className="flex text-[#775a19]">
                     {[...Array(5)].map((_, i) => (
-                      <div key={i} className="w-5 h-5 bg-[black]"></div>
+                      <span
+                        key={i}
+                        className="material-symbols-outlined"
+                        style={{ fontVariationSettings: "'FILL' 1" }}
+                      >
+                        star
+                      </span>
                     ))}
                   </div>
-                  <div className="h-5 w-20 bg-[white]">
-                    {reviewData.rating.toFixed(1)}/5.0
-                  </div>
-                  <div className="h-4 w-24 bg-[white]">
+                  <span className={`${roboto.className} text-lg font-medium text-[#1a1c1b]`}>
+                    {reviewData.rating.toFixed(1)} / 5.0
+                  </span>
+                  <span className={`${roboto.className} text-sm text-[#7f7667]`}>
                     ({reviewData.count} Reviews)
-                  </div>
+                  </span>
                 </div>
               </div>
-              <div className="h-4 w-28 bg-[white]">
+              <button className={`${roboto.className} cursor-pointer text-[0.75rem] uppercase tracking-widest text-[#1a1c1b] border-b border-[#775a19] pb-1 hover:text-[#775a19] transition-colors`}>
                 Write a Review
-              </div>
+              </button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-24">
