@@ -117,6 +117,45 @@ export default function TopNavBar({
   const openCart = () => router.push("?sidebar=cart");
   const closeCart = () => router.push("?");
 
+  const recalculateSubtotal = (items: any[]) => {
+    const newTotal = items.reduce((sum, item) => sum + item.itemTotal, 0);
+    setSubtotal(newTotal);
+  };
+
+  const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
+    // if (newQuantity < 1) {
+    //   return handleRemoveItem(itemId);
+    // }
+
+    const updatedItems = cartItems.map((item) => {
+      if (item.item_id === itemId) {
+        const price = Number(item.price);
+        return {
+          ...item,
+          quantity: newQuantity,
+          itemTotal: price * newQuantity,
+        };
+      }
+
+      return item;
+    });
+
+    try {
+      const response = await fetch(`https://sassysquad-backend.vercel.app/items/${itemId}`,, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({ quantity: newQuantity })
+      });
+
+      if (!response.ok) {
+        console.log("Failed to update item quantity");
+      }
+    }
+  };
+
   return (
     <>
       <nav
