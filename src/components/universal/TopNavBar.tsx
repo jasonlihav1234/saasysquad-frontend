@@ -94,10 +94,21 @@ export default function TopNavBar({
             localStorage.clear();
             router.push("/login");
           }
+        } else {
+          const body = await response.json();
+          console.log(body);
+          localStorage.clear();
+          router.push("/login");
         }
+      } catch(error) {
+        console.log(error);
+        alert(error);
+      } finally {
+        setIsLoading(false);
       }
     }
-
+    
+    fetchCart();
   }, [isCartSidebarOpen]);
 
   const openCart = () => router.push("?sidebar=cart");
