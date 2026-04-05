@@ -82,7 +82,7 @@ function ReturnContent() {
         </p>
 
         <Link
-          href="/"
+          href="/dashboard"
           className="inline-block bg-neutral-900 text-white px-10 py-4 text-xs sm:text-sm tracking-[0.15em] uppercase hover:bg-neutral-700 transition-colors duration-300"
         >
           Continue Shopping

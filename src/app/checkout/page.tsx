@@ -11,23 +11,14 @@ export default function CheckoutPage() {
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
   );
 
-  const authKey =
-    "eyJhbGciOiJIUzI1NiJ9.eyJzdWJqZWN0X2NsYWltIjoiMDgwNDFjMDctM2QxNS00NzA4LTg4YTEtZGU0NDA0NjVlMzI2IiwiZW1haWwiOiJ0ZXN0MTIzQGdtYWlsLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJqd3RfaWQiOiIxMzgwNGNlMC05ZjBlLTQyZWItOTdlZC0zMGI3Y2FlODljYWQiLCJpYXQiOjE3NzUzNTYxNzIsImV4cCI6MTc3NTM1NzA3MiwiaXNzIjoic2Fhc3lzcXVhZC1hdXRoIiwiYXVkIjoic2Fhc3lzcXVhZC1hcGkifQ.ebe6C-7fpc79afvLitoQ_0bZQs0s82Mzr0xzegyc7dM";
-
   const fetchClientSecret = useCallback(async () => {
     const response = await fetch(
-      "https://sassysquad-backend-git-story-sa-a97794-jasons-projects-ac5e4f90.vercel.app/create-checkout-session",
+      "https://sassysquad-backend.vercel.app/create-checkout-session",
       {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          // Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          Authorization: `Bearer ${authKey}`,
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: JSON.stringify({
-          sellerId: "12",
-          email: "test@gmail.com",
-        }),
       },
     );
 
