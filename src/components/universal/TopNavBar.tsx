@@ -285,7 +285,20 @@ export default function TopNavBar({
         </div>
 
         <div className="p-8 border-t border-[#d1c5b4]/10 bg-[#fafafa]">
-          <button className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer">
+          <div className="flex justify-between items-center mb-6">
+            <span
+              className={`text-sm ${roboto.className} uppercase tracking-widest text-[#5f5e5e]`}
+            >
+              Subtotal
+            </span>
+            <span className={`text-lg ${gelasio.className} text-[#1a1c1b]`}>
+              {subtotal.toFixed(2)}
+            </span>
+          </div>
+          <button
+            disabled={cartItems.length === 0}
+            className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer disabled:cursor-not-allowed"
+          >
             Proceed to Checkout
           </button>
         </div>
