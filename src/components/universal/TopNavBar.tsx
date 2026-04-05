@@ -3,9 +3,10 @@
 import { Roboto, Gelasio } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import "material-symbols";
+import { requestToBodyStream } from "next/dist/server/body-streams";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -36,6 +37,9 @@ export default function TopNavBar({
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [cartItems, setCartItems] = useState<any[]>([]);
+  const [subtotal, setSubtotal] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,6 +51,54 @@ export default function TopNavBar({
   };
 
   const isCartSidebarOpen = searchParams.get("sidebar") === "cart";
+
+  useEffect(() => {
+    if (!isCartSidebarOpen) return;
+
+    const fetchCart = async () => {
+      setIsLoading(true);
+
+      try {
+        const response = await fetch("https://sassysquad-backend.vercel.app/cart", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+          }
+        });
+
+        if (response.status === 200) {
+          const body = await response.json();
+          setCartItems(body.items);
+          setSubtotal(body.subtotal);
+        } else if (response.status === 401) {
+          const responseRefresh = await fetch(
+            "https://sassysquad-backend.vercel.app/auth/refresh",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                refreshToken: localStorage.getItem("refreshToken"),
+              }),
+            },
+          );
+
+          if (responseRefresh.status === 200) {
+            const body = await responseRefresh.json();
+            localStorage.setItem("accessToken", body.accessToken);
+            localStorage.setItem("refreshToken", body.refreshToken);
+
+            await fetchCart();
+          } else {
+            localStorage.clear();
+            router.push("/login");
+          }
+        }
+      }
+    }
+
+  }, [isCartSidebarOpen]);
 
   const openCart = () => router.push("?sidebar=cart");
   const closeCart = () => router.push("?");
@@ -145,15 +197,27 @@ export default function TopNavBar({
       <aside
         className={`fixed top-0 right-0 h-full w-full max-w-md bg-[#ffffff] z-[70] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${isCartSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div>
-          <h2>Your cart</h2>
-          <button onClick={closeCart} className="material-symbols-outlined cursor-pointer">close</button>
+        <div className="p-8 flex justify-between items-center border-b border-[#d1c5b4]">
+          <h2
+            className={`text-2xl ${gelasio.className} tracking-tight text-[#1a1c1b]`}
+          >
+            Your cart
+          </h2>
+          <button
+            onClick={closeCart}
+            className="material-symbols-outlined cursor-pointer text-[#5f5e5e] hover:text-[#775a19] transition-colors cursor-pointer"
+          >
+            close
+          </button>
         </div>
+
+        <div className="p-8 flex-1 overflow-y-auto"></div>
 
         <div className="p-8 border-t border-[#d1c5b4]/10 bg-[#fafafa]">
-          <button className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer">Proceed to Checkout</button>
+          <button className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer">
+            Proceed to Checkout
+          </button>
         </div>
-
       </aside>
     </>
   );
