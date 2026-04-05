@@ -28,7 +28,11 @@ interface TopNavBarProps {
   onAiClick?: () => void;
 }
 
-export default function TopNavBar({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
+export default function TopNavBar({
+  activeHref,
+  onSearch,
+  onAiClick,
+}: TopNavBarProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -107,7 +111,9 @@ export default function TopNavBar({ activeHref, onSearch, onAiClick }: TopNavBar
             onClick={onAiClick}
             className="flex items-center gap-2 px-5 py-2 bg-[#5F5E5E] text-[#FFFFFF] text-xs uppercase tracking-widest hover:bg-[#1A1C1B] transition-colors cursor-pointer"
           >
-            <span className="material-symbols-outlined text-sm">image_arrow_up</span>
+            <span className="material-symbols-outlined text-sm">
+              image_arrow_up
+            </span>
             <span className="hidden sm:inline">recommend with ai</span>
           </button>
           <button onClick={openCart}>
@@ -133,11 +139,20 @@ export default function TopNavBar({ activeHref, onSearch, onAiClick }: TopNavBar
           onClick={closeCart}
           className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm transition-opacity"
           aria-hidden="true"
-        >
-        </div>
+        ></div>
       )}
 
-      <aside>
+      <aside
+        className={`fixed top-0 right-0 h-full w-full max-w-md bg-[#ffffff] z-[70] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${isCartSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <div>
+          <h2>Your cart</h2>
+          <button onClick={closeCart} className="material-symbols-outlined cursor-pointer">close</button>
+        </div>
+
+        <div className="p-8 border-t border-[#d1c5b4]/10 bg-[#fafafa]">
+          <button className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer">Proceed to Checkout</button>
+        </div>
 
       </aside>
     </>
