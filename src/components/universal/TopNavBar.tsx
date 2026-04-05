@@ -3,7 +3,7 @@
 import { Roboto, Gelasio } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import "material-symbols";
 import { requestToBodyStream } from "next/dist/server/body-streams";
@@ -29,11 +29,7 @@ interface TopNavBarProps {
   onAiClick?: () => void;
 }
 
-export default function TopNavBar({
-  activeHref,
-  onSearch,
-  onAiClick,
-}: TopNavBarProps) {
+function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -128,12 +124,15 @@ export default function TopNavBar({
     recalculateSubtotal(updatedItems);
 
     try {
-      const response = await fetch(`https://sassysquad-backend.vercel.app/cart/items/${itemId}`, {
-        method: "DELTE",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      const response = await fetch(
+        `https://sassysquad-backend.vercel.app/cart/items/${itemId}`,
+        {
+          method: "DELTE",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
         },
-      });
+      );
 
       if (!response.ok) {
         console.log("Failed to remove item");
@@ -142,7 +141,7 @@ export default function TopNavBar({
       console.log(error);
       alert(error);
     }
-  }
+  };
 
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) {
@@ -166,14 +165,17 @@ export default function TopNavBar({
     recalculateSubtotal(updatedItems);
 
     try {
-      const response = await fetch(`https://sassysquad-backend.vercel.app/items/${itemId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      const response = await fetch(
+        `https://sassysquad-backend.vercel.app/items/${itemId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({ quantity: newQuantity }),
         },
-        body: JSON.stringify({ quantity: newQuantity })
-      });
+      );
 
       if (!response.ok) {
         console.log("Failed to update item quantity");
@@ -302,37 +304,58 @@ export default function TopNavBar({
               {cartItems.map((item) => (
                 <div key={item.item_id} className="flex gap-4">
                   <div className="w-24 h-24 bg-[#f4f3f1] shrink-0">
-                    <img src={item.image_url} alt={item.item_name} className="w-full h-full object-cover" />
+                    <img
+                      src={item.image_url}
+                      alt={item.item_name}
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <div className="flex flex-col justify-between flex-1 py-1">
                     <div>
-                      <h3 className={`text-sm ${gelasio.className} text-[#1a1c1b] truncate pr-4`}>{item.item_name}</h3>
-                      
+                      <h3
+                        className={`text-sm ${gelasio.className} text-[#1a1c1b] truncate pr-4`}
+                      >
+                        {item.item_name}
+                      </h3>
+
                       <div className="flex items-center gap-4 mt-3 border border-[#d1c5b4]/50 w-max px-2 py-1">
-                        <button 
-                          onClick={() => handleUpdateQuantity(item.item_id, item.quantity - 1)}
+                        <button
+                          onClick={() =>
+                            handleUpdateQuantity(
+                              item.item_id,
+                              item.quantity - 1,
+                            )
+                          }
                           className={`text-sm ${roboto.className} text-[#a7a5a5] hover:text-[#1a1c1b] transition-colors cursor-pointer px-1`}
                         >
                           -
                         </button>
-                        <span className={`text-xs ${roboto.className} text-[#5f5e5e] w-4 text-center`}>
+                        <span
+                          className={`text-xs ${roboto.className} text-[#5f5e5e] w-4 text-center`}
+                        >
                           {item.quantity}
                         </span>
-                        <button 
-                          onClick={() => handleUpdateQuantity(item.item_id, item.quantity + 1)}
+                        <button
+                          onClick={() =>
+                            handleUpdateQuantity(
+                              item.item_id,
+                              item.quantity + 1,
+                            )
+                          }
                           className={`text-sm ${roboto.className} text-[#a7a5a5] hover:text-[#1a1c1b] transition-colors cursor-pointer px-1`}
                         >
                           +
                         </button>
                       </div>
-
                     </div>
                     <div className="flex justify-between items-end mt-2">
-                      <span className={`text-sm ${gelasio.className} text-[#775a19]`}>
+                      <span
+                        className={`text-sm ${gelasio.className} text-[#775a19]`}
+                      >
                         ${item.itemTotal.toFixed(2)}
                       </span>
-                      
-                      <button 
+
+                      <button
                         onClick={() => handleRemoveItem(item.item_id)}
                         className={`text-[10px] ${roboto.className} uppercase tracking-widest text-[#a7a5a5] hover:text-[#1a1c1b] transition-colors border-b border-transparent hover:border-[#1a1c1b] pb-0.5 cursor-pointer`}
                       >
@@ -378,5 +401,21 @@ export default function TopNavBar({
         </div>
       </aside>
     </>
+  );
+}
+
+export default function TopNavBar(props: TopNavBarProps) {
+  return (
+    <Suspense
+      fallback={
+        <nav className="flex justify-between items-center top-0 z-50 px-12 h-20 fixed bg-[#F9F8F6] dark:bg-[#1a1c1b] w-full">
+          <div className="text-2xl tracking-tighter text-[#1A1C1B]">
+            The Curated Althaïr
+          </div>
+        </nav>
+      }
+    >
+      <TopNavBarContent {...props} />
+    </Suspense>
   );
 }
