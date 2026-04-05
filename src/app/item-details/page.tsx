@@ -3,6 +3,7 @@
 import { Roboto, Gelasio } from "next/font/google";
 import "material-symbols";
 import TopNavBar from "@/components/universal/TopNavBar";
+import ReviewCard from "@/components/item-details/ReviewCard";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -15,10 +16,28 @@ const gelasio = Gelasio({
   style: ["normal", "italic"],
 });
 
+// placeholder data
 const reviewData = {
-  rating: 0.0,
-  count: 0,
+  rating: 4.8,
+  count: 24,
 };
+
+const reviews = [
+  {
+    id: 1,
+    name: "Eleanor Smith",
+    date: "March 12, 2026",
+    rating: 5,
+    body: "Amazing product.",
+  },
+  {
+    id: 2,
+    name: "Julian Thorne",
+    date: "Feb 04, 2026",
+    rating: 4,
+    body: "Loved the product, but the colors could be better.",
+  },
+];
 
 export default function ItemDetails() {
   return (
@@ -92,6 +111,13 @@ export default function ItemDetails() {
                 Write a Review
               </div>
             </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-24">
+              {reviews.map((review) => (
+                <ReviewCard key={review.id} {...review} />
+              ))}
+            </div>
+
           </div>
         </section>
       </main>
