@@ -59,12 +59,15 @@ export default function TopNavBar({
       setIsLoading(true);
 
       try {
-        const response = await fetch("https://sassysquad-backend.vercel.app/cart", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-          }
-        });
+        const response = await fetch(
+          "https://sassysquad-backend.vercel.app/cart",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          },
+        );
 
         if (response.status === 200) {
           const body = await response.json();
@@ -100,14 +103,14 @@ export default function TopNavBar({
           localStorage.clear();
           router.push("/login");
         }
-      } catch(error) {
+      } catch (error) {
         console.log(error);
         alert(error);
       } finally {
         setIsLoading(false);
       }
-    }
-    
+    };
+
     fetchCart();
   }, [isCartSidebarOpen]);
 
@@ -222,7 +225,64 @@ export default function TopNavBar({
           </button>
         </div>
 
-        <div className="p-8 flex-1 overflow-y-auto"></div>
+        <div className="p-8 flex-1 overflow-y-auto">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-full">
+              <div className="w-6 h-6 border-2 border-[#d1c5b4] border-t-[#775a19] rounded-full animate-spin"></div>
+            </div>
+          ) : cartItems.length > 0 ? (
+            <div className="flex flex-col gap-6">
+              {cartItems.map((item) => (
+                <div key={item.item_id} className="flex gap-4">
+                  <div className="w-20 h-20 bg-[#f4f3f1] shrink-0">
+                    <img
+                      src={item.image_url}
+                      alt={item.item_name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex flex-col justify-between flex-1">
+                    <div>
+                      <h3
+                        className={`text-sm ${gelasio.className} text-[#1a1c1b]`}
+                      >
+                        {item.item_name}
+                      </h3>
+                      <p
+                        className={`text-xs ${roboto.className} text-[#a7a5a5] mt-1`}
+                      >
+                        Qty: {item.quantity}
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-center mt-2">
+                      <span
+                        className={`text-sm ${gelasio.className} text-[#775a19]`}
+                      >
+                        ${item.itemTotal.toFixed(2)}
+                      </span>
+                      <button
+                        className={`text-[10px] ${roboto.className} uppercase tracking-widest text-[#5f5e5e] hover:text-red-900 transition-colors cursor-pointer`}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center text-center h-full opacity-60">
+              <span className="material-symbols-outlined text-4xl mb-4 text-[#d1c5b4]">
+                shopping_bag
+              </span>
+              <p
+                className={`text-sm ${roboto.className} uppercase tracking-[0.2em] text-[#5f5e5e] mb-2`}
+              >
+                Your cart is empty
+              </p>
+            </div>
+          )}
+        </div>
 
         <div className="p-8 border-t border-[#d1c5b4]/10 bg-[#fafafa]">
           <button className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer">
