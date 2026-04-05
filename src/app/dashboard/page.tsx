@@ -1,12 +1,14 @@
 "use client";
 
 import Footer from "@/components/universal/Footer";
+import TopNavBar from "@/components/universal/TopNavBar";
 import { Roboto, Gelasio } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, Suspense } from "react";
+import { Tracing } from "trace_events";
 
 // probably should make this user/dashboard
 
@@ -20,12 +22,27 @@ const gelasio = Gelasio({
   style: ["normal", "italic"],
 });
 
+interface Item {
+  item_id: string;
+  item_name: string;
+  price: number;
+  image_url: string;
+}
+
 function DashboardContent() {
   const [hasItems, setHasItems] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [category, setCategory] = useState("new-arrival");
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [itemCategory, setItemCategory] = useState<string>("");
+  const [dbCategories, setDbCategories] = useState<string[]>([]);
+  const [aiItems, setAiItems] = useState<Item[]>([]);
+  const [aiState, setAiState] = useState<"awaiting" | "loading" | "completed">(
+    "awaiting",
+  );
+  const [message, setMessage] = useState("");
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const topRef = useRef<HTMLElement>(null);
   const itemsPerPage = 6;
   const searchParams = useSearchParams();
@@ -37,10 +54,12 @@ function DashboardContent() {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   // useful - item_name, price, image_url, item_id
   const [items, setItems] = useState<any[]>();
+  const [aiChoice, setAIChoice] = useState(category);
   const router = useRouter();
   const isAiSidebarOpen = searchParams.get("sidebar") === "ai";
   const openSidebar = () => router.push("?sidebar=ai");
   const closeSidebar = () => router.push("?");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const fetchItems = async (isRetry: boolean = false) => {
@@ -73,7 +92,7 @@ function DashboardContent() {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                refreshToken: localStorage.getItem("refreshToken"),
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
               }),
             },
           );
@@ -83,10 +102,89 @@ function DashboardContent() {
             localStorage.setItem("accessToken", body.accessToken);
             localStorage.setItem("refreshToken", body.refreshToken);
 
-            await fetchItems(true);
+            const response2 = await fetch(
+              "https://sassysquad-backend.vercel.app/items",
+              {
+                method: "GET",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                },
+              },
+            );
+
+            if (response2.status === 200) {
+              const data = await response.json();
+              setItems(data.items);
+              setTotalPages(Math.ceil(data.items.length / 6));
+            } else {
+              localStorage.clear();
+              router.push("/login");
+            }
           } else {
             // localStorage.clear();
             // router.push("/login");
+          }
+        } else {
+          throw new Error("Critical failure");
+        }
+
+        const categoryResponse = await fetch(
+          "https://sassysquad-backend.vercel.app/categories",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          },
+        );
+
+        if (categoryResponse.status === 200) {
+          // console.log("HEre");
+          const data = await categoryResponse.json();
+          const filteredCategories = data.categories.map((category: any) =>
+            category.category_name.toUpperCase().replace(/-+/g, " "),
+          );
+
+          setDbCategories(filteredCategories);
+        } else if (categoryResponse.status === 401) {
+          if (isRetry) {
+            throw new Error("Refresh token was also rejected");
+          }
+
+          const responseRefresh = await fetch(
+            "https://sassysquad-backend.vercel.app/auth/refresh",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              }),
+            },
+          );
+
+          if (responseRefresh.status === 200) {
+            const body = await responseRefresh.json();
+            localStorage.setItem("accessToken", body.accessToken);
+            localStorage.setItem("refreshToken", body.refreshToken);
+
+            const categoryResponse2 = await fetch(
+              "https://sassysquad-backend.vercel.app/categories",
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+                },
+              },
+            );
+
+            const data = await categoryResponse.json();
+            setDbCategories(data);
+          } else {
+            localStorage.clear();
+            router.push("/login");
           }
         } else {
           throw new Error("Critical failure");
@@ -120,8 +218,122 @@ function DashboardContent() {
     });
   };
 
-  const handleInputChange = (e: any) => {
-    setSearchTerm(e.target.value.toLowerCase());
+  const handleGenerateAIItems = async () => {
+    if (!imageBase64 || !itemCategory) {
+      alert("Provide a valid picture and item category");
+      return;
+    }
+
+    const formattedItemCategory = itemCategory
+      .split(" ")
+      .join("-")
+      .toLowerCase();
+
+    setAiState("loading");
+    try {
+      const itemResponse = await fetch(
+        "https://sassysquad-backend.vercel.app/items/recommendations",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({
+            category: formattedItemCategory,
+            image: imageBase64,
+          }),
+        },
+      );
+
+      if (itemResponse.status === 200) {
+        const itemBody = await itemResponse.json();
+
+        if (itemBody.items && itemBody.items.length !== 0) {
+          setAiItems(itemBody.items);
+        } else if (itemBody.message) {
+          setMessage(itemBody.message);
+        } else {
+          throw new Error("Fatal error occured in AI return");
+        }
+
+        setAiState("completed");
+      } else if (itemResponse.status === 401) {
+        const responseRefresh = await fetch(
+          "https://sassysquad-backend.vercel.app/auth/refresh",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              refreshToken: localStorage.getItem("refreshToken"),
+            }),
+          },
+        );
+
+        if (responseRefresh.status === 200) {
+          const body = await responseRefresh.json();
+          localStorage.setItem("accessToken", body.accessToken);
+          localStorage.setItem("refreshToken", body.refreshToken);
+
+          const itemResponse2 = await fetch(
+            "https://sassysquad-backend.vercel.app/items/recommendations",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+              },
+              body: JSON.stringify({
+                category: itemCategory,
+                image: imageBase64,
+              }),
+            },
+          );
+
+          const itemBody2 = await itemResponse2.json();
+          if (itemBody2.items && itemBody2.items.length !== 0) {
+            setAiItems(itemBody2.items);
+          } else if (itemBody2.message) {
+            setMessage(itemBody2.message);
+          } else {
+            throw new Error("Fatal error occured in AI return");
+          }
+
+          setAiState("completed");
+        } else {
+          localStorage.clear();
+          router.push("/login");
+        }
+      } else {
+        alert(await itemResponse.json());
+        setAiState("awaiting");
+      }
+    } catch (error) {
+      console.log(error);
+      alert(error);
+      setAiState("awaiting");
+    }
+  };
+
+  const handleFileChange = (e: any) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setImageBase64(base64String);
+
+      console.log(base64String);
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const handleSearchSubmit = async (e: any) => {
@@ -154,7 +366,6 @@ function DashboardContent() {
           setItems([]);
         } else {
           setHasItems(true);
-          setSearchTerm("");
           setItems(filteredArray);
         }
       } else if (response.status === 401) {
@@ -244,182 +455,300 @@ function DashboardContent() {
     setCategory("browse-all");
   };
 
+  const filteredCategories = dbCategories.filter((cat: string) =>
+    cat.startsWith(itemCategory),
+  );
+
   return (
     <>
-      <nav
-        className={`flex justify-between items-center top-0 z-50 px-12 h-20 fixed bg-[#F9F8F6] dark:bg-[#1a1c1b] ${roboto.className} antialiased tracking-tight w-full`}
-      >
-        <div className="flex items-center gap-8">
-          <span
-            className={`text-2xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}
-          >
-            The Curated Althaïr
-          </span>
-          <div className="hidden md:flex gap-6 items-center">
-            <Link
-              href="/dashboard"
-              className={`text-[#775A19] dark:text-[#C5A059] border-b border-[#775A19]`}
-            >
-              Catalog
-            </Link>
-            <Link
-              href="/purchases"
-              className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
-            >
-              Purchases
-            </Link>
-            <Link
-              href="/sales"
-              className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
-            >
-              Sales
-            </Link>
-            <Link
-              href="/messages"
-              className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
-            >
-              Messages
-            </Link>
-            <Link
-              href="/product/sell"
-              className={`text-[#5f5e5e] dark:text-[#a7a5a5] hover:text-[#1a1c1b] hover:text-[#775a19] transition-colors duration-300`}
-            >
-              Sell Items
-            </Link>
-          </div>
-        </div>
-        <div className="relative hidden lg:block group">
-          <form className="relative inline-block" onSubmit={handleSearchSubmit}>
-            <input
-              className={`bg-[#F4F3F1] focus:ring-0 sm:w-50 md:w-100 lg:w-150 py-2 px-2 text-sm ${roboto.className} outline-none border-b border-[#D1C5B4] focus:border-[#775A19] transition-all`}
-              placeholder="Search catalog..."
-              name="search-string"
-              value={searchTerm}
-              onChange={handleInputChange}
-            ></input>
+      <TopNavBar
+        activeHref="/dashboard"
+        onSearch={(term) => handleSearchSubmit(term)}
+        onAiClick={openSidebar}
+      />
+      <div className="flex items-center gap-6">
+        {isAiSidebarOpen && (
+          <div
+            onClick={() => {
+              closeSidebar();
+              setAiState("awaiting");
+            }}
+            className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm transition-opacity"
+            aria-hidden="true"
+          ></div>
+        )}
+
+        <aside
+          className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${isAiSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
+        >
+          <div className="p-8 flex justify-between items-center border-b border-[#d1c5b4]">
+            <h2 className={`text-2xl ${gelasio.className} tracking-tight`}>
+              AI Curator
+            </h2>
             <button
-              type="submit"
-              className="material-symbols-sharp absolute right-2 top-2 text-primary opacity-50 cursor-pointer"
+              onClick={() => {
+                closeSidebar();
+                setAiState("awaiting");
+              }}
+              className="material-symbols-outlined hover:text-[#775a19] transition-colors cursor-pointer"
             >
-              search
+              close
             </button>
-          </form>
-        </div>
-        <div className="flex items-center gap-6">
-          <button
-            onClick={openSidebar}
-            className="flex items-center gap-2 px-5 py-2 bg-[#5F5E5E] text-[#FFFFFF] text-xs uppercase tracking-widest hover:bg-[#1A1C1B] transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-sm">
-              image_arrow_up
-            </span>
-            <span className="hidden sm:inline">recommend with ai</span>
-          </button>
-
-          {isAiSidebarOpen && (
-            <div
-              onClick={closeSidebar}
-              className="fixed inset-0 bg-black/60 z-[60] backdrop-blur-sm transition-opacity"
-              aria-hidden="true"
-            ></div>
-          )}
-
-          <aside
-            className={`fixed top-0 right-0 h-full w-full max-w-md bg-white z-[70] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${isAiSidebarOpen ? "translate-x-0" : "translate-x-full"}`}
-          >
-            <div className="p-8 flex justify-between items-center border-b border-[#d1c5b4]">
-              <h2 className={`text-2xl ${gelasio.className} tracking-tight`}>
-                AI Curator
-              </h2>
-              <button
-                onClick={closeSidebar}
-                className="material-symbols-outlined hover:text-[#775a19] transition-colors cursor-pointer"
-              >
-                close
-              </button>
-            </div>
-            <div className="p-8 flex-1 overflow-y-auto">
-              <div className="mb-8">
-                <p
-                  className={`text-sm ${roboto.className} leading-relaxed mb-6`}
-                >
-                  Discover pieces that resonate with your vision. Upload an
-                  image of a space, a texture, or an inspiration to find
-                  matching artisanal items from our collection.
-                </p>
-                <div className="border-2 border-dashed border-[#d1c5b4]/50 aspect-[4/3] flex flex-col items-center justify-center p-8 text-center group hover:border-[#775a19] transition-colors cursor-pointer bg-[#ffffff]">
-                  <span className="material-symbols-outlined text-4xl text-[#5f5e5e] mb-4 group-hover:scale-110 transition-transform">
-                    image_arrow_up
-                  </span>
-                  <span
-                    className={`text-sm ${roboto.className} font-medium uppercase tracking-widest mb-2 text-[#775a19]]`}
-                  >
-                    Upload Image
-                  </span>
-                  <span
-                    className={`text-[10px] text-[#5f5e5e]/60 uppercase tracking-tighter`}
-                  >
-                    JPG, PNG up to 10MB
-                  </span>
-                </div>
-              </div>
-              <div className="space-y-6">
-                <h4
-                  className={`text-[10px] uppercase tracking-[0.2em] font-bold text-[#775a19]`}
-                >
-                  How it works
-                </h4>
-                <div className="flex gap-4">
-                  <span className={`italic ${gelasio.className} text-xs`}>
-                    01
-                  </span>
-                  <p className="text-xs text-[#4e4639] leading-relaxed">
-                    Our AI analyzes colour palettes, textures, and form factors.
-                  </p>
-                </div>
-                <div className="flex gap-4">
-                  <span className={`italic ${gelasio.className} text-xs`}>
-                    02
-                  </span>
-                  <p className="text-xs text-[#4e4639] leading-relaxed">
-                    It cross-references our entire archive of limited editions
-                    and bespoke pieces.
-                  </p>
-                </div>
-                <div className="flex gap-4">
-                  <span className={`italic ${gelasio.className} text-xs`}>
-                    03
-                  </span>
-                  <p className="text-xs text-[#4e4639] leading-relaxed">
-                    The AI presents a tailoured selection curated specifically
-                    for your aesthetic.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-8 border-t border-[#d1c5b4]/10">
-              <button className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer">
-                Start Visual Search
-              </button>
-            </div>
-          </aside>
-          <div className="flex items-center gap-6">
-            <span className="material-symbols-outlined text-primary cursor-pointer hover:text-secondary transition-colors">
-              shopping_cart
-            </span>
-            <div className="w-8 h-8 bg-surface-container-highest flex items-center justify-center overflow-hidden">
-              <Link href="/me">
-                <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIEWWIsS24oEuhS288WfCZjz-DYqXxsIG0aCNeFSv78p1rnf6XwcNzKSw-Xn1_AUFH_ESsayZqp-A6g9FAOCencuC1ka2p90hh06vwU4RCpA5Hwuk70p6PViQLxszYYVWfaLRm4VcP-tFyWJY2Zgqmwlg37Yt-iN7qKnSfl812uX1V6D9gAzX43IGcr63yiDKlxJjky5qS3cDTR63mrstO31kxFyupT6m7F2_peMXjtNvbrgTXD5doEoG3vBr0gESyhoIGCZvtgLi7"
-                  alt="User Profile"
-                  width={32}
-                  height={32}
-                ></Image>
-              </Link>
-            </div>
           </div>
-        </div>
-      </nav>
+
+          <div className="flex w-full">
+            <button
+              onClick={() => setAIChoice("category")}
+              className={`flex-1 px-4 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors cursor-pointer ${aiChoice === "category" ? "border-b-2 border-b-[#775A19]" : ""}`}
+            >
+              By Category
+            </button>
+            <button
+              onClick={() => setAIChoice("past-purchases")}
+              className={`flex-1 px-4 py-3 bg-[#FFFFFF] border border-[#D1C5B4]/20 hover:bg-[#F4F3F1] transition-colors cursor-pointer ${aiChoice === "past-purchases" ? "border-b-2 border-b-[#775A19]" : ""}`}
+            >
+              By Past Purchases
+            </button>
+          </div>
+
+          <div className="p-8 flex-1 overflow-y-auto">
+            {aiState === "awaiting" && (
+              <>
+                <div className="mb-8">
+                  <p
+                    className={`text-sm ${roboto.className} leading-relaxed mb-6`}
+                  >
+                    Discover pieces that resonate with your vision. Select a
+                    category and upload an image of a space, a texture, or an
+                    inspiration.
+                  </p>
+                  <div className="mb-6 relative">
+                    <label
+                      className={`block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2 ${roboto.className}`}
+                    >
+                      1. Select Category
+                    </label>
+                    <input
+                      name="ai-category"
+                      className={`pl-4 focus:outline-0 w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50 ${gelasio.className}`}
+                      placeholder="E.g., Seating, Lighting, Decor..."
+                      type="text"
+                      value={itemCategory}
+                      onChange={(e) => {
+                        e.preventDefault();
+                        setItemCategory(e.target.value.toUpperCase());
+                        setIsCategoryOpen(true);
+                      }}
+                      onFocus={() => setIsCategoryOpen(true)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+
+                          if (dbCategories.includes(itemCategory)) {
+                            setIsCategoryOpen(false);
+                          } else if (filteredCategories.length === 1) {
+                            setItemCategory(filteredCategories[0]);
+                            setIsCategoryOpen(false);
+                          }
+                        }
+                      }}
+                    />
+                    {isCategoryOpen && (
+                      <ul className="absolute z-20 w-full mt-1 bg-white border border-[#d1c5b4] shadow-lg max-h-48 overflow-y-auto">
+                        {filteredCategories.length > 0 ? (
+                          filteredCategories.map((cat, index) => (
+                            <li
+                              key={index}
+                              className="px-4 py-3 text-sm text-[#5f5e5e] hover:bg-[#775a19]/5 hover:text-[#775a19] cursor-pointer transition-colors"
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                setItemCategory(cat);
+                                setIsCategoryOpen(false);
+                              }}
+                            >
+                              {cat}
+                            </li>
+                          ))
+                        ) : (
+                          <></>
+                        )}
+                      </ul>
+                    )}
+                  </div>
+                  <label
+                    className={`block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2 ${roboto.className}`}
+                  >
+                    2. Upload Inspiration
+                  </label>
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="relative border-2 border-dashed border-[#d1c5b4]/50 aspect-[4/3] flex flex-col items-center justify-center p-8 text-center group hover:border-[#775a19] transition-colors cursor-pointer bg-[#ffffff] overflow-hidden"
+                  >
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/png, image/jpeg"
+                      className="hidden"
+                    />
+                    {imageBase64 ? (
+                      <>
+                        <img
+                          src={imageBase64}
+                          alt="Preview"
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-white text-sm tracking-widest uppercase font-medium">
+                            Change Image
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <span className="material-symbols-outlined text-4xl text-[#5f5e5e] mb-4 group-hover:scale-110 transition-transform">
+                          image_arrow_up
+                        </span>
+                        <span
+                          className={`text-sm ${roboto.className} font-medium uppercase tracking-widest mb-2 text-[#775a19]`}
+                        >
+                          Upload Image
+                        </span>
+                        <span
+                          className={`text-[10px] text-[#5f5e5e]/60 uppercase tracking-tighter`}
+                        >
+                          JPG, PNG up to 10MB
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <h4
+                    className={`text-[10px] uppercase tracking-[0.2em] font-bold text-[#775a19]`}
+                  >
+                    How it works
+                  </h4>
+                  <div className="flex gap-4">
+                    <span className={`italic ${gelasio.className} text-xs`}>
+                      01
+                    </span>
+                    <p className="text-xs text-[#4e4639] leading-relaxed">
+                      Our AI analyzes colour palettes, textures, and form
+                      factors.
+                    </p>
+                  </div>
+                  <div className="flex gap-4">
+                    <span className={`italic ${gelasio.className} text-xs`}>
+                      02
+                    </span>
+                    <p className="text-xs text-[#4e4639] leading-relaxed">
+                      It cross-references our entire archive of limited editions
+                      and bespoke pieces.
+                    </p>
+                  </div>
+                  <div className="flex gap-4">
+                    <span className={`italic ${gelasio.className} text-xs`}>
+                      03
+                    </span>
+                    <p className="text-xs text-[#4e4639] leading-relaxed">
+                      The AI presents a tailoured selection curated specifically
+                      for your aesthetic.
+                    </p>
+                  </div>
+                </div>
+                <div className="p-8 border-t border-[#d1c5b4]/10">
+                  <button
+                    onClick={handleGenerateAIItems}
+                    className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer"
+                  >
+                    Start Visual Search
+                  </button>
+                </div>
+              </>
+            )}
+
+            {aiState === "loading" && (
+              <div className="grid grid-cols-2 gap-6">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((skeleton) => (
+                  <div key={skeleton} className="animate-pulse">
+                    <div className="relative aspect-[1/1] bg-[#e9e8e6] overflow-hidden mb-4 rounded-sm"></div>
+                    <div className="flex justify-between items-baseline gap-4">
+                      <div className="h-4 bg-[#e9e8e6] rounded w-2/3 mb-1"></div>
+                      <div className="h-4 bg-[#e9e8e6] rounded w-1/4"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {aiState === "completed" && (
+              <>
+                {aiItems.length > 0 ? (
+                  <div className="grid grid-cols-2 gap-6">
+                    {aiItems.map((item) => (
+                      <div key={item.item_id} className="group cursor-pointer">
+                        <div className="relative aspect-[1/1] bg-[#efeeec] overflow-hidden mb-4 rounded-sm">
+                          <img
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                            alt="store product image"
+                            src={`${item.image_url}`}
+                          ></img>
+                        </div>
+                        <div className="flex justify-between items-baseline gap-4">
+                          <div>
+                            <h3
+                              className={`text-sm ${gelasio.className} antialiased mb-1 truncate`}
+                            >
+                              {item.item_name}
+                            </h3>
+                          </div>
+                          <div>
+                            <span
+                              className={`text-sm ${gelasio.className} text-[#775a19] whitespace-nowrap`}
+                            >
+                              ${item.price}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center text-center p-8 bg-[#f9f8f6] border border-[#d1c5b4]/30 rounded-sm">
+                    <span className="material-symbols-outlined text-4xl text-[#d1c5b4] mb-4">
+                      search_off
+                    </span>
+                    <h3
+                      className={`text-lg ${gelasio.className} text-[#1a1c1b] mb-2`}
+                    >
+                      No Exact Matches
+                    </h3>
+                    <p
+                      className={`text-sm ${roboto.className} text-[#5f5e5e] leading-relaxed italic`}
+                    >
+                      {message}
+                    </p>
+                  </div>
+                )}
+
+                <div className="p-8 border-t border-[#d1c5b4]/10">
+                  <button
+                    onClick={() => {
+                      setAiState("awaiting");
+                      setItemCategory("");
+                      setImageBase64(null);
+                    }}
+                    className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer disabled:bg-[#5f5e5e] disabled:cursor-not-allowed"
+                  >
+                    Start New Search
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </aside>
+      </div>
       <main
         className="bg-[#F9F8F6] pt-32 pb-24 px-12 mx-auto min-h-screen"
         ref={topRef}
