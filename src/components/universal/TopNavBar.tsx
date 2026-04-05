@@ -162,8 +162,11 @@ export default function TopNavBar({
       return item;
     });
 
+    setCartItems(updatedItems);
+    recalculateSubtotal(updatedItems);
+
     try {
-      const response = await fetch(`https://sassysquad-backend.vercel.app/items/${itemId}`,, {
+      const response = await fetch(`https://sassysquad-backend.vercel.app/items/${itemId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -295,37 +298,43 @@ export default function TopNavBar({
               <div className="w-6 h-6 border-2 border-[#d1c5b4] border-t-[#775a19] rounded-full animate-spin"></div>
             </div>
           ) : cartItems.length > 0 ? (
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-8">
               {cartItems.map((item) => (
                 <div key={item.item_id} className="flex gap-4">
-                  <div className="w-20 h-20 bg-[#f4f3f1] shrink-0">
-                    <img
-                      src={item.image_url}
-                      alt={item.item_name}
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="w-24 h-24 bg-[#f4f3f1] shrink-0">
+                    <img src={item.image_url} alt={item.item_name} className="w-full h-full object-cover" />
                   </div>
-                  <div className="flex flex-col justify-between flex-1">
+                  <div className="flex flex-col justify-between flex-1 py-1">
                     <div>
-                      <h3
-                        className={`text-sm ${gelasio.className} text-[#1a1c1b]`}
-                      >
-                        {item.item_name}
-                      </h3>
-                      <p
-                        className={`text-xs ${roboto.className} text-[#a7a5a5] mt-1`}
-                      >
-                        Qty: {item.quantity}
-                      </p>
+                      <h3 className={`text-sm ${gelasio.className} text-[#1a1c1b] truncate pr-4`}>{item.item_name}</h3>
+                      
+                      <div className="flex items-center gap-4 mt-3 border border-[#d1c5b4]/50 w-max px-2 py-1">
+                        <button 
+                          onClick={() => handleUpdateQuantity(item.item_id, item.quantity - 1)}
+                          className={`text-sm ${roboto.className} text-[#a7a5a5] hover:text-[#1a1c1b] transition-colors cursor-pointer px-1`}
+                        >
+                          -
+                        </button>
+                        <span className={`text-xs ${roboto.className} text-[#5f5e5e] w-4 text-center`}>
+                          {item.quantity}
+                        </span>
+                        <button 
+                          onClick={() => handleUpdateQuantity(item.item_id, item.quantity + 1)}
+                          className={`text-sm ${roboto.className} text-[#a7a5a5] hover:text-[#1a1c1b] transition-colors cursor-pointer px-1`}
+                        >
+                          +
+                        </button>
+                      </div>
+
                     </div>
-                    <div className="flex justify-between items-center mt-2">
-                      <span
-                        className={`text-sm ${gelasio.className} text-[#775a19]`}
-                      >
+                    <div className="flex justify-between items-end mt-2">
+                      <span className={`text-sm ${gelasio.className} text-[#775a19]`}>
                         ${item.itemTotal.toFixed(2)}
                       </span>
-                      <button
-                        className={`text-[10px] ${roboto.className} uppercase tracking-widest text-[#5f5e5e] hover:text-red-900 transition-colors cursor-pointer`}
+                      
+                      <button 
+                        onClick={() => handleRemoveItem(item.item_id)}
+                        className={`text-[10px] ${roboto.className} uppercase tracking-widest text-[#a7a5a5] hover:text-[#1a1c1b] transition-colors border-b border-transparent hover:border-[#1a1c1b] pb-0.5 cursor-pointer`}
                       >
                         Remove
                       </button>
@@ -361,6 +370,7 @@ export default function TopNavBar({
           </div>
           <button
             disabled={cartItems.length === 0}
+            onClick={() => router.push("/checkout")}
             className="w-full py-4 bg-[#1a1c1b] text-[#ffffff] text-xs uppercase tracking-[0.2em] font-medium hover:bg-[#775a19] transition-colors cursor-pointer disabled:cursor-not-allowed"
           >
             Proceed to Checkout
