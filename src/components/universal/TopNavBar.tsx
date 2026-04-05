@@ -19,9 +19,6 @@ const gelasio = Gelasio({
 
 const navLinks = [
   { href: "/dashboard", label: "Catalog" },
-  { href: "/purchases", label: "Purchases" },
-  { href: "/sales", label: "Sales" },
-  { href: "/messages", label: "Messages" },
   { href: "/product/sell", label: "Sell Items" },
 ];
 
@@ -104,7 +101,7 @@ export default function TopNavBar({ activeHref, onSearch }: TopNavBarProps) {
               shopping_cart
             </span>
             <div className="w-8 h-8 bg-surface-container-highest flex items-center justify-center overflow-hidden">
-              <Link href="/me">
+              <Link href="/settings">
                 <Image
                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIEWWIsS24oEuhS288WfCZjz-DYqXxsIG0aCNeFSv78p1rnf6XwcNzKSw-Xn1_AUFH_ESsayZqp-A6g9FAOCencuC1ka2p90hh06vwU4RCpA5Hwuk70p6PViQLxszYYVWfaLRm4VcP-tFyWJY2Zgqmwlg37Yt-iN7qKnSfl812uX1V6D9gAzX43IGcr63yiDKlxJjky5qS3cDTR63mrstO31kxFyupT6m7F2_peMXjtNvbrgTXD5doEoG3vBr0gESyhoIGCZvtgLi7"
                   alt="User Profile"
