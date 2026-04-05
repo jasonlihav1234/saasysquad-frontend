@@ -122,10 +122,32 @@ export default function TopNavBar({
     setSubtotal(newTotal);
   };
 
+  const handleRemoveItem = async (itemId: string) => {
+    const updatedItems = cartItems.filter((item) => item.item_id !== itemId);
+    setCartItems(updatedItems);
+    recalculateSubtotal(updatedItems);
+
+    try {
+      const response = await fetch(`https://sassysquad-backend.vercel.app/cart/items/${itemId}`, {
+        method: "DELTE",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+
+      if (!response.ok) {
+        console.log("Failed to remove item");
+      }
+    } catch (error) {
+      console.log(error);
+      alert(error);
+    }
+  }
+
   const handleUpdateQuantity = async (itemId: string, newQuantity: number) => {
-    // if (newQuantity < 1) {
-    //   return handleRemoveItem(itemId);
-    // }
+    if (newQuantity < 1) {
+      return handleRemoveItem(itemId);
+    }
 
     const updatedItems = cartItems.map((item) => {
       if (item.item_id === itemId) {
@@ -153,6 +175,9 @@ export default function TopNavBar({
       if (!response.ok) {
         console.log("Failed to update item quantity");
       }
+    } catch (error) {
+      console.log(error);
+      alert(error);
     }
   };
 
