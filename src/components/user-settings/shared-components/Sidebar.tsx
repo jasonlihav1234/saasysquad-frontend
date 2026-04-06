@@ -19,7 +19,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { id: "account", label: "Account Details", href: "/settings" },
   { id: "purchases", label: "Purchases", href: "/purchases" },
-  { id: "sales", label: "Sales", href: "#sales" },
+  { id: "sales", label: "Sales", href: "/sales" },
 ];
 
 interface SidebarProps {
