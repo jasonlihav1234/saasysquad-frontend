@@ -9,33 +9,26 @@ function asTrimmedString(v: unknown): string | undefined {
   return t.length ? t : undefined;
 }
 
+/**
+ * Maps GET /profile JSON to form state.
+ * Contract (cursor.md): `{ message, response: [{ user_id, user_name, email, password_hash, created_at }] }`.
+ * Biography is not in the documented GET body; if present on the row we still map it for forward compatibility.
+ */
 export function mapGetProfileJsonToForm(
   json: unknown,
 ): AccountFormValues | null {
   if (!json || typeof json !== "object") return null;
   const root = json as Record<string, unknown>;
   const response = root.response;
-  const rowRaw =
-    Array.isArray(response) && response.length > 0 ? response[0] : null;
+  if (!Array.isArray(response) || response.length === 0) return null;
+  const rowRaw = response[0];
   if (!rowRaw || typeof rowRaw !== "object") return null;
   const row = rowRaw as Record<string, unknown>;
 
   const email = asTrimmedString(row.email) ?? "";
+  const userName = asTrimmedString(row.user_name) ?? "";
   const biography = asTrimmedString(row.biography) ?? "";
 
-  const first =
-    asTrimmedString(row.first_name) ?? asTrimmedString(row.firstName);
-  const last = asTrimmedString(row.last_name) ?? asTrimmedString(row.lastName);
-  if (first !== undefined || last !== undefined) {
-    return {
-      firstName: first ?? "",
-      lastName: last ?? "",
-      email,
-      biography,
-    };
-  }
-
-  const userName = asTrimmedString(row.user_name) ?? "";
   const spaceIdx = userName.indexOf(" ");
   if (spaceIdx === -1) {
     return {

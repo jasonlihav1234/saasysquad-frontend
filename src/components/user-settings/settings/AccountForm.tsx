@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import PageSectionHeading from "@/components/user-settings/shared-components/PageSectionHeading";
 import { Gelasio, Roboto } from "next/font/google";
 
@@ -32,7 +33,14 @@ type AccountFormProps = {
   onChange: (next: AccountFormValues) => void;
 };
 
+const fieldShellClass = `${roboto.className} bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6`;
+
+const emptyFieldClass = "text-[#5F5E5E]/60 italic";
+
 export default function AccountForm({ value, onChange }: AccountFormProps) {
+  const [isEditingPersonalDetails, setIsEditingPersonalDetails] =
+    useState(false);
+
   return (
     <div>
       <PageSectionHeading
@@ -92,92 +100,135 @@ export default function AccountForm({ value, onChange }: AccountFormProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col">
               <label
-                htmlFor="firstName"
+                htmlFor={isEditingPersonalDetails ? "firstName" : undefined}
                 className={`${roboto.className} text-[#5F5E5E] text-xs uppercase tracking-widest mb-3 cursor-text`}
               >
                 FIRST NAME
               </label>
-              <input
-                id="firstName"
-                name="firstName"
-                type="text"
-                value={value.firstName}
-                onChange={(e) =>
-                  onChange({ ...value, firstName: e.target.value })
-                }
-                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6`}
-              />
+              {isEditingPersonalDetails ? (
+                <input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  value={value.firstName}
+                  onChange={(e) =>
+                    onChange({ ...value, firstName: e.target.value })
+                  }
+                  className={`focus:outline-none ${fieldShellClass}`}
+                />
+              ) : (
+                <div className={fieldShellClass}>
+                  {value.firstName.trim() ? (
+                    value.firstName
+                  ) : (
+                    <span className={emptyFieldClass}>Not set.</span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex flex-col">
               <label
-                htmlFor="lastName"
+                htmlFor={isEditingPersonalDetails ? "lastName" : undefined}
                 className={`${roboto.className} text-[#5F5E5E] text-xs uppercase tracking-widest mb-3 cursor-text`}
               >
                 LAST NAME
               </label>
-              <input
-                id="lastName"
-                name="lastName"
-                type="text"
-                value={value.lastName}
-                onChange={(e) =>
-                  onChange({ ...value, lastName: e.target.value })
-                }
-                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6`}
-              />
+              {isEditingPersonalDetails ? (
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  value={value.lastName}
+                  onChange={(e) =>
+                    onChange({ ...value, lastName: e.target.value })
+                  }
+                  className={`focus:outline-none ${fieldShellClass}`}
+                />
+              ) : (
+                <div className={fieldShellClass}>
+                  {value.lastName.trim() ? (
+                    value.lastName
+                  ) : (
+                    <span className={emptyFieldClass}>Not set.</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex flex-col">
             <label
-              htmlFor="email"
+              htmlFor={isEditingPersonalDetails ? "email" : undefined}
               className={`${roboto.className} text-[#5F5E5E] text-xs uppercase tracking-widest mb-3 cursor-text`}
             >
               EMAIL ADDRESS
             </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={value.email}
-              onChange={(e) =>
-                onChange({ ...value, email: e.target.value })
-              }
-              className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6`}
-            />
+            {isEditingPersonalDetails ? (
+              <input
+                id="email"
+                name="email"
+                type="email"
+                value={value.email}
+                onChange={(e) => onChange({ ...value, email: e.target.value })}
+                className={`focus:outline-none ${fieldShellClass}`}
+              />
+            ) : (
+              <div className={fieldShellClass}>
+                {value.email.trim() ? (
+                  value.email
+                ) : (
+                  <span className={emptyFieldClass}>Not set.</span>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col">
             <label
-              htmlFor="bio"
+              htmlFor={isEditingPersonalDetails ? "bio" : undefined}
               className={`${roboto.className} text-[#5F5E5E] text-xs uppercase tracking-widest mb-3 cursor-text`}
             >
               CURATOR BIOGRAPHY
             </label>
-            <textarea
-              id="bio"
-              name="bio"
-              rows={4}
-              value={value.biography}
-              onChange={(e) =>
-                onChange({ ...value, biography: e.target.value })
-              }
-              className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6 resize-none`}
-            />
+            {isEditingPersonalDetails ? (
+              <textarea
+                id="bio"
+                name="bio"
+                rows={4}
+                value={value.biography}
+                onChange={(e) =>
+                  onChange({ ...value, biography: e.target.value })
+                }
+                className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6 resize-none`}
+              />
+            ) : (
+              <div
+                className={`${roboto.className} bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6 min-h-[7.5rem] whitespace-pre-wrap`}
+              >
+                {value.biography.trim() ? (
+                  value.biography
+                ) : (
+                  <span className={emptyFieldClass}>
+                    No biography added yet.
+                  </span>
+                )}
+              </div>
+            )}
             <p
               className={`${roboto.className} text-xs text-[#5F5E5E] mt-2 text-right`}
             >
-              Additional Text add later.
+              Leave your mark in the Althaïr curation.
             </p>
           </div>
 
           <div className="pt-4 flex justify-end">
             <button
-              type="submit"
+              type="button"
+              onClick={() => setIsEditingPersonalDetails((open) => !open)}
               className={`${roboto.className} cursor-pointer bg-[#474747] hover:bg-[#303030] transition duration-300 tracking-widest text-sm text-white font-bold px-8 py-4 uppercase`}
             >
-              SAVE CHANGES
+              {isEditingPersonalDetails ? "DONE" : "EDIT DETAILS"}
             </button>
           </div>
         </form>
