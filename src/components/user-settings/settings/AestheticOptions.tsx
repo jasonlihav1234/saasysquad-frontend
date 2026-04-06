@@ -29,10 +29,10 @@ const accentSwatches: AccentSwatch[] = [
 export default function AestheticOptions() {
   const [mode, setMode] = useState<ThemeMode>("light");
   const [activeAccent, setActiveAccent] = useState<string>("#C5A059");
+  const [suggestionSubmitted, setSuggestionSubmitted] = useState(false);
 
   return (
     <div>
-      {/* Aesthetic Preferences */}
       <section id="aesthetic" className="mb-24">
         <h2 className={`${gelasio.className} text-black text-2xl font-medium mb-2`}>
           Aesthetic Preferences
@@ -111,21 +111,36 @@ export default function AestheticOptions() {
               Your perspective shapes the future of The Atelier. Propose additions or refinements to our digital space.
             </p>
 
-            <form className="flex flex-col gap-6">
-              <textarea
-                id="suggestion"
-                name="suggestion"
-                rows={3}
-                placeholder="Share your vision..."
-                className={`${roboto.className} focus:outline-none bg-white/10 border border-white/30 text-white placeholder:text-white/50 p-4 resize-none`}
-              />
-              <button
-                type="submit"
-                className={`${roboto.className} self-start cursor-pointer bg-[#F9F8F6] hover:bg-white transition duration-300 text-[#474747] tracking-widest font-bold text-sm px-8 py-4 uppercase`}
+            {suggestionSubmitted ? (
+              <p
+                className={`${roboto.className} text-[#F1F1EF] font-normal italic text-lg  text-sm max-w-lg opacity-90`}
+                role="status"
               >
-                SUBMIT SUGGESTION
-              </button>
-            </form>
+                Thank you for your input! We appreciate the effort you make to make Althaïr a better place for all users.
+              </p>
+            ) : (
+              <form
+                className="flex flex-col gap-6"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSuggestionSubmitted(true);
+                }}
+              >
+                <textarea
+                  id="suggestion"
+                  name="suggestion"
+                  rows={3}
+                  placeholder="Share your vision..."
+                  className={`${roboto.className} focus:outline-none bg-white/10 border border-white/30 text-white placeholder:text-white/50 p-4 resize-none`}
+                />
+                <button
+                  type="submit"
+                  className={`${roboto.className} self-start cursor-pointer bg-[#F9F8F6] hover:bg-white transition duration-300 text-[#474747] tracking-widest font-bold text-sm px-8 py-4 uppercase`}
+                >
+                  SUBMIT SUGGESTION
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </section>
