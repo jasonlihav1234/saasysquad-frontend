@@ -24,11 +24,18 @@ export default function SubpageHeader({ title }: SubpageHeaderProps) {
       >
         ← Back to Main
       </Link>
-      <h2
-        className={`${gelasio.className} text-[#F9F8F6] text-xl font-medium tracking-tight`}
-      >
-        {title}
-      </h2>
+      <div className="flex flex-row items-center gap-4 cursor-pointer">
+        <h2
+          className={`${gelasio.className} text-[#F9F8F6] text-xl font-medium tracking-tight`}
+        >
+          {title}
+        </h2>
+        <button
+          className={`${gelasio.className} text-[#F9F8F6] text-xl hover:underline font-black cursor-pointer font-medium tracking-tight`}
+        >
+          Logout
+        </button>
+      </div>
     </header>
   );
 }
