@@ -28,16 +28,24 @@ const color = {
 
 function CreateNewPasswordFunction() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const token = searchParams.get("reset-token");
   const email = searchParams.get("email");
   const router = useRouter();
 
-  const [password, isPassword] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setIsSubmitting(true);
+    const formData = new FormData(e.currentTarget);
+    const password = formData.get("new-password");
+    const confirmPassword = formData.get("new-password-confirm");
+
+    if (!password || !confirmPassword || password !== confirmPassword) {
+      alert("Passwords are incorrect");
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -45,7 +53,7 @@ function CreateNewPasswordFunction() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token, email, newPassword: password }),
+          body: JSON.stringify({ token, email, password }),
         },
       );
 
@@ -119,7 +127,7 @@ function CreateNewPasswordFunction() {
               disabled={isSubmitting}
               className={`cursor-pointer w-full bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-12 text-white font-bold disabled:opacity-80 p-5 disbled:opacity-80 disabled:cursor-not-allowed`}
             >
-              {isSubmitting ? "UPDATE PASSWORD →" : "UPDATING..."}
+              {isSubmitting ? "UPDATING..." : "UPDATE PASSWORD →"}
             </button>
             <p
               className={`tracking-widest underline decoration-[${color.colorGold}] underline-offset-10 text-[${color.textColor}] ${roboto.className} text-center cursor-pointer pt-7`}
@@ -138,7 +146,7 @@ function CreateNewPasswordFunction() {
 export default function CreateNewPasswordPage() {
   return (
     <Suspense fallback={<div>Loading password reset form...</div>}>
-      <CreateNewPasswordPage />
+      <CreateNewPasswordFunction />
     </Suspense>
   );
 }
