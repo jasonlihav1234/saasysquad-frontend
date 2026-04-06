@@ -2,7 +2,7 @@
 
 import { Gelasio, Roboto } from "next/font/google";
 import { useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import Link from "next/link";
 import Footer from "@/components/universal/Footer";
 import PasswordPageBrandingHeader from "@/components/universal/PasswordPageBrandingHeader";
@@ -26,7 +26,7 @@ const color = {
   colorGold: "#E9C176",
 };
 
-export default function CreateNewPasswordPage() {
+function CreateNewPasswordFunction() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const email = searchParams.get("email");
@@ -132,5 +132,13 @@ export default function CreateNewPasswordPage() {
 
       <Footer variant="page" />
     </main>
+  );
+}
+
+export default function CreateNewPasswordPage() {
+  return (
+    <Suspense fallback={<div>Loading password reset form...</div>}>
+      <CreateNewPasswordPage />
+    </Suspense>
   );
 }
