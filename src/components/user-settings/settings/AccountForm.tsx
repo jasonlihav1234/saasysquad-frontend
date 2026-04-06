@@ -13,7 +13,26 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
-export default function AccountForm() {
+export type AccountFormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  biography: string;
+};
+
+export const emptyAccountFormValues: AccountFormValues = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  biography: "",
+};
+
+type AccountFormProps = {
+  value: AccountFormValues;
+  onChange: (next: AccountFormValues) => void;
+};
+
+export default function AccountForm({ value, onChange }: AccountFormProps) {
   return (
     <div>
       <PageSectionHeading
@@ -82,6 +101,10 @@ export default function AccountForm() {
                 id="firstName"
                 name="firstName"
                 type="text"
+                value={value.firstName}
+                onChange={(e) =>
+                  onChange({ ...value, firstName: e.target.value })
+                }
                 className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6`}
               />
             </div>
@@ -97,6 +120,10 @@ export default function AccountForm() {
                 id="lastName"
                 name="lastName"
                 type="text"
+                value={value.lastName}
+                onChange={(e) =>
+                  onChange({ ...value, lastName: e.target.value })
+                }
                 className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6`}
               />
             </div>
@@ -113,6 +140,10 @@ export default function AccountForm() {
               id="email"
               name="email"
               type="email"
+              value={value.email}
+              onChange={(e) =>
+                onChange({ ...value, email: e.target.value })
+              }
               className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6`}
             />
           </div>
@@ -128,6 +159,10 @@ export default function AccountForm() {
               id="bio"
               name="bio"
               rows={4}
+              value={value.biography}
+              onChange={(e) =>
+                onChange({ ...value, biography: e.target.value })
+              }
               className={`${roboto.className} focus:outline-none bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6 resize-none`}
             />
             <p
