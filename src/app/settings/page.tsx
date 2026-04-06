@@ -9,7 +9,10 @@ import AccountForm, {
 import AestheticOptions from "@/components/user-settings/settings/AestheticOptions";
 import Footer from "@/components/universal/Footer";
 import SubpageHeader from "@/components/user-settings/shared-components/SubpageHeader";
-import { SettingsProfileFetch } from "@/app/settings/SettingsProfileFetch";
+import {
+  patchProfileFromForm,
+  SettingsProfileFetch,
+} from "@/app/settings/SettingsProfileFetch";
 
 export default function SettingsPage() {
   const [accountForm, setAccountForm] = useState<AccountFormValues>(
@@ -25,7 +28,11 @@ export default function SettingsPage() {
         <Sidebar activePage="account" />
 
         <div className="flex-1 overflow-y-auto p-8 md:p-12 lg:p-16 max-w-4xl">
-          <AccountForm value={accountForm} onChange={setAccountForm} />
+          <AccountForm
+            value={accountForm}
+            onChange={setAccountForm}
+            saveProfile={patchProfileFromForm}
+          />
           <AestheticOptions />
 
           <Footer />

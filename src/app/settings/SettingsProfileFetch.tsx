@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import type { AccountFormValues } from "@/components/user-settings/settings/AccountForm";
+import type {
+  AccountFormValues,
+  SaveProfileResult,
+} from "@/components/user-settings/settings/AccountForm";
+
+const PROFILE_URL = "https://sassysquad-backend.vercel.app/profile";
 
 function asTrimmedString(v: unknown): string | undefined {
   if (typeof v !== "string") return undefined;
@@ -9,11 +14,6 @@ function asTrimmedString(v: unknown): string | undefined {
   return t.length ? t : undefined;
 }
 
-/**
- * Maps GET /profile JSON to form state.
- * Contract (cursor.md): `{ message, response: [{ user_id, user_name, email, password_hash, created_at }] }`.
- * Biography is not in the documented GET body; if present on the row we still map it for forward compatibility.
- */
 export function mapGetProfileJsonToForm(
   json: unknown,
 ): AccountFormValues | null {
@@ -46,6 +46,57 @@ export function mapGetProfileJsonToForm(
   };
 }
 
+export function userNameFromAccountForm(values: AccountFormValues): string {
+  const parts = [values.firstName.trim(), values.lastName.trim()].filter(
+    (p) => p.length > 0,
+  );
+  return parts.join(" ");
+}
+
+export async function patchProfileFromForm(
+  values: AccountFormValues,
+): Promise<SaveProfileResult> {
+  const accessToken = localStorage.getItem("accessToken");
+  if (!accessToken) {
+    return { ok: false, error: "Not signed in." };
+  }
+
+  const username = userNameFromAccountForm(values);
+  const email = values.email.trim();
+  const biography = values.biography.trim();
+
+  try {
+    const response = await fetch(PROFILE_URL, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+      body: JSON.stringify({
+        accessToken,
+        email,
+        username,
+        biography,
+      }),
+    });
+
+    if (response.status === 200) {
+      return { ok: true };
+    }
+
+    const data: unknown = await response.json().catch(() => null);
+    let message = `Update failed (${response.status}).`;
+    if (data && typeof data === "object") {
+      const rec = data as Record<string, unknown>;
+      const m = rec.message ?? rec.error;
+      if (typeof m === "string" && m.trim()) message = m.trim();
+    }
+    return { ok: false, error: message };
+  } catch {
+    return { ok: false, error: "Network error. Try again." };
+  }
+}
+
 type SettingsProfileFetchProps = {
   onLoaded: (values: AccountFormValues) => void;
 };
@@ -53,7 +104,7 @@ type SettingsProfileFetchProps = {
 export function SettingsProfileFetch({ onLoaded }: SettingsProfileFetchProps) {
   useEffect(() => {
     const run = () => {
-      fetch("https://sassysquad-backend.vercel.app/profile", {
+      fetch(PROFILE_URL, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

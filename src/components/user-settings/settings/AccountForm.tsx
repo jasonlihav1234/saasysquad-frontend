@@ -28,18 +28,52 @@ export const emptyAccountFormValues: AccountFormValues = {
   biography: "",
 };
 
+export type SaveProfileResult =
+  | { ok: true }
+  | { ok: false; error: string };
+
 type AccountFormProps = {
   value: AccountFormValues;
   onChange: (next: AccountFormValues) => void;
+  saveProfile?: (
+    values: AccountFormValues,
+  ) => Promise<SaveProfileResult>;
 };
 
 const fieldShellClass = `${roboto.className} bg-[#E3E2E0] border-b border-[#C5A059] text-[#5F5E5E] p-6`;
 
 const emptyFieldClass = "text-[#5F5E5E]/60 italic";
 
-export default function AccountForm({ value, onChange }: AccountFormProps) {
+export default function AccountForm({
+  value,
+  onChange,
+  saveProfile,
+}: AccountFormProps) {
   const [isEditingPersonalDetails, setIsEditingPersonalDetails] =
     useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+
+  const handlePersonalDetailsAction = async () => {
+    if (!isEditingPersonalDetails) {
+      setIsEditingPersonalDetails(true);
+      return;
+    }
+    if (saveProfile) {
+      setIsSavingProfile(true);
+      try {
+        const result = await saveProfile(value);
+        if (result.ok) {
+          setIsEditingPersonalDetails(false);
+        } else {
+          alert(result.error);
+        }
+      } finally {
+        setIsSavingProfile(false);
+      }
+    } else {
+      setIsEditingPersonalDetails(false);
+    }
+  };
 
   return (
     <div>
@@ -225,10 +259,15 @@ export default function AccountForm({ value, onChange }: AccountFormProps) {
           <div className="pt-4 flex justify-end">
             <button
               type="button"
-              onClick={() => setIsEditingPersonalDetails((open) => !open)}
-              className={`${roboto.className} cursor-pointer bg-[#474747] hover:bg-[#303030] transition duration-300 tracking-widest text-sm text-white font-bold px-8 py-4 uppercase`}
+              disabled={isSavingProfile}
+              onClick={() => void handlePersonalDetailsAction()}
+              className={`${roboto.className} cursor-pointer bg-[#474747] hover:bg-[#303030] transition duration-300 tracking-widest text-sm text-white font-bold px-8 py-4 uppercase disabled:opacity-60 disabled:cursor-not-allowed`}
             >
-              {isEditingPersonalDetails ? "DONE" : "EDIT DETAILS"}
+              {isSavingProfile
+                ? "SAVING…"
+                : isEditingPersonalDetails
+                  ? "DONE"
+                  : "EDIT DETAILS"}
             </button>
           </div>
         </form>
