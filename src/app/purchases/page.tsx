@@ -1,3 +1,5 @@
+"use client";
+
 import { PurchasesProfileFetch } from "@/app/purchases/PurchasesProfileFetch";
 import PurchaseOrderItem, {
   type PurchaseOrderItemProps,
@@ -6,49 +8,28 @@ import Sidebar from "@/components/user-settings/shared-components/Sidebar";
 import Footer from "@/components/universal/Footer";
 import PageSectionHeading from "@/components/user-settings/shared-components/PageSectionHeading";
 import SubpageHeader from "@/components/user-settings/shared-components/SubpageHeader";
-import { Roboto } from "next/font/google";
+import { Gelasio, Roboto } from "next/font/google";
+import { useState } from "react";
 
 const roboto = Roboto({
   subsets: ["latin"],
   style: ["normal", "italic"],
 });
 
+const gelasio = Gelasio({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+});
+
+
 const STATUS_TABS = ["All Orders", "Processing", "In Transit", "Delivered"];
 
-const SAMPLE_ORDERS: PurchaseOrderItemProps[] = [
-  {
-    imageSrc: "",
-    status: "delivered",
-    productTitle: "Height Adjusting Desk",
-    orderNumber: "AT-89012",
-    dateLabel: "October 12, 2026",
-    price: "$1,240.00",
-    actionLabel: "View Details",
-  },
-  {
-    imageSrc: "",
-    status: "in_transit",
-    productTitle: "Lounge Chair",
-    orderNumber: "AT-90234",
-    dateLabel: "October 28, 2026",
-    price: "$4,850.00",
-    actionLabel: "View Details",
-  },
-  {
-    imageSrc: "",
-    status: "processing",
-    productTitle: "Floor Lamp",
-    orderNumber: "AT-91442",
-    dateLabel: "November 02, 2026",
-    price: "$890.00",
-    actionLabel: "View Details",
-  },
-];
-
 export default function PurchasesPage() {
+  const [purchases, setPurchases] = useState<PurchaseOrderItemProps[]>([]);
+
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
-      <PurchasesProfileFetch />
+      <PurchasesProfileFetch onLoaded={setPurchases} />
       <SubpageHeader title="Purchases" />
 
       <div className="flex flex-1 overflow-hidden">
@@ -59,7 +40,7 @@ export default function PurchasesPage() {
             <header className="w-full flex justify-between items-end pb-10">
               <PageSectionHeading
                 title="Your Purchases"
-                description="Page description here"
+                description="View all your purchases"
               />
 
               <div className="flex items-center space-x-8 pb-1">
@@ -103,9 +84,24 @@ export default function PurchasesPage() {
             </nav>
 
             <section className="w-full py-12 space-y-12">
-              {SAMPLE_ORDERS.map((order) => (
-                <PurchaseOrderItem key={order.orderNumber} {...order} />
-              ))}
+              {purchases.length > 0 ? (
+                purchases.map((order) => (
+                  <PurchaseOrderItem key={order.orderNumber} {...order} />
+                ))
+              ) : (
+                <div className="text-center py-6">
+                  <h1
+                    className={`${gelasio.className} text-3xl md:text-4xl font-bold text-[#1a1c1b] mb-4 tracking-tight`}
+                  >
+                    No purchases so far.
+                  </h1>
+                  <p
+                    className={`${roboto.className} text-[#5f5e5e] text-base max-w-md mx-auto leading-relaxed`}
+                  >
+                    Make a purchase to get started.
+                  </p>
+                </div>
+              )}
             </section>
           </div>
 

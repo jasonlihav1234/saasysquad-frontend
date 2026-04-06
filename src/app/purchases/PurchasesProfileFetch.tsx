@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import type { PurchaseOrderItemProps } from "@/components/user-settings/purchases/PurchaseOrderItem";
 
 const BACKEND_BASE = "https://sassysquad-backend.vercel.app";
 const PROFILE_URL = `${BACKEND_BASE}/profile`;
+const EMPTY_IMAGE =
+  "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
 
 function userIdFromProfileJson(json: unknown): string | null {
   if (!json || typeof json !== "object") return null;
@@ -68,11 +71,11 @@ async function fetchProfileJson(isRetry: boolean): Promise<unknown | null> {
 async function fetchUserPurchases(
   userId: string,
   isRetry: boolean,
-): Promise<void> {
+): Promise<unknown | null> {
   const accessToken = localStorage.getItem("accessToken");
   if (!accessToken) {
     console.log("purchases no accessToken for purchases request");
-    return;
+    return null;
   }
 
   const url = `${BACKEND_BASE}/users/${encodeURIComponent(userId)}/purchases`;
@@ -86,8 +89,7 @@ async function fetchUserPurchases(
   });
 
   if (res.status === 401 && !isRetry && (await refreshAccessToken())) {
-    await fetchUserPurchases(userId, true);
-    return;
+    return fetchUserPurchases(userId, true);
   }
 
   const data: unknown = await res.json().catch(() => null);
@@ -95,10 +97,98 @@ async function fetchUserPurchases(
     status: res.status,
     ok: res.ok,
     body: data,
+  });  
+  return data;
+}
+
+type PurchasesProfileFetchProps = {
+  onLoaded: (purchases: PurchaseOrderItemProps[]) => void;
+};
+
+function asOrderList(json: unknown): Record<string, unknown>[] {
+  if (!json || typeof json !== "object") return [];
+  const root = json as Record<string, unknown>;
+  const maybeOrders = root.orders;
+  if (Array.isArray(maybeOrders)) {
+    return maybeOrders.filter(
+      (row): row is Record<string, unknown> =>
+        !!row && typeof row === "object" && !Array.isArray(row),
+    );
+  }
+
+  const maybeOrder = root.order;
+  if (maybeOrder && typeof maybeOrder === "object" && !Array.isArray(maybeOrder)) {
+    return [maybeOrder as Record<string, unknown>];
+  }
+
+  return [];
+}
+
+function orderStatusToUiStatus(status: unknown): PurchaseOrderItemProps["status"] {
+  if (typeof status !== "string") return "processing";
+  const lower = status.trim().toLowerCase();
+  if (lower === "delivered" || lower === "fulfilled" || lower === "completed") {
+    return "delivered";
+  }
+  if (lower === "in_transit" || lower === "in transit" || lower === "shipped") {
+    return "in_transit";
+  }
+  return "processing";
+}
+
+function currencyAndTotal(order: Record<string, unknown>): string {
+  const code = order.pricingCurrencyCode;
+  const total = order.totalCost;
+  if (typeof total !== "number") return "$0.00";
+
+  if (typeof code === "string" && code.trim().length > 0) {
+    return new Intl.NumberFormat("en-AU", {
+      style: "currency",
+      currency: code,
+      maximumFractionDigits: 2,
+    }).format(total);
+  }
+
+  return `$${total.toFixed(2)}`;
+}
+
+function formatIssueDate(issueDate: unknown): string {
+  if (typeof issueDate !== "string" || issueDate.trim().length === 0) {
+    return "Unknown date";
+  }
+  const parsed = new Date(issueDate);
+  if (Number.isNaN(parsed.getTime())) return issueDate;
+  return parsed.toLocaleDateString("en-AU", {
+    month: "long",
+    day: "2-digit",
+    year: "numeric",
   });
 }
 
-export function PurchasesProfileFetch() {
+function mapPurchaseJsonToItems(json: unknown): PurchaseOrderItemProps[] {
+  const orders = asOrderList(json);
+  return orders.map((order) => {
+    const orderIdRaw = order.orderId;
+    const orderId = typeof orderIdRaw === "string" ? orderIdRaw : "unknown-order";
+    const orderNameRaw = order.orderName;
+    const orderName =
+      typeof orderNameRaw === "string" && orderNameRaw.trim().length > 0
+        ? orderNameRaw.trim()
+        : "Purchase Order";
+
+    return {
+      imageSrc: EMPTY_IMAGE,
+      status: orderStatusToUiStatus(order.status),
+      productTitle: orderName,
+      orderNumber: orderId.slice(0, 8).toUpperCase(),
+      dateLabel: formatIssueDate(order.issueDate),
+      price: currencyAndTotal(order),
+      actionLabel: "View Details",
+    };
+  });
+}
+
+export function PurchasesProfileFetch({ onLoaded }: PurchasesProfileFetchProps) {
   useEffect(() => {
     let cancelled = false;
 
@@ -112,13 +202,16 @@ export function PurchasesProfileFetch() {
         return;
       }
 
-      await fetchUserPurchases(userId, false);
+      const purchasesJson = await fetchUserPurchases(userId, false);
+      if (cancelled) return;
+      const items = mapPurchaseJsonToItems(purchasesJson);
+      onLoaded(items);
     })();
 
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [onLoaded]);
 
   return null;
 }
