@@ -1,9 +1,13 @@
 "use client";
 
 import { Gelasio, Roboto } from "next/font/google";
+import { useSearchParams } from "next/navigation";
+import React, { useState } from "react";
 import Link from "next/link";
 import Footer from "@/components/universal/Footer";
 import PasswordPageBrandingHeader from "@/components/universal/PasswordPageBrandingHeader";
+import { SearchParamsContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime";
+import { useRouter } from "next/navigation";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -23,6 +27,45 @@ const color = {
 };
 
 export default function CreateNewPasswordPage() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const email = searchParams.get("email");
+  const router = useRouter();
+
+  const [password, isPassword] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch(
+        "https://sassysquad-backend-c8zg43icx-jasons-projects-ac5e4f90.vercel.app/auth/reset-password",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, email, newPassword: password }),
+        },
+      );
+
+      if (response.ok) {
+        alert("Password successfully reset");
+        router.push("/login");
+      } else {
+        alert("Error while resetting password");
+      }
+    } catch (error) {
+      alert(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (!token || !email) {
+    return <div>Error: Missing reset token or email.</div>;
+  }
+
   return (
     <main
       className={`bg-[${color.colorWhite}] grid grid-rows-[auto_1fr_auto] min-h-screen w-full`}
@@ -32,7 +75,9 @@ export default function CreateNewPasswordPage() {
       <div
         className={`flex bg-[${color.colorWhite}] items-center justify-center flex-col`}
       >
-        <h1 className={`text-black text-5xl md:text-6xl text-center ${gelasio.className}`}>
+        <h1
+          className={`text-black text-5xl md:text-6xl text-center ${gelasio.className}`}
+        >
           Create New <br></br> Password
         </h1>
 
@@ -42,7 +87,7 @@ export default function CreateNewPasswordPage() {
           Please enter your new credentials below.
         </p>
         <div>
-          <form className="pt-16 w-full max-w-md">
+          <form onSubmit={handleSubmit} className="pt-16 w-full max-w-md">
             <label
               htmlFor="new-password"
               className={`text-[#5c5a5a] ${roboto.className} tracking-widest pb-3 cursor-text`}
@@ -71,9 +116,10 @@ export default function CreateNewPasswordPage() {
             />
             <button
               type="submit"
+              disabled={isSubmitting}
               className={`cursor-pointer w-full bg-[#474747] hover:bg-[#303030] transition duration-300 ${roboto.className} tracking-widest mt-12 text-white font-bold disabled:opacity-80 p-5 disbled:opacity-80 disabled:cursor-not-allowed`}
             >
-              UPDATE PASSWORD →
+              {isSubmitting ? "UPDATE PASSWORD →" : "UPDATING..."}
             </button>
             <p
               className={`tracking-widest underline decoration-[${color.colorGold}] underline-offset-10 text-[${color.textColor}] ${roboto.className} text-center cursor-pointer pt-7`}
