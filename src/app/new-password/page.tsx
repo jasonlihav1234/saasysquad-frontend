@@ -49,7 +49,7 @@ function CreateNewPasswordFunction() {
 
     try {
       const response = await fetch(
-        "https://sassysquad-backend-c8zg43icx-jasons-projects-ac5e4f90.vercel.app/auth/reset-password",
+        "https://sassysquad-backend.vercel.app/auth/reset-password",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
