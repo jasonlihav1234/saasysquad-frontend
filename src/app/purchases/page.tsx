@@ -1,3 +1,4 @@
+import { PurchasesProfileFetch } from "@/app/purchases/PurchasesProfileFetch";
 import PurchaseOrderItem, {
   type PurchaseOrderItemProps,
 } from "@/components/user-settings/purchases/PurchaseOrderItem";
@@ -47,6 +48,7 @@ const SAMPLE_ORDERS: PurchaseOrderItemProps[] = [
 export default function PurchasesPage() {
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
+      <PurchasesProfileFetch />
       <SubpageHeader title="Purchases" />
 
       <div className="flex flex-1 overflow-hidden">
