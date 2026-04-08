@@ -1,6 +1,7 @@
 import { projectEntrypoints } from "next/dist/build/swc/generated-native";
 import { Gelasio, Roboto } from "next/font/google";
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function ItemCard({ item }: ItemCardProps) {
 
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
       const observer = new IntersectionObserver(
@@ -66,6 +68,7 @@ export default function ItemCard({ item }: ItemCardProps) {
   return (
     <div
       ref={cardRef}
+      onClick={() => router.push(`/item/detail?id=${item_id}`)}
       className={`group cursor-pointer transition-all duration-500 hover:bg-[#F4F3F1] p-4 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"}`}>
       <div className="aspect-[4/5] overflow-hidden mb-8 bg-[#E9E8E6]">
         <img
