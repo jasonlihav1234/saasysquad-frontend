@@ -46,25 +46,26 @@ export default function ItemDetails() {
       <main className="max-w-[1920px] mx-auto pt-20">
         <section className="flex flex-col md:flex-row min-h-[819px]">
           <div className="w-full md:w-3/5 bg-[grey] overflow-hidden relative group min-h-[400px]">
-            <div className="w-full h-full flex items-center justify-center text-[#5f5e5e]/20">
-              <span className="material-symbols-outlined text-6xl">image</span>
-            </div>
+            <img 
+              src="https://images.unsplash.com/photo-1760716478125-aa948e99ef85?q=80&w=1364&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="w-full md:w-2/5 p-8 md:p-24 flex flex-col justify-center bg-[#faf9f7]">
             <nav className="mb-12">
               <span className={`text-[0.65rem] uppercase tracking-[0.2em] text-[#7f7667] ${roboto.className}`}>
-                Objects / Ceramics
+                CHAIR
               </span>
             </nav>
 
             <h1 className={`${gelasio.className} text-5xl md:text-6xl italic tracking-tight text-[#1a1c1b] mb-12`}>
-              Handcrafted Ceramic Vessel
+              Serpentine Abstract Lounge
             </h1>
 
             <div className="mb-12">
-              <p className={`${gelasio.className} text-2xl text-[#1a1c1b] mb-8`}>$450</p>
+              <p className={`${gelasio.className} text-2xl text-[#1a1c1b] mb-8`}>$12,500</p>
               <p className={`text-sm leading-relaxed max-w-md text-[#5f5e5e] ${roboto.className}`}>
-                Placeholder.
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
               </p>
             </div>
 
@@ -79,7 +80,7 @@ export default function ItemDetails() {
                 <h4 className={`text-[0.6rem] uppercase tracking-widest text-[#7f7667] mb-2 ${roboto.className}`}>
                   Dimensions
                 </h4>
-                <p className="text-sm text-[#1a1c1b]">Place cm × Holder cm</p>
+                <p className="text-sm text-[#1a1c1b]">86 cm W × 74 cm H</p>
               </div>
             </div>
           </div>
