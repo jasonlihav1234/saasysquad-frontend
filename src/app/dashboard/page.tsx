@@ -339,7 +339,7 @@ function DashboardContent() {
   const handleSearchSubmit = async (e: any) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    let searchString =
+    const searchString =
       formData.get("search-string")?.toString().toLowerCase() || "";
 
     const executeSearch = async (searchString: string) => {
