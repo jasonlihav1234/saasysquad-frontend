@@ -22,10 +22,17 @@ const gelasio = Gelasio({
 });
 
 
-const STATUS_TABS = ["All Orders", "Processing", "In Transit", "Delivered"];
+const STATUS_TABS = [
+  "All Orders",
+  "Processing",
+  "In Transit",
+  "Delivered",
+] as const;
 
 export default function PurchasesPage() {
   const [purchases, setPurchases] = useState<PurchaseOrderItemProps[]>([]);
+  const [activeStatusTab, setActiveStatusTab] =
+    useState<(typeof STATUS_TABS)[number]>("All Orders");
 
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
@@ -65,11 +72,12 @@ export default function PurchasesPage() {
             <nav className="w-full border-b border-[#d1c5b4]/10">
               <div className="flex space-x-12">
                 {STATUS_TABS.map((label) => {
-                  const isActive = label === "All Orders";
+                  const isActive = label === activeStatusTab;
                   return (
                     <button
                       key={label}
                       type="button"
+                      onClick={() => setActiveStatusTab(label)}
                       className={`${roboto.className} pb-4 text-[0.7rem] uppercase tracking-widest transition-colors ${
                         isActive
                           ? "border-b border-[#775a19] text-[#775a19] font-bold"
