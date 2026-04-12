@@ -77,9 +77,10 @@ function statusColour(status: any) {
   return "text-[#5f5e5e]/30";
 }
 
-function statusLabel(status: any) {
+function statusLabel(status: any, error?: string) {
   if (status === "done") return "done";
   if (status === "analyzing") return "analyzing...";
+  if (status === "error") return error || "failed";
 
   return "ready";
 }
@@ -451,13 +452,13 @@ export default function AgentPage() {
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
               onClick={() => canAddMore && inputRef.current?.click()}
-              className={`relative py-12 px-8 flex flex-col items-center text-center transition-all duration-200 ${
+              className={`relative py-12 px-8 flex flex-col items-center text-center transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
                 files.length > 0
                   ? "border-b border-dashed border-[#d1c5b4]"
                   : ""
               } ${
                 isDragging
-                  ? "bg-[#e9e8e6]"
+                  ? "bg-[#e9e8e6] scale-[1.01]"
                   : canAddMore
                     ? "cursor-pointer hover:bg-[#efeeec]"
                     : ""
@@ -472,91 +473,120 @@ export default function AgentPage() {
                 className="hidden"
               />
               <span
-                className={`material-symbols-outlined text-4xl mb-3 transition-transform duration-200 ${isDragging ? "text-[#775a19] scale-110" : "text-[#7f7667]"}`}
+                className={`material-symbols-outlined text-4xl mb-3 transition-all duration-300 ${isDragging ? "text-[#775a19] scale-110" : "text-[#7f7667] scale-100"}`}
               >
                 upload_file
               </span>
-              <h3 className="font-gelasio text-xl mb-1">Drop images here</h3>
+              <h3 className={`${gelasio.className} text-xl mb-1`}>
+                Drop images here
+              </h3>
               <p className="text-[12px] text-[#5f5e5e] max-w-xs mx-auto leading-relaxed">
                 JPEG, PNG, WEBP — up to {MAX_IMAGES} items
               </p>
             </div>
-
+ 
             {files.length > 0 && (
               <div className="px-6 py-4">
-                {agentRunning && analyzingFile && (
-                  <div className="mb-3 px-3 py-2.5 bg-[#775a19]/5 border border-[#775a19]/10 flex items-center gap-3">
+                <div
+                  className={`transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] overflow-hidden ${
+                    agentRunning && analyzingCount > 0
+                      ? "max-h-20 opacity-100 mb-3"
+                      : "max-h-0 opacity-0 mb-0"
+                  }`}
+                >
+                  <div className="px-3 py-2.5 bg-[#775a19]/5 border border-[#775a19]/10 flex items-center gap-3">
                     <span className="material-symbols-outlined animate-spin text-[18px] text-[#775a19]">
                       progress_activity
                     </span>
                     <span className="text-[12px] text-[#775a19]">
-                      Analyzing{" "}
-                      <span className="font-medium">{analyzingFile.name}</span>
+                      Processing{" "}
+                      <span className="font-medium">
+                        {analyzingCount} image
+                        {analyzingCount !== 1 ? "s" : ""}
+                      </span>
                       <span className="text-[#775a19]/50 ml-2">
-                        · {doneCount + 1} of {files.length}
+                        · {doneCount} of {files.length} complete
                       </span>
                     </span>
                   </div>
-                )}
-
+                </div>
+ 
                 <div className="max-h-[220px] overflow-y-auto space-y-0.5 pr-1">
-                  {files.map((f: any) => (
-                    <div
-                      key={f.id}
-                      className="animate-fade-in group flex items-center gap-3 py-2 px-2 rounded hover:bg-[#efeeec] transition-colors"
-                    >
-                      <span
-                        className={`material-symbols-outlined text-[18px] ${statusColour(f.status)} flex-shrink-0`}
-                      >
-                        {statusIcon(f.status)}
-                      </span>
-                      <div className="flex-1 min-w-0 flex items-center gap-2">
-                        <span
-                          className={`text-[12px] truncate ${f.status === "analyzing" ? "text-[#775a19] font-medium" : ""}`}
-                        >
-                          {f.name}
-                        </span>
-                        <span className="text-[10px] text-[#5f5e5e]/30 flex-shrink-0">
-                          {formatSize(f.size)}
-                        </span>
-                      </div>
-                      <span
-                        className={`text-[10px] flex-shrink-0 ${
-                          f.status === "done"
-                            ? "text-emerald-600"
-                            : f.status === "analyzing"
-                              ? "text-[#775a19] animate-pulse-dot"
-                              : "text-[#5f5e5e]/40"
+                  {files.map((f: any) => {
+                    const isRevealed = revealedFiles.has(f.id);
+                    return (
+                      <div
+                        key={f.id}
+                        className={`group flex items-center gap-3 py-2 px-2 rounded hover:bg-[#efeeec] transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                          isRevealed
+                            ? "opacity-100 translate-y-0"
+                            : "opacity-0 translate-y-2"
                         }`}
                       >
-                        {statusLabel(f.status)}
-                      </span>
-                      {!agentRunning && (
-                        <button
-                          onClick={() => removeFile(f.id)}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity text-[#5f5e5e]/30 hover:text-red-500 flex-shrink-0 bg-transparent border-none cursor-pointer"
+                        <span
+                          className={`material-symbols-outlined text-[18px] ${statusColour(f.status)} flex-shrink-0`}
                         >
-                          <span className="material-symbols-outlined text-[16px]">
-                            close
+                          {statusIcon(f.status)}
+                        </span>
+                        <div className="flex-1 min-w-0 flex items-center gap-2">
+                          <span
+                            className={`text-[12px] truncate transition-colors duration-200 ${
+                              f.status === "analyzing"
+                                ? "text-[#775a19] font-medium"
+                                : f.status === "error"
+                                  ? "text-red-500"
+                                  : ""
+                            }`}
+                          >
+                            {f.name}
                           </span>
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                          <span className="text-[10px] text-[#5f5e5e]/30 flex-shrink-0">
+                            {formatSize(f.size)}
+                          </span>
+                        </div>
+                        <span
+                          className={`text-[10px] flex-shrink-0 transition-colors duration-200 ${
+                            f.status === "done"
+                              ? "text-emerald-600"
+                              : f.status === "analyzing"
+                                ? "text-[#775a19] animate-pulse"
+                                : f.status === "error"
+                                  ? "text-red-500"
+                                  : "text-[#5f5e5e]/40"
+                          }`}
+                        >
+                          {statusLabel(f.status, f.error)}
+                        </span>
+                        {!agentRunning && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeFile(f.id);
+                            }}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#5f5e5e]/30 hover:text-red-500 flex-shrink-0 bg-transparent border-none cursor-pointer"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">
+                              close
+                            </span>
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
-
+ 
                 <div className="mt-3 pt-3 border-t border-[#d1c5b4]/20 flex items-center justify-between">
                   <span className="text-[11px] text-[#5f5e5e]/60">
                     {agentRunning
                       ? `${doneCount} of ${files.length} analyzed`
-                      : doneCount === files.length && doneCount > 0
-                        ? `All ${files.length} images processed`
+                      : allProcessed
+                        ? `All ${files.length} images processed${errorCount > 0 ? ` · ${errorCount} failed` : ""}`
                         : `${files.length} image${files.length !== 1 ? "s" : ""} ready · ${MAX_IMAGES - files.length} slots remaining`}
                   </span>
                   {canAddMore && (
                     <button
                       onClick={() => inputRef.current?.click()}
-                      className="font-roboto text-[11px] text-[#775a19] uppercase tracking-[0.1em] font-medium hover:underline cursor-pointer bg-transparent border-none"
+                      className={`${roboto.className} text-[11px] text-[#775a19] uppercase tracking-[0.1em] font-medium hover:underline cursor-pointer bg-transparent border-none`}
                     >
                       + Add more
                     </button>
@@ -565,17 +595,12 @@ export default function AgentPage() {
               </div>
             )}
           </div>
-
+ 
           <button
             onClick={startSession}
-            disabled={
-              files.length === 0 ||
-              agentRunning ||
-              (doneCount === files.length && doneCount > 0)
-            }
-            className={`font-roboto mt-4 w-full uppercase py-4 text-[11px] tracking-[0.15em] font-medium transition-all duration-200 border-none ${
-              files.length === 0 ||
-              (doneCount === files.length && doneCount > 0)
+            disabled={files.length === 0 || agentRunning || allProcessed}
+            className={`${roboto.className} mt-4 w-full uppercase py-4 text-[11px] tracking-[0.15em] font-medium transition-all duration-300 border-none ${
+              files.length === 0 || allProcessed
                 ? "bg-[#e3e2e0] text-[#5f5e5e]/40 cursor-not-allowed"
                 : agentRunning
                   ? "bg-[#775a19] text-white cursor-wait"
@@ -583,12 +608,12 @@ export default function AgentPage() {
             }`}
           >
             {agentRunning
-              ? `Analyzing · ${doneCount} of ${files.length} complete`
-              : doneCount === files.length && doneCount > 0
-                ? "Session complete"
+              ? `Processing · ${doneCount} of ${files.length} complete`
+              : allProcessed
+                ? `Session complete${errorCount > 0 ? ` · ${errorCount} failed` : ""}`
                 : files.length === 0
                   ? "Start new session"
-                  : `Start new session · ${files.length} image${files.length !== 1 ? "s" : ""}`}
+                  : `Start new session · ${files.filter((f: any) => f.status === "ready").length} image${files.filter((f: any) => f.status === "ready").length !== 1 ? "s" : ""}`}
           </button>
         </section>
 
