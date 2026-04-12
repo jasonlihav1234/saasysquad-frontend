@@ -2,6 +2,7 @@
 
 import TopNavBar from "@/components/universal/TopNavBar";
 import { projectCompilationEventsSubscribe } from "next/dist/build/swc/generated-native";
+import { deleteReactDebugChannelForHtmlRequest } from "next/dist/server/dev/debug-channel";
 import { Roboto, Gelasio, Fleur_De_Leah } from "next/font/google";
 import { useRef, useState, useCallback, useEffect } from "react";
 
@@ -244,23 +245,56 @@ export default function AgentPage() {
   const startSession = async () => {
     if (files.length === 0 || agentRunning) return;
     setAgentRunning(true);
+    const readyFiles = files.filter((file: any) => file.status === "ready");
+    await Promise.allSettled(readyFiles.map((file: any) => processFile(file)));
+    setAgentRunning(false);
+  };
 
-    for (let i = 0; i < files.length; ++i) {
-      const fileId = files[i].id;
-      setFiles((prev: any) =>
-        prev.map((f: any) =>
-          f.id === fileId ? { ...f, status: "analyzing" } : f,
+  const handleAccept = async (draftId: string) => {
+    const draft = drafts.find((d: any) => d.id === draftId);
+    if (!draft) return;
+
+    setDrafts((prev: any) =>
+      prev.map((d: any) =>
+        d.id === draftId ? { ...d, status: "accepting" } : d,
+      ),
+    );
+
+    try {
+      const res = await fetch("/v1/agent/accept", {
+        method: "POST",
+        headers: { "Content-Type": "application/json " },
+        body: JSON.stringify({
+          title: draft.title,
+          description: draft.description,
+          category: draft.category,
+          tags: draft.tags,
+          imageBase64: draft.imageBase64,
+          suggestedPrice: draft.suggestedPrice,
+          sellerPrice: draft.priceOverride
+            ? parseFloat(draft.priceOverride)
+            : null,
+          quantityAvailable: draft.qtyOverride,
+        }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to publish");
+      }
+
+      setDrafts((prev: any) =>
+        prev.map((d: any) =>
+          d.id === draftId ? { ...d, status: "accepted" } : d,
         ),
       );
-
-      await new Promise((r) => setTimeout(r, 800 + Math.random() * 1200));
-
-      setFiles((prev: any) =>
-        prev.map((f: any) => (f.id === fileId ? { ...f, status: "done" } : f)),
+    } catch (error: any) {
+      setDrafts((prev: any) =>
+        prev.map((d: any) => (d.id === draftId ? { ...d, status: "pending" } : d)),
       );
-    }
 
-    setAgentRunning(false);
+      console.log("Accept failed: ", error.message);
+    }
   };
 
   const doneCount: any = files.filter(
