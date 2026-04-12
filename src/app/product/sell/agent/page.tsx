@@ -290,11 +290,19 @@ export default function AgentPage() {
       );
     } catch (error: any) {
       setDrafts((prev: any) =>
-        prev.map((d: any) => (d.id === draftId ? { ...d, status: "pending" } : d)),
+        prev.map((d: any) =>
+          d.id === draftId ? { ...d, status: "pending" } : d,
+        ),
       );
 
       console.log("Accept failed: ", error.message);
     }
+  };
+
+  const handleDeny = (draftId: string) => {
+    setDrafts((prev: any) =>
+      prev.map((d: any) => (d.id === draftId ? { ...d, status: "denied" } : d)),
+    );
   };
 
   const doneCount: any = files.filter(
@@ -303,34 +311,43 @@ export default function AgentPage() {
   const analyzingCount = files.filter(
     (file: any) => file.status === "analyzing",
   ).length;
+  const errorCount = files.filter(
+    (file: any) => file.status === "error",
+  ).length;
   const analyzingFile: any = files.find(
     (file: any) => file.status === "analyzing",
   );
+  const allProcessed =
+    files.length > 0 &&
+    files.every((f: any) => f.status === "done" || f.status === "error");
   const canAddMore: any = files.length < MAX_IMAGES && !agentRunning;
 
   const updateStatus = (id: any, s: any) =>
     setStatuses((p: any) => ({ ...p, [id]: s }));
 
-  const approveAll = () => {
-    const next: any = {};
-    ITEMS.forEach((i) => (next[i.id] = "accepted"));
-    setStatuses(next);
+  const approveAll = async () => {
+    const pending = drafts.filter((d: any) => d.status === "pending");
+    await Promise.allSettled(pending.map((d: any) => handleAccept(d.id)));
   };
 
-  const filteredItems = ITEMS.filter((i) => {
-    const s = statuses[i.id] || "pending";
-    if (activeTab === "All") {
-      return true;
-    }
-
-    return s === activeTab.toLowerCase();
-  });
+  const updateDraftField = (
+    id: string,
+    field: "priceOverride" | "qtyOverride",
+    value: string | number,
+  ) => {
+    setDrafts((prev: any) =>
+      prev.map((d: any) => (d.id === id ? { ...d, [field]: value } : d)),
+    );
+  };
 
   const pendingReview = ITEMS.filter(
     (i) => !statuses[i.id] || statuses[i.id] === "pending",
   ).length;
   const publishedCount = ITEMS.filter(
     (i) => statuses[i.id] === "accepted",
+  ).length;
+  const skeletonCount = files.filter(
+    (f: any) => f.status === "analyzing" && !drafts.some((d: any) => d.fileId === f.id)
   ).length;
 
   const counts = {
@@ -341,6 +358,15 @@ export default function AgentPage() {
     ).length,
     published: ITEMS.filter((i) => statuses[i.id] === "accepted").length,
   };
+  
+  const filteredItems = drafts.filter((d: any) => {
+    if (activeTab === "All") return true;
+    if (activeTab === "Pending") return d.status === "pending";
+    if (activeTab === "Accepted") return d.status === "accepted" || d.status === "accepting";
+    if (activeTab === "Denied") return d.status === "denied";
+
+    return true;
+  })
 
   return (
     <div className="min-h-screen">
