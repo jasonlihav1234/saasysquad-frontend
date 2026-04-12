@@ -13,15 +13,30 @@ const roboto = Roboto({
 
 export type PurchaseOrderStatus = "delivered" | "in_transit" | "processing";
 
-export type PurchaseOrderItemProps = {
+export type PurchaseOrderRow = {
   imageSrc: string;
   status: PurchaseOrderStatus;
   productTitle: string;
   orderNumber: string;
   dateLabel: string;
+  orderedAtMs: number;
   price: string;
   actionLabel: string;
 };
+
+export type PurchaseOrderItemProps = Omit<PurchaseOrderRow, "orderedAtMs">;
+
+export function purchaseRowToItemProps(row: PurchaseOrderRow): PurchaseOrderItemProps {
+  return {
+    imageSrc: row.imageSrc,
+    status: row.status,
+    productTitle: row.productTitle,
+    orderNumber: row.orderNumber,
+    dateLabel: row.dateLabel,
+    price: row.price,
+    actionLabel: row.actionLabel,
+  };
+}
 
 const STATUS_BADGE: Record<
   PurchaseOrderStatus,
