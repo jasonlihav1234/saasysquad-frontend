@@ -3,7 +3,7 @@
 import TopNavBar from "@/components/universal/TopNavBar";
 import { projectCompilationEventsSubscribe } from "next/dist/build/swc/generated-native";
 import { Roboto, Gelasio, Fleur_De_Leah } from "next/font/google";
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -67,21 +67,21 @@ function statusIcon(status: any) {
   if (status === "done") return "check_circle";
   if (status === "analyzing") return "progress_activity";
   return "image";
-};
+}
 
 function statusColour(status: any) {
   if (status === "done") return "text-emerald-600";
   if (status === "analyzing") return "text-[#775a19] animate-spin";
 
   return "text-[#5f5e5e]/30";
-};
+}
 
 function statusLabel(status: any) {
   if (status === "done") return "done";
   if (status === "analyzing") return "analyzing...";
 
   return "ready";
-};
+}
 
 // formatting bytes, kilobytes, and megabytes
 function formatSize(bytes: any) {
@@ -89,8 +89,27 @@ function formatSize(bytes: any) {
   if (bytes < 1048576) return `${(bytes / 1024).toFixed(0)} KB`;
 
   return `${(bytes / 1048576).toFixed(1)} MB`;
-};
+}
 
+// need to track IDs which have been revealed
+function useRevealSet(ids: string[], staggerMs = 80) {
+  const [revealed, setRevealed] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    const newIds = ids.filter((id: any) => !revealed.has(id));
+    if (newIds.length === 0) return;
+
+    const timeouts = newIds.map((id, i) =>
+      setTimeout(() => {
+        setRevealed((prev) => new Set(prev).add(id));
+      }, i * staggerMs),
+    );
+
+    return () => timeouts.forEach(clearTimeout);
+  }, [ids, revealed, staggerMs]);
+
+  return revealed;
+}
 
 const TABS = ["All", "Pending", "Accepted", "Denied"];
 const MAX_IMAGES = 50;
@@ -102,7 +121,21 @@ export default function AgentPage() {
   const [files, setFiles] = useState<any>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [agentRunning, setAgentRunning] = useState(false);
+  const [drafts, setDrafts] = useState<any>([]);
+  const [boardVisible, setBoardVisible] = useState(false);
   const inputRef = useRef<any>(null);
+
+  const draftIds = drafts.map((draft: any) => draft.id);
+  const revealedDrafts = useRevealSet(draftIds, 120);
+
+  const fileIds = files.map((file: any) => file.id);
+  const revealedFiles = useRevealSet(fileIds, 40);
+
+  useEffect(() => {
+    if (drafts.length > 0 && !boardVisible) {
+      setBoardVisible(true);
+    }
+  }, [drafts.length, boardVisible]);
 
   const addFiles = useCallback((incoming: any) => {
     const valid = Array.from(incoming).filter((file: any) =>
@@ -120,7 +153,7 @@ export default function AgentPage() {
         name: file.name,
         size: file.size,
         file: file,
-        status: "ready",
+        status: "ready" as const,
       }));
 
       return [...prev, ...toAdd];
@@ -149,7 +182,7 @@ export default function AgentPage() {
   const handleDragLeave = () => setIsDragging(false);
 
   const handleInputChange = (event: any) => {
-    if (event.target.files.length) {
+    if (event.target.files?.length) {
       addFiles(event.target.files);
       event.target.value = "";
     }
