@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import type { PurchaseOrderItemProps } from "@/components/user-settings/purchases/PurchaseOrderItem";
+import type { PurchaseOrderRow } from "@/components/user-settings/purchases/PurchaseOrderItem";
 
 const BACKEND_BASE = "https://sassysquad-backend.vercel.app";
 const PROFILE_URL = `${BACKEND_BASE}/profile`;
-const EMPTY_IMAGE =
-  "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
+const EMPTY_IMAGE = "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
 
 function userIdFromProfileJson(json: unknown): string | null {
   if (!json || typeof json !== "object") return null;
@@ -37,7 +36,8 @@ async function refreshAccessToken(): Promise<boolean> {
   const access = body.accessToken;
   const refresh = body.refreshToken;
   if (typeof access === "string") localStorage.setItem("accessToken", access);
-  if (typeof refresh === "string") localStorage.setItem("refreshToken", refresh);
+  if (typeof refresh === "string")
+    localStorage.setItem("refreshToken", refresh);
   return true;
 }
 
@@ -97,12 +97,12 @@ async function fetchUserPurchases(
     status: res.status,
     ok: res.ok,
     body: data,
-  });  
+  });
   return data;
 }
 
 type PurchasesProfileFetchProps = {
-  onLoaded: (purchases: PurchaseOrderItemProps[]) => void;
+  onLoaded: (purchases: PurchaseOrderRow[]) => void;
 };
 
 function asOrderList(json: unknown): Record<string, unknown>[] {
@@ -117,14 +117,18 @@ function asOrderList(json: unknown): Record<string, unknown>[] {
   }
 
   const maybeOrder = root.order;
-  if (maybeOrder && typeof maybeOrder === "object" && !Array.isArray(maybeOrder)) {
+  if (
+    maybeOrder &&
+    typeof maybeOrder === "object" &&
+    !Array.isArray(maybeOrder)
+  ) {
     return [maybeOrder as Record<string, unknown>];
   }
 
   return [];
 }
 
-function orderStatusToUiStatus(status: unknown): PurchaseOrderItemProps["status"] {
+function orderStatusToUiStatus(status: unknown): PurchaseOrderRow["status"] {
   if (typeof status !== "string") return "processing";
   const lower = status.trim().toLowerCase();
   if (lower === "delivered" || lower === "fulfilled" || lower === "completed") {
@@ -165,11 +169,18 @@ function formatIssueDate(issueDate: unknown): string {
   });
 }
 
-function mapPurchaseJsonToItems(json: unknown): PurchaseOrderItemProps[] {
+function issueDateToOrderedAtMs(issueDate: unknown): number {
+  if (typeof issueDate !== "string" || issueDate.trim().length === 0) return 0;
+  const t = new Date(issueDate).getTime();
+  return Number.isNaN(t) ? 0 : t;
+}
+
+function mapPurchaseJsonToItems(json: unknown): PurchaseOrderRow[] {
   const orders = asOrderList(json);
   return orders.map((order) => {
     const orderIdRaw = order.orderId;
-    const orderId = typeof orderIdRaw === "string" ? orderIdRaw : "unknown-order";
+    const orderId =
+      typeof orderIdRaw === "string" ? orderIdRaw : "unknown-order";
     const orderNameRaw = order.orderName;
     const orderName =
       typeof orderNameRaw === "string" && orderNameRaw.trim().length > 0
@@ -182,13 +193,16 @@ function mapPurchaseJsonToItems(json: unknown): PurchaseOrderItemProps[] {
       productTitle: orderName,
       orderNumber: orderId.slice(0, 8).toUpperCase(),
       dateLabel: formatIssueDate(order.issueDate),
+      orderedAtMs: issueDateToOrderedAtMs(order.issueDate),
       price: currencyAndTotal(order),
       actionLabel: "View Details",
     };
   });
 }
 
-export function PurchasesProfileFetch({ onLoaded }: PurchasesProfileFetchProps) {
+export function PurchasesProfileFetch({
+  onLoaded,
+}: PurchasesProfileFetchProps) {
   useEffect(() => {
     let cancelled = false;
 
