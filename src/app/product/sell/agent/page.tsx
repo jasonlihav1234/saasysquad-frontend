@@ -1,9 +1,8 @@
 "use client";
 
 import TopNavBar from "@/components/universal/TopNavBar";
-import { Roboto, Gelasio } from "next/font/google";
-import { useState } from "react";
-import { Z_FILTERED } from "zlib";
+import { Roboto, Gelasio, Fleur_De_Leah } from "next/font/google";
+import { useRef, useState, useCallback } from "react";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -51,10 +50,53 @@ const ITEMS = [
 ];
 
 const TABS = ["All", "Pending", "Accepted", "Denied"];
+const MAX_IMAGES = 50;
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function AgentPage() {
   const [activeTab, setActiveTab] = useState<string>("All");
   const [statuses, setStatuses] = useState({});
+  const [files, setFiles] = useState([]);
+  const [isDragging, setIsDragging] = useState(false);
+  const [agentRunning, setAgentRunning] = useState(false);
+  const inputRef = useRef(null);
+
+  const addFiles = useCallback((incoming: any) => {
+    const valid = Array.from(incoming).filter((file: any) =>
+      ACCEPTED_TYPES.includes(file.type),
+    );
+
+    setFiles((prev: any) => {
+      const remaining = MAX_IMAGES - prev.length;
+      if (remaining <= 0) {
+        return prev;
+      }
+
+      const toAdd = valid.slice(0, remaining).map((file: any) => ({
+        id: crypto.randomUUID(),
+        name: file.name,
+        size: file.size,
+        file: file,
+        status: "ready",
+      }));
+
+      return [...prev, ...toAdd];
+    });
+  }, []);
+
+  const removeFile = (id: any) => {
+    if (agentRunning) return;
+
+    setFiles((prev) => prev.filter((f: any) => f.id !== id));
+  };
+
+  const handleDrop = (event: any) => {
+    event.preventDefault();
+    setIsDragging(false);
+    if (event.dataTransfer.files.length) {
+      addFiles(event.dataTransfer.files);
+    }
+  };
 
   const updateStatus = (id: any, s: any) =>
     setStatuses((p) => ({ ...p, [id]: s }));
