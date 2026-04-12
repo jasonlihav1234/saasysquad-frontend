@@ -50,6 +50,48 @@ const ITEMS = [
   },
 ];
 
+function fileToBase64(file: any): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      resolve(result.split(",")[1] || result);
+    };
+
+    reader.onerror = () => reject(new Error("Failed to read file"));
+    reader.readAsDataURL(file);
+  });
+}
+
+function statusIcon(status: any) {
+  if (status === "done") return "check_circle";
+  if (status === "analyzing") return "progress_activity";
+  return "image";
+};
+
+function statusColour(status: any) {
+  if (status === "done") return "text-emerald-600";
+  if (status === "analyzing") return "text-[#775a19] animate-spin";
+
+  return "text-[#5f5e5e]/30";
+};
+
+function statusLabel(status: any) {
+  if (status === "done") return "done";
+  if (status === "analyzing") return "analyzing...";
+
+  return "ready";
+};
+
+// formatting bytes, kilobytes, and megabytes
+function formatSize(bytes: any) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1048576) return `${(bytes / 1024).toFixed(0)} KB`;
+
+  return `${(bytes / 1048576).toFixed(1)} MB`;
+};
+
+
 const TABS = ["All", "Pending", "Accepted", "Denied"];
 const MAX_IMAGES = 50;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -178,34 +220,6 @@ export default function AgentPage() {
       (i) => !statuses[i.id] || statuses[i.id] === "pending",
     ).length,
     published: ITEMS.filter((i) => statuses[i.id] === "accepted").length,
-  };
-
-  const statusIcon = (status: any) => {
-    if (status === "done") return "check_circle";
-    if (status === "analyzing") return "progress_activity";
-    return "image";
-  };
-
-  const statusColour = (status: any) => {
-    if (status === "done") return "text-emerald-600";
-    if (status === "analyzing") return "text-[#775a19] animate-spin";
-
-    return "text-[#5f5e5e]/30";
-  };
-
-  const statusLabel = (status: any) => {
-    if (status === "done") return "done";
-    if (status === "analyzing") return "analyzing...";
-
-    return "ready";
-  };
-
-  // formatting bytes, kilobytes, and megabytes
-  const formatSize = (bytes: any) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1048576) return `${(bytes / 1024).toFixed(0)} KB`;
-
-    return `${(bytes / 1048576).toFixed(1)} MB`;
   };
 
   return (
