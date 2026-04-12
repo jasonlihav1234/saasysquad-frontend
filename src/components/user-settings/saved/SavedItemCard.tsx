@@ -56,7 +56,7 @@ export default function SavedItemCard({
         <p
           className={`${roboto.className} text-md font-medium mt-3 text-[#1a1c1b]`}
         >
-          {price}
+          {`$${price.toLocaleString()}`}
         </p>
         <button
           className={`${roboto.className} mt-4 w-full bg-[#5f5e5e] text-white py-3 text-xs tracking-widest uppercase font-bold transition-all hover:bg-[#1a1c1b] active:scale-[0.98]`}
