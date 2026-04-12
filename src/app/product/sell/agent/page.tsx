@@ -258,6 +258,19 @@ export default function AgentPage() {
                       ></input>
                     </div>
                   </div>
+
+                  <div className="flex gap-4">
+                    <button
+                      className={`${roboto.className} flex-1 bg-[#5f5e5e] text-white border-none py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:bg-[#1a1c1b] transition-colors`}
+                    >
+                      Accept &amp; publish
+                    </button>
+                    <button
+                      className={`${roboto.className} px-8 border border-[#d1c5b4] bg-transparent text-[#5f5e5e] py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:bg-red-50 hover:text-red-700 hover:border-red-700 transition-all`}
+                    >
+                      Deny
+                    </button>
+                  </div>
                 </div>
               </article>
             );
