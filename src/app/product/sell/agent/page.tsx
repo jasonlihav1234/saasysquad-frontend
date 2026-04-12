@@ -50,5 +50,38 @@ const ITEMS = [
 ];
 
 export default function AgentPage() {
-  return <div>Test</div>;
+  const [activeTab, setActiveTab] = useState<string>("All");
+  const [statuses, setStatuses] = useState({});
+
+  const counts = {
+    pending: ITEMS.filter((i) => !statuses[i.id] || statuses[i.id] === "pending").length,
+    published: ITEMS.filter((i) => statuses[i.id] === "accepted").length,
+  };
+
+  return (
+    <>
+      <TopNavBar />
+      <main className="pt-32 pb-24 max-w-[1120px] mx-auto px-12">
+        <section className="grid grid-cols-4 gap-4 mb-16">
+            {[
+              { label: "Uploaded", val: 3, sub: "Images in current session", bg: "bg-[#f4f3f1]" },
+              { label: "Processed", val: 3, sub: "Drafts generated", bg: "bg-[#efeeec]" },
+              { label: "Pending review", val: counts.pending, sub: "Requires seller approval", bg: "bg-[#e9e8e6]", accent: true },
+              { label: "Published", val: counts.published, sub: "Active live listings", bg: "bg-[#e3e2e0]" },
+            ].map((s, i) => (
+              <div key={i} className={`${s.bg} p-8 border-b border-[#d1c5b4]/15`}>
+                <span className={`block text-[9px] uppercase tracking-[0.15em] mb-2 ${s.accent ? "text-[#775a19]" : "text-[#5f5e5e]"}`}>
+                  {s.label}
+                </span>
+                <span className={`font-gelasio text-4xl font-light ${s.accent ? "text-[#775a19]" : "text-[#1a1c1b]"}`}>
+                  {s.val}
+                </span>
+                <span className="block text-[9px] text-[#5f5e5e]/60 mt-1">{s.sub}</span>
+              </div>
+            ))}
+        </section>
+
+      </main>
+    </>
+  );
 }
