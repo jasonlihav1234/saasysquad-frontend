@@ -180,6 +180,31 @@ export default function AgentPage() {
                     </span>
                   </div>
                 </div>
+
+                <div className="col-span-7 pt-4">
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <span>{item.category}</span>
+                      <h3>{item.name}</h3>
+                      <div className="flex gap-2">
+                        {item.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="bg-[#e8e2d9] text-[#1d1b16] text-[8px] px-3 py-1 uppercase tracking-[0.15em]"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+
+                      </div>
+                     </div>
+                     <div className="text-right">
+                      <span>{item.priceLabel}</span>
+                      <span>${item.price}</span>
+                     </div>
+                  </div>
+
+                </div>
               </article>
             );
           })}
