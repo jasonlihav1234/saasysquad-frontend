@@ -484,7 +484,7 @@ export default function AgentPage() {
                 JPEG, PNG, WEBP — up to {MAX_IMAGES} items
               </p>
             </div>
- 
+
             {files.length > 0 && (
               <div className="px-6 py-4">
                 <div
@@ -510,7 +510,7 @@ export default function AgentPage() {
                     </span>
                   </div>
                 </div>
- 
+
                 <div className="max-h-[220px] overflow-y-auto space-y-0.5 pr-1">
                   {files.map((f: any) => {
                     const isRevealed = revealedFiles.has(f.id);
@@ -574,7 +574,7 @@ export default function AgentPage() {
                     );
                   })}
                 </div>
- 
+
                 <div className="mt-3 pt-3 border-t border-[#d1c5b4]/20 flex items-center justify-between">
                   <span className="text-[11px] text-[#5f5e5e]/60">
                     {agentRunning
@@ -595,7 +595,7 @@ export default function AgentPage() {
               </div>
             )}
           </div>
- 
+
           <button
             onClick={startSession}
             disabled={files.length === 0 || agentRunning || allProcessed}
@@ -780,46 +780,46 @@ export default function AgentPage() {
                 key={`skeleton-${i}`}
                 className="grid grid-cols-12 gap-12 items-start"
               >
-              <div className="col-span-4 relative">
-                <div className="bg-[#efeeec] aspect-[4/5] overflow-hidden animate-pulse" />
-                <div className="absolute -bottom-6 -right-6 bg-white p-6 shadow-sm border border-[#d1c5b4]/10">
-                  <div className="h-3 w-16 bg-[#efeeec] rounded animate-pulse mb-2" />
-                  <div className="h-5 w-24 bg-[#efeeec] rounded animate-pulse" />
-                </div>
-              </div>
-              <div className="col-span-7 pt-4">
-                <div className="mb-6">
-                  <div className="h-2.5 w-20 bg-[#efeeec] rounded animate-pulse mb-4" />
-                  <div className="h-8 w-64 bg-[#efeeec] rounded animate-pulse mb-4" />
-                  <div className="flex gap-2">
-                    <div className="h-5 w-14 bg-[#efeeec] rounded animate-pulse" />
-                    <div className="h-5 w-16 bg-[#efeeec] rounded animate-pulse" />
-                    <div className="h-5 w-12 bg-[#efeeec] rounded animate-pulse" />
+                <div className="col-span-4 relative">
+                  <div className="bg-[#efeeec] aspect-[4/5] overflow-hidden animate-pulse" />
+                  <div className="absolute -bottom-6 -right-6 bg-white p-6 shadow-sm border border-[#d1c5b4]/10">
+                    <div className="h-3 w-16 bg-[#efeeec] rounded animate-pulse mb-2" />
+                    <div className="h-5 w-24 bg-[#efeeec] rounded animate-pulse" />
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-px bg-[#d1c5b4]/15 border border-[#d1c5b4]/15 mb-10">
-                  {[0, 1].map((j) => (
+                <div className="col-span-7 pt-4">
+                  <div className="mb-6">
+                    <div className="h-2.5 w-20 bg-[#efeeec] rounded animate-pulse mb-4" />
+                    <div className="h-8 w-64 bg-[#efeeec] rounded animate-pulse mb-4" />
+                    <div className="flex gap-2">
+                      <div className="h-5 w-14 bg-[#efeeec] rounded animate-pulse" />
+                      <div className="h-5 w-16 bg-[#efeeec] rounded animate-pulse" />
+                      <div className="h-5 w-12 bg-[#efeeec] rounded animate-pulse" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-px bg-[#d1c5b4]/15 border border-[#d1c5b4]/15 mb-10">
+                    {[0, 1].map((j) => (
                       <div key={j} className="bg-[#faf9f7] p-6">
-                          <div className="h-2 w-24 bg-[#efeeec] rounded animate-pulse mb-3" />
-                          <div className="h-6 w-20 bg-[#efeeec] rounded animate-pulse" />
+                        <div className="h-2 w-24 bg-[#efeeec] rounded animate-pulse mb-3" />
+                        <div className="h-6 w-20 bg-[#efeeec] rounded animate-pulse" />
                       </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-2 gap-8 mb-10">
-                  {[0, 1].map((j) => (
+                    ))}
+                  </div>
+                  <div className="grid grid-cols-2 gap-8 mb-10">
+                    {[0, 1].map((j) => (
                       <div key={j}>
-                          <div className="h-2 w-28 bg-[#efeeec] rounded animate-pulse mb-4" />
-                          <div className="h-8 w-full bg-[#efeeec] rounded animate-pulse" />
+                        <div className="h-2 w-28 bg-[#efeeec] rounded animate-pulse mb-4" />
+                        <div className="h-8 w-full bg-[#efeeec] rounded animate-pulse" />
                       </div>
-                  ))}
+                    ))}
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex-1 h-12 bg-[#efeeec] rounded animate-pulse" />
+                    <div className="w-28 h-12 bg-[#efeeec] rounded animate-pulse" />
+                  </div>
                 </div>
-                <div className="flex gap-4">
-                      <div className="flex-1 h-12 bg-[#efeeec] rounded animate-pulse" />
-                      <div className="w-28 h-12 bg-[#efeeec] rounded animate-pulse" />
-                </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            ))}
         </div>
       </main>
     </div>
