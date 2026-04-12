@@ -56,6 +56,15 @@ export default function AgentPage() {
   const [activeTab, setActiveTab] = useState<string>("All");
   const [statuses, setStatuses] = useState({});
 
+  const updateStatus = (id: any, s: any) =>
+    setStatuses((p) => ({ ...p, [id]: s }));
+
+  const approveAll = () => {
+    const next = {};
+    ITEMS.forEach((i) => (next[i.id] = "accepted"));
+    setStatuses(next);
+  };
+
   const filteredItems = ITEMS.filter((i) => {
     const s = statuses[i.id] || "pending";
     if (activeTab === "All") {
@@ -73,7 +82,7 @@ export default function AgentPage() {
   };
 
   return (
-    <>
+    <div className="min-h-screen">
       <TopNavBar />
       <main className="pt-32 pb-24 max-w-[1120px] mx-auto px-12">
         <section className="grid grid-cols-4 gap-4 mb-16">
@@ -120,6 +129,24 @@ export default function AgentPage() {
               </span>
             </div>
           ))}
+        </section>
+
+        <section className="mb-20">
+          <div>
+            <span className="material-symbols-outlined text-4xl text-[#7f7667] mb-4">
+              upload_file
+            </span>
+            <h3>Drop images here</h3>
+            <p>
+              AI will automatically analyze your high-resolution product
+              image to generate listings.
+            </p>
+            <button
+              className={`${roboto.className} uppercase bg-[#5f5e5e] text-white border-none px-8 py-3.5 text-[11px] tracking-[0.15em] font-medium cursor-pointer hover:bg-[#1a1c1b] transition-colors`}
+            >
+              START NEW SESSION
+            </button>
+          </div>
         </section>
 
         <section className="flex justify-between items-end mb-12">
@@ -277,6 +304,6 @@ export default function AgentPage() {
           })}
         </div>
       </main>
-    </>
+    </div>
   );
 }
