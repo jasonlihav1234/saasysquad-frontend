@@ -347,7 +347,8 @@ export default function AgentPage() {
     (i) => statuses[i.id] === "accepted",
   ).length;
   const skeletonCount = files.filter(
-    (f: any) => f.status === "analyzing" && !drafts.some((d: any) => d.fileId === f.id)
+    (f: any) =>
+      f.status === "analyzing" && !drafts.some((d: any) => d.fileId === f.id),
   ).length;
 
   const counts = {
@@ -358,15 +359,16 @@ export default function AgentPage() {
     ).length,
     published: ITEMS.filter((i) => statuses[i.id] === "accepted").length,
   };
-  
+
   const filteredItems = drafts.filter((d: any) => {
     if (activeTab === "All") return true;
     if (activeTab === "Pending") return d.status === "pending";
-    if (activeTab === "Accepted") return d.status === "accepted" || d.status === "accepting";
+    if (activeTab === "Accepted")
+      return d.status === "accepted" || d.status === "accepting";
     if (activeTab === "Denied") return d.status === "denied";
 
     return true;
-  })
+  });
 
   return (
     <div className="min-h-screen">
@@ -389,9 +391,11 @@ export default function AgentPage() {
               sub:
                 analyzingCount > 0
                   ? `${analyzingCount} currently analyzing…`
-                  : doneCount > 0
-                    ? "Drafts generated"
-                    : "Waiting to start",
+                  : errorCount > 0
+                    ? `${errorCount} failed`
+                    : doneCount > 0
+                      ? "Drafts generated"
+                      : "Waiting to start",
               bg: "bg-[#efeeec]",
               processing: analyzingCount > 0,
             },
@@ -399,7 +403,11 @@ export default function AgentPage() {
               label: "Pending review",
               val: pendingReview,
               sub:
-                pendingReview > 0 ? "Requires seller approval" : "All reviewed",
+                pendingReview > 0
+                  ? "Requires seller approval"
+                  : drafts.length > 0
+                    ? "All reviewed"
+                    : "No drafts yet",
               bg: "bg-[#e9e8e6]",
               accent: true,
             },
@@ -423,12 +431,12 @@ export default function AgentPage() {
                 {s.label}
               </span>
               <span
-                className={`font-gelasio text-4xl font-light transition-all duration-300 ${s.accent ? "text-[#775a19]" : "text-[#1a1c1b]"}`}
+                className={`${gelasio.className} text-4xl font-light transition-all duration-300 ${s.accent ? "text-[#775a19]" : "text-[#1a1c1b]"}`}
               >
                 {s.val}
               </span>
               <span
-                className={`block text-[9px] mt-1 ${s.processing ? "text-[#775a19] animate-pulse-dot" : "text-[#5f5e5e]/60"}`}
+                className={`block text-[9px] mt-1 transition-colors duration-300 ${s.processing ? "text-[#775a19] animate-pulse" : "text-[#5f5e5e]/60"}`}
               >
                 {s.sub}
               </span>
@@ -610,7 +618,7 @@ export default function AgentPage() {
         </section>
 
         <div className="flex flex-col gap-24">
-          {filteredItems.map((item) => {
+          {filteredItems.map((item: any) => {
             const status = statuses[item.id] || "pending";
             return (
               <article
@@ -655,7 +663,7 @@ export default function AgentPage() {
                         {item.name}
                       </h3>
                       <div className="flex gap-2">
-                        {item.tags.map((tag) => (
+                        {item.tags.map((tag: any) => (
                           <span
                             key={tag}
                             className="bg-[#e8e2d9] text-[#1d1b16] text-[8px] px-3 py-1 uppercase tracking-[0.15em]"
@@ -676,7 +684,7 @@ export default function AgentPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-px bg-[#d1c6b4]/15 border border-[#d1c5b4]/15 mb-10">
-                    {item.metrics.map((m, i) => (
+                    {item.metrics.map((m: any, i: any) => (
                       <div key={i} className="bg-[#faf9f7] p-6">
                         <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
                           {m.label}
