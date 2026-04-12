@@ -188,6 +188,59 @@ export default function AgentPage() {
     }
   };
 
+  const processFile = async (uploadFile: any) => {
+    setFiles((prev: any) =>
+      prev.map((file: any) =>
+        file.id === uploadFile.id ? { ...file, status: "analyzing" } : file,
+      ),
+    );
+
+    try {
+      const base64 = await fileToBase64(uploadFile.file);
+
+      const res = await fetch("/v1/agent/process", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({ image: base64 }),
+      });
+
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Processing Failed");
+      }
+
+      const { draft } = await res.json();
+
+      setDrafts((prev: any) => [
+        ...prev,
+        {
+          ...draft,
+          fileId: uploadFile.id,
+          status: "pending",
+          priceOverride: draft.suggestedPrice?.toString() || "",
+          qtyOverride: draft.quantityAvailable || 1,
+        },
+      ]);
+
+      setFiles((prev: any) =>
+        prev.map((file: any) =>
+          file.id === uploadFile.id ? { ...file, status: "done" } : file,
+        ),
+      );
+    } catch (error: any) {
+      setFiles((prev: any) =>
+        prev.map((file: any) =>
+          file.id === uploadFile.id
+            ? { ...file, status: "error", error: error.message }
+            : file,
+        ),
+      );
+    }
+  };
+
   const startSession = async () => {
     if (files.length === 0 || agentRunning) return;
     setAgentRunning(true);
