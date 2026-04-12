@@ -1,6 +1,7 @@
 "use client";
 
 import TopNavBar from "@/components/universal/TopNavBar";
+import { projectCompilationEventsSubscribe } from "next/dist/build/swc/generated-native";
 import { Roboto, Gelasio, Fleur_De_Leah } from "next/font/google";
 import { useRef, useState, useCallback } from "react";
 
@@ -55,11 +56,11 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function AgentPage() {
   const [activeTab, setActiveTab] = useState<string>("All");
-  const [statuses, setStatuses] = useState({});
-  const [files, setFiles] = useState([]);
+  const [statuses, setStatuses] = useState<any>({});
+  const [files, setFiles] = useState<any>([]);
   const [isDragging, setIsDragging] = useState(false);
   const [agentRunning, setAgentRunning] = useState(false);
-  const inputRef = useRef(null);
+  const inputRef = useRef<any>(null);
 
   const addFiles = useCallback((incoming: any) => {
     const valid = Array.from(incoming).filter((file: any) =>
@@ -87,7 +88,7 @@ export default function AgentPage() {
   const removeFile = (id: any) => {
     if (agentRunning) return;
 
-    setFiles((prev) => prev.filter((f: any) => f.id !== id));
+    setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
   };
 
   const handleDrop = (event: any) => {
@@ -96,6 +97,11 @@ export default function AgentPage() {
     if (event.dataTransfer.files.length) {
       addFiles(event.dataTransfer.files);
     }
+  };
+
+  const handleDragOver = (event: any) => {
+    event.preventDefault();
+    setIsDragging(true);
   };
 
   const handleDragLeave = () => setIsDragging(false);
@@ -129,15 +135,19 @@ export default function AgentPage() {
     setAgentRunning(false);
   };
 
-  const doneCount = files.filter((file: any) => file.status === "done").length;
-  const analyzingFile = files.find((file: any) => file.status === "analyzing");
-  const canAddMore = files.length < MAX_IMAGES && !agentRunning;
+  const doneCount: any = files.filter(
+    (file: any) => file.status === "done",
+  ).length;
+  const analyzingFile: any = files.find(
+    (file: any) => file.status === "analyzing",
+  );
+  const canAddMore: any = files.length < MAX_IMAGES && !agentRunning;
 
   const updateStatus = (id: any, s: any) =>
-    setStatuses((p) => ({ ...p, [id]: s }));
+    setStatuses((p: any) => ({ ...p, [id]: s }));
 
   const approveAll = () => {
-    const next = {};
+    const next: any = {};
     ITEMS.forEach((i) => (next[i.id] = "accepted"));
     setStatuses(next);
   };
@@ -239,25 +249,151 @@ export default function AgentPage() {
         </section>
 
         <section className="mb-20">
-          <div className="bg-[#f4f3f1] border border-dashed border-[#d1c5b4] py-16 px-8 flex flex-col items-center text-center">
-            <span className="material-symbols-outlined text-4xl text-[#7f7667] mb-4">
-              upload_file
-            </span>
-            <h3 className={`${gelasio.className} text-xl mb-2`}>
-              Drop images here
-            </h3>
-            <p
-              className={`${gelasio.className} text-[13px] text-[#5f5e5e] max-w-xs mx-auto mb-8 leading-relaxed`}
+          <div className="bg-[#f4f3f1] border border-[#d1c5b4] overflow-hidden">
+            <div
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onClick={() => canAddMore && inputRef.current?.click()}
+              className={`relative py-12 px-8 flex flex-col items-center text-center transition-all duration-200 ${
+                files.length > 0
+                  ? "border-b border-dashed border-[#d1c5b4]"
+                  : ""
+              } ${
+                isDragging
+                  ? "bg-[#e9e8e6]"
+                  : canAddMore
+                    ? "cursor-pointer hover:bg-[#efeeec]"
+                    : ""
+              } ${!canAddMore ? "opacity-40 cursor-not-allowed" : ""}`}
             >
-              AI will automatically analyze your high-resolution product image
-              to generate listings.
-            </p>
-            <button
-              className={`${roboto.className} uppercase bg-[#5f5e5e] text-white border-none px-8 py-3.5 text-[11px] tracking-[0.15em] font-medium cursor-pointer hover:bg-[#1a1c1b] transition-colors`}
-            >
-              START NEW SESSION
-            </button>
+              <input
+                ref={inputRef}
+                type="file"
+                multiple
+                accept=".jpg,.jpeg,.png,.webp"
+                onChange={handleInputChange}
+                className="hidden"
+              />
+              <span
+                className={`material-symbols-outlined text-4xl mb-3 transition-transform duration-200 ${isDragging ? "text-[#775a19] scale-110" : "text-[#7f7667]"}`}
+              >
+                upload_file
+              </span>
+              <h3 className="font-gelasio text-xl mb-1">Drop images here</h3>
+              <p className="text-[12px] text-[#5f5e5e] max-w-xs mx-auto leading-relaxed">
+                JPEG, PNG, WEBP — up to {MAX_IMAGES} items
+              </p>
+            </div>
+
+            {files.length > 0 && (
+              <div className="px-6 py-4">
+                {agentRunning && analyzingFile && (
+                  <div className="mb-3 px-3 py-2.5 bg-[#775a19]/5 border border-[#775a19]/10 flex items-center gap-3">
+                    <span className="material-symbols-outlined animate-spin text-[18px] text-[#775a19]">
+                      progress_activity
+                    </span>
+                    <span className="text-[12px] text-[#775a19]">
+                      Analyzing{" "}
+                      <span className="font-medium">{analyzingFile.name}</span>
+                      <span className="text-[#775a19]/50 ml-2">
+                        · {doneCount + 1} of {files.length}
+                      </span>
+                    </span>
+                  </div>
+                )}
+
+                <div className="max-h-[220px] overflow-y-auto space-y-0.5 pr-1">
+                  {files.map((f: any) => (
+                    <div
+                      key={f.id}
+                      className="animate-fade-in group flex items-center gap-3 py-2 px-2 rounded hover:bg-[#efeeec] transition-colors"
+                    >
+                      <span
+                        className={`material-symbols-outlined text-[18px] ${statusColour(f.status)} flex-shrink-0`}
+                      >
+                        {statusIcon(f.status)}
+                      </span>
+                      <div className="flex-1 min-w-0 flex items-center gap-2">
+                        <span
+                          className={`text-[12px] truncate ${f.status === "analyzing" ? "text-[#775a19] font-medium" : ""}`}
+                        >
+                          {f.name}
+                        </span>
+                        <span className="text-[10px] text-[#5f5e5e]/30 flex-shrink-0">
+                          {formatSize(f.size)}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-[10px] flex-shrink-0 ${
+                          f.status === "done"
+                            ? "text-emerald-600"
+                            : f.status === "analyzing"
+                              ? "text-[#775a19] animate-pulse-dot"
+                              : "text-[#5f5e5e]/40"
+                        }`}
+                      >
+                        {statusLabel(f.status)}
+                      </span>
+                      {!agentRunning && (
+                        <button
+                          onClick={() => removeFile(f.id)}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity text-[#5f5e5e]/30 hover:text-red-500 flex-shrink-0 bg-transparent border-none cursor-pointer"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">
+                            close
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-3 pt-3 border-t border-[#d1c5b4]/20 flex items-center justify-between">
+                  <span className="text-[11px] text-[#5f5e5e]/60">
+                    {agentRunning
+                      ? `${doneCount} of ${files.length} analyzed`
+                      : doneCount === files.length && doneCount > 0
+                        ? `All ${files.length} images processed`
+                        : `${files.length} image${files.length !== 1 ? "s" : ""} ready · ${MAX_IMAGES - files.length} slots remaining`}
+                  </span>
+                  {canAddMore && (
+                    <button
+                      onClick={() => inputRef.current?.click()}
+                      className="font-roboto text-[11px] text-[#775a19] uppercase tracking-[0.1em] font-medium hover:underline cursor-pointer bg-transparent border-none"
+                    >
+                      + Add more
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
+
+          <button
+            onClick={startSession}
+            disabled={
+              files.length === 0 ||
+              agentRunning ||
+              (doneCount === files.length && doneCount > 0)
+            }
+            className={`font-roboto mt-4 w-full uppercase py-4 text-[11px] tracking-[0.15em] font-medium transition-all duration-200 border-none ${
+              files.length === 0 ||
+              (doneCount === files.length && doneCount > 0)
+                ? "bg-[#e3e2e0] text-[#5f5e5e]/40 cursor-not-allowed"
+                : agentRunning
+                  ? "bg-[#775a19] text-white cursor-wait"
+                  : "bg-[#5f5e5e] text-white cursor-pointer hover:bg-[#1a1c1b]"
+            }`}
+          >
+            {agentRunning
+              ? `Analyzing · ${doneCount} of ${files.length} complete`
+              : doneCount === files.length && doneCount > 0
+                ? "Session complete"
+                : files.length === 0
+                  ? "Start new session"
+                  : `Start new session · ${files.length} image${files.length !== 1 ? "s" : ""}`}
+          </button>
         </section>
 
         <section className="flex justify-between items-end mb-12">
