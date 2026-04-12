@@ -184,8 +184,12 @@ export default function AgentPage() {
                 <div className="col-span-7 pt-4">
                   <div className="flex justify-between items-start mb-6">
                     <div>
-                      <span>{item.category}</span>
-                      <h3>{item.name}</h3>
+                      <span className="block text-[9px] uppercase tracking-[0.2em] text-[#775a19] mb-2">
+                        {item.category}
+                      </span>
+                      <h3 className={`${gelasio.className} text-[28px] mb-4`}>
+                        {item.name}
+                      </h3>
                       <div className="flex gap-2">
                         {item.tags.map((tag) => (
                           <span
@@ -195,15 +199,17 @@ export default function AgentPage() {
                             {tag}
                           </span>
                         ))}
-
                       </div>
-                     </div>
-                     <div className="text-right">
-                      <span>{item.priceLabel}</span>
-                      <span>${item.price}</span>
-                     </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-1">
+                        {item.priceLabel}
+                      </span>
+                      <span className={`${gelasio.className} text-2xl`}>
+                        ${item.price}
+                      </span>
+                    </div>
                   </div>
-
                 </div>
               </article>
             );
