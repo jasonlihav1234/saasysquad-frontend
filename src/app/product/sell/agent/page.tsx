@@ -138,6 +138,9 @@ export default function AgentPage() {
   const doneCount: any = files.filter(
     (file: any) => file.status === "done",
   ).length;
+  const analyzingCount = files.filter(
+    (file: any) => file.status === "analyzing",
+  ).length;
   const analyzingFile: any = files.find(
     (file: any) => file.status === "analyzing",
   );
@@ -160,6 +163,13 @@ export default function AgentPage() {
 
     return s === activeTab.toLowerCase();
   });
+
+  const pendingReview = ITEMS.filter(
+    (i) => !statuses[i.id] || statuses[i.id] === "pending",
+  ).length;
+  const publishedCount = ITEMS.filter(
+    (i) => statuses[i.id] === "accepted",
+  ).length;
 
   const counts = {
     uploaded: files.length,
@@ -206,42 +216,60 @@ export default function AgentPage() {
           {[
             {
               label: "Uploaded",
-              val: 3,
-              sub: "Images in current session",
+              val: files.length,
+              sub:
+                files.length === 0
+                  ? "No images yet"
+                  : `${files.length} image${files.length !== 1 ? "s" : ""} in session`,
               bg: "bg-[#f4f3f1]",
             },
             {
               label: "Processed",
-              val: 3,
-              sub: "Drafts generated",
+              val: doneCount,
+              sub:
+                analyzingCount > 0
+                  ? `${analyzingCount} currently analyzing…`
+                  : doneCount > 0
+                    ? "Drafts generated"
+                    : "Waiting to start",
               bg: "bg-[#efeeec]",
+              processing: analyzingCount > 0,
             },
             {
               label: "Pending review",
-              val: counts.pending,
-              sub: "Requires seller approval",
+              val: pendingReview,
+              sub:
+                pendingReview > 0 ? "Requires seller approval" : "All reviewed",
               bg: "bg-[#e9e8e6]",
               accent: true,
             },
             {
               label: "Published",
-              val: counts.published,
-              sub: "Active live listings",
+              val: publishedCount,
+              sub:
+                publishedCount > 0
+                  ? "Active live listings"
+                  : "None published yet",
               bg: "bg-[#e3e2e0]",
             },
           ].map((s, i) => (
-            <div key={i} className={`${s.bg} p-8 border-b border-[#d1c5b4]/15`}>
+            <div
+              key={i}
+              className={`${s.bg} p-8 border-b border-[#d1c5b4]/15 transition-all duration-300`}
+            >
               <span
                 className={`block text-[9px] uppercase tracking-[0.15em] mb-2 ${s.accent ? "text-[#775a19]" : "text-[#5f5e5e]"}`}
               >
                 {s.label}
               </span>
               <span
-                className={`font-gelasio text-4xl font-light ${s.accent ? "text-[#775a19]" : "text-[#1a1c1b]"}`}
+                className={`font-gelasio text-4xl font-light transition-all duration-300 ${s.accent ? "text-[#775a19]" : "text-[#1a1c1b]"}`}
               >
                 {s.val}
               </span>
-              <span className="block text-[9px] text-[#5f5e5e]/60 mt-1">
+              <span
+                className={`block text-[9px] mt-1 ${s.processing ? "text-[#775a19] animate-pulse-dot" : "text-[#5f5e5e]/60"}`}
+              >
                 {s.sub}
               </span>
             </div>
