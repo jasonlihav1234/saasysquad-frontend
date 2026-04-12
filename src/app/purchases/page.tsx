@@ -41,15 +41,22 @@ export default function PurchasesPage() {
   const [isSortOpen, setIsSortOpen] = useState(false);
   const sortDropdownRef = useRef<HTMLDivElement>(null);
 
-  const sortedPurchases = useMemo(() => {
-    const next = [...purchases];
-    next.sort((a, b) =>
+  const filteredAndSortedPurchases = useMemo(() => {
+    let rows = [...purchases];
+    if (activeStatusTab === "Processing") {
+      rows = rows.filter((r) => r.status === "processing");
+    } else if (activeStatusTab === "In Transit") {
+      rows = rows.filter((r) => r.status === "in_transit");
+    } else if (activeStatusTab === "Delivered") {
+      rows = rows.filter((r) => r.status === "delivered");
+    }
+    rows.sort((a, b) =>
       sortOrder === "newest"
         ? b.orderedAtMs - a.orderedAtMs
         : a.orderedAtMs - b.orderedAtMs,
     );
-    return next;
-  }, [purchases, sortOrder]);
+    return rows;
+  }, [purchases, activeStatusTab, sortOrder]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -175,13 +182,26 @@ export default function PurchasesPage() {
             </nav>
 
             <section className="w-full py-12 space-y-12">
-              {sortedPurchases.length > 0 ? (
-                sortedPurchases.map((row) => (
+              {filteredAndSortedPurchases.length > 0 ? (
+                filteredAndSortedPurchases.map((row) => (
                   <PurchaseOrderItem
                     key={row.orderNumber}
                     {...purchaseRowToItemProps(row)}
                   />
                 ))
+              ) : purchases.length > 0 ? (
+                <div className="text-center py-6">
+                  <h1
+                    className={`${gelasio.className} text-3xl md:text-4xl font-bold text-[#1a1c1b] mb-4 tracking-tight`}
+                  >
+                    No orders in this category.
+                  </h1>
+                  <p
+                    className={`${roboto.className} text-[#5f5e5e] text-base max-w-md mx-auto leading-relaxed`}
+                  >
+                    Try another tab or view all orders.
+                  </p>
+                </div>
               ) : (
                 <div className="text-center py-6">
                   <h1
