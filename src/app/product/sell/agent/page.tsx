@@ -210,6 +210,54 @@ export default function AgentPage() {
                       </span>
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-px bg-[#d1c6b4]/15 border border-[#d1c5b4]/15 mb-10">
+                    {item.metrics.map((m, i) => (
+                      <div key={i} className="bg-[#faf9f7] p-6">
+                        <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
+                          {m.label}
+                        </span>
+                        <span
+                          className={`text-xl font-light ${m.accent ? "text-[#775a19]" : "text-[#1a1c1b]"}`}
+                        >
+                          {m.value}{" "}
+                          {m.suffix && (
+                            <span className="text-xs text-[#5f5e5e]/40">
+                              {m.suffix}
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-8 mb-10">
+                    <div>
+                      <label className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-3">
+                        Price (Override Prediction)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-0 bottom-2 text-[#5f5e5e]/40 text-sm">
+                          $
+                        </span>
+                        <input
+                          defaultValue={item.price}
+                          className={`${roboto.className} w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 pl-4 text-sm font-medium`}
+                        ></input>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-3">
+                        Quantity Availble
+                      </label>
+                      <input
+                        type="number"
+                        defaultValue={item.qty}
+                        className={`${roboto.className} w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 text-sm font-medium`}
+                      ></input>
+                    </div>
+                  </div>
                 </div>
               </article>
             );
