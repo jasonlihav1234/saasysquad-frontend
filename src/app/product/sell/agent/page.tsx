@@ -16,47 +16,12 @@ const gelasio = Gelasio({
   style: ["normal", "italic"],
 });
 
-const ITEMS = [
-  {
-    id: 1,
-    category: "Furniture",
-    name: "Vintage oak bookshelf",
-    tags: ["oak", "vintage", "storage"],
-    priceLabel: "Optimal price",
-    price: 340,
-    metrics: [
-      { label: "Est. volume / mo", value: "16—20", suffix: "units" },
-      { label: "Max revenue potential", value: "$6,120", accent: true },
-    ],
-    confidence: 92,
-    qty: 12,
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAfM2XPNjOoNKA_Ke5rcHdFEONWP3bdSPwvsl0BeDUROcQ7bXIaCXhoRB8JQrMrxB71hKcoAvmUQFT9PTrPzpseW--kjP0JQsv9ZJOO9s5Nk_xX2qQ1GSA35YweIJy4LFqW2MgV04BPqieOIvD48xY_CRJm8c6F7MVpW2RHT0_jHR8EhU7QtmgzfUdDQ5Tb26Q_0WKp1dvyEVwCGCwJJCeQVvWX6ygV3ErBjR8t-pHdhlaMKLEyz7-1Cyw_-OvI0GXGgL6aRwMkeRxo",
-  },
-  {
-    id: 2,
-    category: "Soft furnishings",
-    name: "Linen throw cushion — sage",
-    tags: ["linen", "sage", "handmade"],
-    priceLabel: "AI Midpoint",
-    price: 65,
-    metrics: [
-      { label: "Market Range", value: "$45 — $85" },
-      { label: "Trend Velocity", value: "High", suffix: "+12%", accent: true },
-    ],
-    confidence: 88,
-    qty: 45,
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDZd1i4B2GzPbw4_2d6psUdfOp0wAQ301bKlXfzigx8EFHdqVfeiRHqxURfLwcmU2VOiVgU6LpHMYQrCofSzYXRJi13AP2taJ3UtmZA4CRkIhAKoIxeuZXVE47OOd4ZJ0o97KVJRLdz0gQJVKaZbM3qhcNg9-xzwaxwSGETtNWM6AvYNxXKlrr2KsfmqZDTt6G8iaqdws3dXW-fSZodooo3hKqKe6r8TVFTHdsrRTeIryquApxDRwAiSj59TZ7CgN83GTSUPQEXBv1u",
-  },
-];
-
 function fileToBase64(file: any): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      resolve(result.split(",")[1] || result);
+      resolve(result);
     };
 
     reader.onerror = () => reject(new Error("Failed to read file"));
@@ -200,14 +165,17 @@ export default function AgentPage() {
     try {
       const base64 = await fileToBase64(uploadFile.file);
 
-      const res = await fetch("/v1/agent/process", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      const res = await fetch(
+        "https://sassysquad-backend.vercel.app/v1/agent/process",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({ image: base64 }),
         },
-        body: JSON.stringify({ image: base64 }),
-      });
+      );
 
       if (!res.ok) {
         const error = await res.json();
@@ -262,22 +230,28 @@ export default function AgentPage() {
     );
 
     try {
-      const res = await fetch("/v1/agent/accept", {
-        method: "POST",
-        headers: { "Content-Type": "application/json " },
-        body: JSON.stringify({
-          title: draft.title,
-          description: draft.description,
-          category: draft.category,
-          tags: draft.tags,
-          imageBase64: draft.imageBase64,
-          suggestedPrice: draft.suggestedPrice,
-          sellerPrice: draft.priceOverride
-            ? parseFloat(draft.priceOverride)
-            : null,
-          quantityAvailable: draft.qtyOverride,
-        }),
-      });
+      const res = await fetch(
+        "https://sassysquad-backend.vercel.app/v1/agent/accept",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify({
+            title: draft.title,
+            description: draft.description,
+            category: draft.category,
+            tags: draft.tags,
+            imageBase64: draft.imageBase64,
+            suggestedPrice: draft.suggestedPrice,
+            sellerPrice: draft.priceOverride
+              ? parseFloat(draft.priceOverride)
+              : null,
+            quantityAvailable: draft.qtyOverride,
+          }),
+        },
+      );
 
       if (!res.ok) {
         const error = await res.json();
@@ -309,22 +283,19 @@ export default function AgentPage() {
   const doneCount: any = files.filter(
     (file: any) => file.status === "done",
   ).length;
+
   const analyzingCount = files.filter(
     (file: any) => file.status === "analyzing",
   ).length;
+
   const errorCount = files.filter(
     (file: any) => file.status === "error",
   ).length;
-  const analyzingFile: any = files.find(
-    (file: any) => file.status === "analyzing",
-  );
+
   const allProcessed =
     files.length > 0 &&
     files.every((f: any) => f.status === "done" || f.status === "error");
   const canAddMore: any = files.length < MAX_IMAGES && !agentRunning;
-
-  const updateStatus = (id: any, s: any) =>
-    setStatuses((p: any) => ({ ...p, [id]: s }));
 
   const approveAll = async () => {
     const pending = drafts.filter((d: any) => d.status === "pending");
@@ -341,25 +312,18 @@ export default function AgentPage() {
     );
   };
 
-  const pendingReview = ITEMS.filter(
-    (i) => !statuses[i.id] || statuses[i.id] === "pending",
+  const pendingReview = drafts.filter(
+    (d: any) => d.status === "pending",
   ).length;
-  const publishedCount = ITEMS.filter(
-    (i) => statuses[i.id] === "accepted",
+
+  const publishedCount = drafts.filter(
+    (d: any) => d.status === "accepted",
   ).length;
+
   const skeletonCount = files.filter(
     (f: any) =>
       f.status === "analyzing" && !drafts.some((d: any) => d.fileId === f.id),
   ).length;
-
-  const counts = {
-    uploaded: files.length,
-    processed: doneCount,
-    pending: ITEMS.filter(
-      (i) => !statuses[i.id] || statuses[i.id] === "pending",
-    ).length,
-    published: ITEMS.filter((i) => statuses[i.id] === "accepted").length,
-  };
 
   const filteredItems = drafts.filter((d: any) => {
     if (activeTab === "All") return true;
@@ -617,210 +581,342 @@ export default function AgentPage() {
           </button>
         </section>
 
-        <section className="flex justify-between items-end mb-12">
-          <div>
-            <h2 className={`${gelasio.className} text-4xl tracking-tight mb-4`}>
-              Review board
-            </h2>
-            <div className="flex gap-8">
-              {TABS.map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`${roboto.className} transition-all duration-200 bg-transparent border-none pb-2 text-[11px] uppercase tracking-[0.15em] cursor-pointer border-b-2 ${activeTab === tab ? "text-[#1a1c1b] border-b-[#755a10] font-medium" : "text-[#5f5e5e]/60 border-b-transparent hover:text-[#1a1c1b]"}`}
+        {(drafts.length > 0 || skeletonCount > 0) && (
+          <>
+            <section
+              className={`flex justify-between items-end mb-12 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                boardVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-8"
+              }`}
+            >
+              <div>
+                <h2
+                  className={`${gelasio.className} text-4xl tracking-tight mb-4`}
                 >
-                  {tab}
-                </button>
-              ))}
-            </div>
-          </div>
-          <button
-            onClick={approveAll}
-            className={`${roboto.className} bg-[#775a19] text-white border-none px-10 py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:opacity-90 transition-opacity`}
-          >
-            Approve all
-          </button>
-        </section>
-
-        <div className="flex flex-col gap-24">
-          {filteredItems.map((item: any) => {
-            const status = statuses[item.id] || "pending";
-            return (
-              <article
-                key={item.id}
-                className={`grid grid-cols-12 gap-12 items-start ${status === "denied" ? "opacity-40" : "opacity-90"}`}
-              >
-                <div className="col-span-4 relative">
-                  <div className="bg-[#efeeec] aspect-[4/5] overflow-hidden">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="img-hover w-full h-full object-cover transition-all duration-700"
-                    ></img>
-                  </div>
-                  <div className="absolute -bottom-6 -right-6 bg-white p-6 shadow-sm border border-[#d1c5b4]/10">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="material-symbols-outlined filled text-sm text-[#775a19]">
-                        auto_awesome
-                      </span>
-                      <span className="text-[9px] uppercase -tracking-tight text-[#5f5e5e]/80">
-                        ML Model
-                      </span>
-                    </div>
-                    <span className={`${gelasio.className} text-lg`}>
-                      {item.confidence}%{" "}
-                      <span
-                        className={`${roboto.className} text-xs text-[#5f5e5e]/60 italic`}
-                      >
-                        confidence
-                      </span>
-                    </span>
-                  </div>
+                  Review board
+                </h2>
+                <div className="flex gap-8">
+                  {TABS.map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveTab(tab)}
+                      className={`${roboto.className} transition-all duration-200 bg-transparent border-none pb-2 text-[11px] uppercase tracking-[0.15em] cursor-pointer border-b-2 ${
+                        activeTab === tab
+                          ? "text-[#1a1c1b] border-b-[#775a19] font-medium"
+                          : "text-[#5f5e5e]/60 border-b-transparent hover:text-[#1a1c1b]"
+                      }`}
+                    >
+                      {tab}
+                      {tab === "Pending" && pendingReview > 0 && (
+                        <span className="ml-1.5 text-[9px] text-[#775a19]">
+                          {pendingReview}
+                        </span>
+                      )}
+                    </button>
+                  ))}
                 </div>
+              </div>
+              <button
+                onClick={approveAll}
+                disabled={pendingReview === 0}
+                className={`${roboto.className} border-none px-10 py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer transition-all duration-200 ${
+                  pendingReview === 0
+                    ? "bg-[#e3e2e0] text-[#5f5e5e]/40 cursor-not-allowed"
+                    : "bg-[#775a19] text-white hover:opacity-90"
+                }`}
+              >
+                Approve all
+              </button>
+            </section>
 
-                <div className="col-span-7 pt-4">
-                  <div className="flex justify-between items-start mb-6">
-                    <div>
-                      <span className="block text-[9px] uppercase tracking-[0.2em] text-[#775a19] mb-2">
-                        {item.category}
-                      </span>
-                      <h3 className={`${gelasio.className} text-[28px] mb-4`}>
-                        {item.name}
-                      </h3>
-                      <div className="flex gap-2">
-                        {item.tags.map((tag: any) => (
-                          <span
-                            key={tag}
-                            className="bg-[#e8e2d9] text-[#1d1b16] text-[8px] px-3 py-1 uppercase tracking-[0.15em]"
-                          >
-                            {tag}
+            <div className="flex flex-col gap-24">
+              {filteredItems.map((draft: any) => {
+                const isML = draft.pricing.source === "ml";
+                const isAccepting = draft.status === "accepting";
+                const isRevealed = revealedDrafts.has(draft.id);
+
+                return (
+                  <article
+                    key={draft.id}
+                    className={`grid grid-cols-12 gap-12 items-start transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+                      isRevealed
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 translate-y-12"
+                    } ${
+                      draft.status === "denied"
+                        ? "!opacity-30 pointer-events-none"
+                        : draft.status === "accepted"
+                          ? "!opacity-50"
+                          : ""
+                    }`}
+                  >
+                    <div className="col-span-4 relative">
+                      <div className="bg-[#efeeec] aspect-[4/5] overflow-hidden">
+                        <img
+                          src={`${draft.imageBase64}`}
+                          alt={draft.title}
+                          className="w-full h-full object-contain transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:scale-105 grayscale-[20%] hover:grayscale-0"
+                        />
+                      </div>
+                      <div className="absolute -bottom-6 -right-6 bg-white p-6 shadow-sm border border-[#d1c5b4]/10">
+                        <div className="flex items-center gap-1.5 mb-1">
+                          <span className="material-symbols-outlined filled text-sm text-[#775a19]">
+                            auto_awesome
                           </span>
+                          <span className="text-[9px] uppercase -tracking-tight text-[#5f5e5e]/80">
+                            {isML ? "ML Model" : "AI Estimate"}
+                          </span>
+                        </div>
+                        <span className={`${gelasio.className} text-lg`}>
+                          {isML && draft.pricing.confidence
+                            ? `${draft.pricing.confidence * 100}%`
+                            : "—"}{" "}
+                          <span
+                            className={`${roboto.className} text-xs text-[#5f5e5e]/60 italic`}
+                          >
+                            {isML ? "confidence" : "no sales history"}
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="col-span-7 pt-4">
+                      <div className="flex justify-between items-start mb-6">
+                        <div>
+                          <span className="block text-[9px] uppercase tracking-[0.2em] text-[#775a19] mb-2">
+                            {draft.category}
+                          </span>
+                          <h3
+                            className={`${gelasio.className} text-[28px] mb-4`}
+                          >
+                            {draft.title}
+                          </h3>
+                          <div className="flex gap-2 flex-wrap">
+                            {draft.tags.map((tag: any) => (
+                              <span
+                                key={tag}
+                                className="bg-[#e8e2d9] text-[#1d1b16] text-[8px] px-3 py-1 uppercase tracking-[0.15em]"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="text-right flex-shrink-0 ml-6">
+                          <span className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-1">
+                            {isML ? "Optimal price" : "AI Midpoint"}
+                          </span>
+                          <span className={`${gelasio.className} text-2xl`}>
+                            ${draft.suggestedPrice ?? "—"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-px bg-[#d1c5b4]/15 border border-[#d1c5b4]/15 mb-10">
+                        {isML ? (
+                          <>
+                            <div className="bg-[#faf9f7] p-6">
+                              <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
+                                Est. volume / mo
+                              </span>
+                              <span className="text-xl font-light text-[#1a1c1b]">
+                                {draft.pricing.estVolume || "—"}{" "}
+                                <span className="text-xs text-[#5f5e5e]/40">
+                                  units
+                                </span>
+                              </span>
+                            </div>
+                            <div className="bg-[#faf9f7] p-6">
+                              <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
+                                Max revenue potential
+                              </span>
+                              <span
+                                className={`text-xl font-light text-[#1a1c1b] ${gelasio.className}`}
+                              >
+                                {draft.pricing.price_range
+                                  ? `$${draft.pricing.price_range[0]} — $${draft.pricing.price_range[1]}`
+                                  : draft.pricing.suggested_price_range
+                                    ? `$${draft.pricing.suggested_price_range[0]} — $${draft.pricing.suggested_price_range[1]}`
+                                    : "—"}
+                              </span>
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="bg-[#faf9f7] p-6">
+                              <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
+                                Market range
+                              </span>
+                              <span className="text-xl font-light text-[#1a1c1b]">
+                                {draft.pricing.range || "—"}
+                              </span>
+                            </div>
+                            <div className="bg-[#faf9f7] p-6">
+                              <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
+                                Est. volume
+                              </span>
+                              <span className="text-xl font-light text-[#775a19]">
+                                {Array.isArray(
+                                  draft.pricing.expected_monthly_volume,
+                                )
+                                  ? `${draft.pricing.expected_monthly_volume[1]}—${draft.pricing.expected_monthly_volume[0]}`
+                                  : draft.pricing.expected_monthly_volume ||
+                                    "Unknown"}
+                              </span>
+                            </div>
+                          </>
+                        )}
+                      </div>
+
+                      {draft.description && (
+                        <p className="text-[12px] text-[#5f5e5e]/70 leading-relaxed mb-8 max-w-lg">
+                          {draft.description}
+                        </p>
+                      )}
+
+                      <div className="grid grid-cols-2 gap-8 mb-10">
+                        <div>
+                          <label className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-3">
+                            Price (Override Prediction)
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-0 bottom-2 text-[#5f5e5e]/40 text-sm">
+                              $
+                            </span>
+                            <input
+                              value={draft.priceOverride}
+                              onChange={(e) =>
+                                updateDraftField(
+                                  draft.id,
+                                  "priceOverride",
+                                  e.target.value,
+                                )
+                              }
+                              disabled={draft.status !== "pending"}
+                              className={`${roboto.className} w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 pl-4 text-sm font-medium focus:outline-none focus:border-[#775a19] transition-colors duration-200 disabled:opacity-50`}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-3">
+                            Quantity Available
+                          </label>
+                          <input
+                            type="number"
+                            value={draft.qtyOverride}
+                            onChange={(e) =>
+                              updateDraftField(
+                                draft.id,
+                                "qtyOverride",
+                                parseInt(e.target.value) || 1,
+                              )
+                            }
+                            min={1}
+                            disabled={draft.status !== "pending"}
+                            className={`${roboto.className} w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 text-sm font-medium focus:outline-none focus:border-[#775a19] transition-colors duration-200 disabled:opacity-50`}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex gap-4">
+                        {draft.status === "accepted" ? (
+                          <div className="flex-1 flex items-center justify-center gap-2 py-4 bg-emerald-50 border border-emerald-200 transition-all duration-500">
+                            <span className="material-symbols-outlined text-emerald-600 text-lg">
+                              check_circle
+                            </span>
+                            <span className="text-[11px] uppercase tracking-[0.15em] text-emerald-700 font-medium">
+                              Published
+                            </span>
+                          </div>
+                        ) : draft.status === "denied" ? (
+                          <div className="flex-1 flex items-center justify-center gap-2 py-4 bg-red-50/50 border border-red-200/50 transition-all duration-500">
+                            <span className="text-[11px] uppercase tracking-[0.15em] text-red-400 font-medium">
+                              Denied
+                            </span>
+                          </div>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleAccept(draft.id)}
+                              disabled={isAccepting}
+                              className={`${roboto.className} flex-1 border-none py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 ${
+                                isAccepting
+                                  ? "bg-[#775a19] text-white cursor-wait"
+                                  : "bg-[#5f5e5e] text-white hover:bg-[#1a1c1b]"
+                              }`}
+                            >
+                              {isAccepting && (
+                                <span className="material-symbols-outlined animate-spin text-sm">
+                                  progress_activity
+                                </span>
+                              )}
+                              {isAccepting ? "Publishing…" : "Accept & publish"}
+                            </button>
+                            <button
+                              onClick={() => handleDeny(draft.id)}
+                              disabled={isAccepting}
+                              className={`${roboto.className} px-8 border border-[#d1c5b4] bg-transparent text-[#5f5e5e] py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:bg-red-50 hover:text-red-700 hover:border-red-700 transition-all duration-200 disabled:opacity-40 disabled:pointer-events-none`}
+                            >
+                              Deny
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+
+              {activeTab === "All" &&
+                Array.from({ length: skeletonCount }).map((_, i) => (
+                  <article
+                    key={`skeleton-${i}`}
+                    className="grid grid-cols-12 gap-12 items-start"
+                  >
+                    <div className="col-span-4 relative">
+                      <div className="bg-[#efeeec] aspect-[4/5] overflow-hidden animate-pulse" />
+                      <div className="absolute -bottom-6 -right-6 bg-white p-6 shadow-sm border border-[#d1c5b4]/10">
+                        <div className="h-3 w-16 bg-[#efeeec] rounded animate-pulse mb-2" />
+                        <div className="h-5 w-24 bg-[#efeeec] rounded animate-pulse" />
+                      </div>
+                    </div>
+                    <div className="col-span-7 pt-4">
+                      <div className="mb-6">
+                        <div className="h-2.5 w-20 bg-[#efeeec] rounded animate-pulse mb-4" />
+                        <div className="h-8 w-64 bg-[#efeeec] rounded animate-pulse mb-4" />
+                        <div className="flex gap-2">
+                          <div className="h-5 w-14 bg-[#efeeec] rounded animate-pulse" />
+                          <div className="h-5 w-16 bg-[#efeeec] rounded animate-pulse" />
+                          <div className="h-5 w-12 bg-[#efeeec] rounded animate-pulse" />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-px bg-[#d1c5b4]/15 border border-[#d1c5b4]/15 mb-10">
+                        {[0, 1].map((j) => (
+                          <div key={j} className="bg-[#faf9f7] p-6">
+                            <div className="h-2 w-24 bg-[#efeeec] rounded animate-pulse mb-3" />
+                            <div className="h-6 w-20 bg-[#efeeec] rounded animate-pulse" />
+                          </div>
                         ))}
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-1">
-                        {item.priceLabel}
-                      </span>
-                      <span className={`${gelasio.className} text-2xl`}>
-                        ${item.price}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-px bg-[#d1c6b4]/15 border border-[#d1c5b4]/15 mb-10">
-                    {item.metrics.map((m: any, i: any) => (
-                      <div key={i} className="bg-[#faf9f7] p-6">
-                        <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
-                          {m.label}
-                        </span>
-                        <span
-                          className={`text-xl font-light ${m.accent ? "text-[#775a19]" : "text-[#1a1c1b]"}`}
-                        >
-                          {m.value}{" "}
-                          {m.suffix && (
-                            <span className="text-xs text-[#5f5e5e]/40">
-                              {m.suffix}
-                            </span>
-                          )}
-                        </span>
+                      <div className="grid grid-cols-2 gap-8 mb-10">
+                        {[0, 1].map((j) => (
+                          <div key={j}>
+                            <div className="h-2 w-28 bg-[#efeeec] rounded animate-pulse mb-4" />
+                            <div className="h-8 w-full bg-[#efeeec] rounded animate-pulse" />
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-8 mb-10">
-                    <div>
-                      <label className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-3">
-                        Price (Override Prediction)
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-0 bottom-2 text-[#5f5e5e]/40 text-sm">
-                          $
-                        </span>
-                        <input
-                          defaultValue={item.price}
-                          className={`${roboto.className} w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 pl-4 text-sm font-medium`}
-                        ></input>
+                      <div className="flex gap-4">
+                        <div className="flex-1 h-12 bg-[#efeeec] rounded animate-pulse" />
+                        <div className="w-28 h-12 bg-[#efeeec] rounded animate-pulse" />
                       </div>
                     </div>
-
-                    <div>
-                      <label className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-3">
-                        Quantity Availble
-                      </label>
-                      <input
-                        type="number"
-                        defaultValue={item.qty}
-                        className={`${roboto.className} w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 text-sm font-medium`}
-                      ></input>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <button
-                      onClick={() => updateStatus(item.id, "accepted")}
-                      className={`${roboto.className} flex-1 bg-[#5f5e5e] text-white border-none py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:bg-[#1a1c1b] transition-colors`}
-                    >
-                      Accept &amp; publish
-                    </button>
-                    <button
-                      onClick={() => updateStatus(item.id, "denied")}
-                      className={`${roboto.className} px-8 border border-[#d1c5b4] bg-transparent text-[#5f5e5e] py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:bg-red-50 hover:text-red-700 hover:border-red-700 transition-all`}
-                    >
-                      Deny
-                    </button>
-                  </div>
-                </div>
-              </article>
-            );
-          })}
-          {activeTab === "All" &&
-            Array.from({ length: skeletonCount }).map((_, i) => (
-              <article
-                key={`skeleton-${i}`}
-                className="grid grid-cols-12 gap-12 items-start"
-              >
-                <div className="col-span-4 relative">
-                  <div className="bg-[#efeeec] aspect-[4/5] overflow-hidden animate-pulse" />
-                  <div className="absolute -bottom-6 -right-6 bg-white p-6 shadow-sm border border-[#d1c5b4]/10">
-                    <div className="h-3 w-16 bg-[#efeeec] rounded animate-pulse mb-2" />
-                    <div className="h-5 w-24 bg-[#efeeec] rounded animate-pulse" />
-                  </div>
-                </div>
-                <div className="col-span-7 pt-4">
-                  <div className="mb-6">
-                    <div className="h-2.5 w-20 bg-[#efeeec] rounded animate-pulse mb-4" />
-                    <div className="h-8 w-64 bg-[#efeeec] rounded animate-pulse mb-4" />
-                    <div className="flex gap-2">
-                      <div className="h-5 w-14 bg-[#efeeec] rounded animate-pulse" />
-                      <div className="h-5 w-16 bg-[#efeeec] rounded animate-pulse" />
-                      <div className="h-5 w-12 bg-[#efeeec] rounded animate-pulse" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-px bg-[#d1c5b4]/15 border border-[#d1c5b4]/15 mb-10">
-                    {[0, 1].map((j) => (
-                      <div key={j} className="bg-[#faf9f7] p-6">
-                        <div className="h-2 w-24 bg-[#efeeec] rounded animate-pulse mb-3" />
-                        <div className="h-6 w-20 bg-[#efeeec] rounded animate-pulse" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="grid grid-cols-2 gap-8 mb-10">
-                    {[0, 1].map((j) => (
-                      <div key={j}>
-                        <div className="h-2 w-28 bg-[#efeeec] rounded animate-pulse mb-4" />
-                        <div className="h-8 w-full bg-[#efeeec] rounded animate-pulse" />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="flex-1 h-12 bg-[#efeeec] rounded animate-pulse" />
-                    <div className="w-28 h-12 bg-[#efeeec] rounded animate-pulse" />
-                  </div>
-                </div>
-              </article>
-            ))}
-        </div>
+                  </article>
+                ))}
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
