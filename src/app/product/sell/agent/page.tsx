@@ -132,14 +132,18 @@ export default function AgentPage() {
         </section>
 
         <section className="mb-20">
-          <div>
+          <div className="bg-[#f4f3f1] border border-dashed border-[#d1c5b4] py-16 px-8 flex flex-col items-center text-center">
             <span className="material-symbols-outlined text-4xl text-[#7f7667] mb-4">
               upload_file
             </span>
-            <h3>Drop images here</h3>
-            <p>
-              AI will automatically analyze your high-resolution product
-              image to generate listings.
+            <h3 className={`${gelasio.className} text-xl mb-2`}>
+              Drop images here
+            </h3>
+            <p
+              className={`${gelasio.className} text-[13px] text-[#5f5e5e] max-w-xs mx-auto mb-8 leading-relaxed`}
+            >
+              AI will automatically analyze your high-resolution product image
+              to generate listings.
             </p>
             <button
               className={`${roboto.className} uppercase bg-[#5f5e5e] text-white border-none px-8 py-3.5 text-[11px] tracking-[0.15em] font-medium cursor-pointer hover:bg-[#1a1c1b] transition-colors`}
@@ -158,6 +162,7 @@ export default function AgentPage() {
               {TABS.map((tab) => (
                 <button
                   key={tab}
+                  onClick={() => setActiveTab(tab)}
                   className={`${roboto.className} transition-all duration-200 bg-transparent border-none pb-2 text-[11px] uppercase tracking-[0.15em] cursor-pointer border-b-2 ${activeTab === tab ? "text-[#1a1c1b] border-b-[#755a10] font-medium" : "text-[#5f5e5e]/60 border-b-transparent hover:text-[#1a1c1b]"}`}
                 >
                   {tab}
@@ -166,6 +171,7 @@ export default function AgentPage() {
             </div>
           </div>
           <button
+            onClick={approveAll}
             className={`${roboto.className} bg-[#775a19] text-white border-none px-10 py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:opacity-90 transition-opacity`}
           >
             Approve all
@@ -288,11 +294,13 @@ export default function AgentPage() {
 
                   <div className="flex gap-4">
                     <button
+                      onClick={() => updateStatus(item.id, "accepted")}
                       className={`${roboto.className} flex-1 bg-[#5f5e5e] text-white border-none py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:bg-[#1a1c1b] transition-colors`}
                     >
                       Accept &amp; publish
                     </button>
                     <button
+                      onClick={() => updateStatus(item.id, "denied")}
                       className={`${roboto.className} px-8 border border-[#d1c5b4] bg-transparent text-[#5f5e5e] py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:bg-red-50 hover:text-red-700 hover:border-red-700 transition-all`}
                     >
                       Deny
