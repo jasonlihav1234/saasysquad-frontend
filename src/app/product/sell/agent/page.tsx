@@ -3,6 +3,7 @@
 import TopNavBar from "@/components/universal/TopNavBar";
 import { Roboto, Gelasio } from "next/font/google";
 import { useState } from "react";
+import { Z_FILTERED } from "zlib";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -54,6 +55,15 @@ const TABS = ["All", "Pending", "Accepted", "Denied"];
 export default function AgentPage() {
   const [activeTab, setActiveTab] = useState<string>("All");
   const [statuses, setStatuses] = useState({});
+
+  const filteredItems = ITEMS.filter((i) => {
+    const s = statuses[i.id] || "pending";
+    if (activeTab === "All") {
+      return true;
+    }
+
+    return s === activeTab.toLowerCase();
+  });
 
   const counts = {
     pending: ITEMS.filter(
@@ -134,6 +144,46 @@ export default function AgentPage() {
             Approve all
           </button>
         </section>
+
+        <div className="flex flex-col gap-24">
+          {filteredItems.map((item) => {
+            const status = statuses[item.id] || "pending";
+            return (
+              <article
+                key={item.id}
+                className={`grid grid-cols-12 gap-12 items-start ${status === "denied" ? "opacity-40" : "opacity-90"}`}
+              >
+                <div className="col-span-4 relative">
+                  <div className="bg-[#efeeec] aspect-[4/5] overflow-hidden">
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="img-hover w-full h-full object-cover transition-all duration-700"
+                    ></img>
+                  </div>
+                  <div className="absolute -bottom-6 -right-6 bg-white p-6 shadow-sm border border-[#d1c5b4]/10">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="material-symbols-outlined filled text-sm text-[#775a19]">
+                        auto_awesome
+                      </span>
+                      <span className="text-[9px] uppercase -tracking-tight text-[#5f5e5e]/80">
+                        ML Model
+                      </span>
+                    </div>
+                    <span className={`${gelasio.className} text-lg`}>
+                      {item.confidence}%{" "}
+                      <span
+                        className={`${roboto.className} text-xs text-[#5f5e5e]/60 italic`}
+                      >
+                        confidence
+                      </span>
+                    </span>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </main>
     </>
   );
