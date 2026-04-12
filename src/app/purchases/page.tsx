@@ -23,7 +23,6 @@ const gelasio = Gelasio({
   style: ["normal", "italic"],
 });
 
-
 const STATUS_TABS = [
   "All Orders",
   "Processing",
@@ -93,8 +92,6 @@ export default function PurchasesPage() {
                     type="button"
                     className="flex items-center space-x-2 cursor-pointer group"
                     onClick={() => setIsSortOpen((open) => !open)}
-                    aria-expanded={isSortOpen}
-                    aria-haspopup="listbox"
                   >
                     <span
                       className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#5f5e5e]/60`}
@@ -108,7 +105,6 @@ export default function PurchasesPage() {
                     </span>
                     <span
                       className={`material-symbols-outlined text-sm transition-transform ${isSortOpen ? "rotate-180" : ""}`}
-                      aria-hidden
                     >
                       expand_more
                     </span>
@@ -117,9 +113,8 @@ export default function PurchasesPage() {
                     <ul
                       className="absolute right-0 top-full z-20 mt-2 min-w-[10rem] bg-white border border-[#d1c5b4] shadow-lg py-1"
                       role="listbox"
-                      aria-label="Sort by date"
                     >
-                      <li role="option" aria-selected={sortOrder === "newest"}>
+                      <li role="option">
                         <button
                           type="button"
                           className={`${roboto.className} w-full text-left px-4 py-3 text-[0.7rem] uppercase tracking-widest transition-colors ${
@@ -136,7 +131,7 @@ export default function PurchasesPage() {
                           Newest
                         </button>
                       </li>
-                      <li role="option" aria-selected={sortOrder === "oldest"}>
+                      <li role="option">
                         <button
                           type="button"
                           className={`${roboto.className} w-full text-left px-4 py-3 text-[0.7rem] uppercase tracking-widest transition-colors ${
