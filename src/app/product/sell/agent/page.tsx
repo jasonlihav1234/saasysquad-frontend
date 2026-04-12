@@ -98,6 +98,41 @@ export default function AgentPage() {
     }
   };
 
+  const handleDragLeave = () => setIsDragging(false);
+
+  const handleInputChange = (event: any) => {
+    if (event.target.files.length) {
+      addFiles(event.target.files);
+      event.target.value = "";
+    }
+  };
+
+  const startSession = async () => {
+    if (files.length === 0 || agentRunning) return;
+    setAgentRunning(true);
+
+    for (let i = 0; i < files.length; ++i) {
+      const fileId = files[i].id;
+      setFiles((prev: any) =>
+        prev.map((f: any) =>
+          f.id === fileId ? { ...f, status: "analyzing" } : f,
+        ),
+      );
+
+      await new Promise((r) => setTimeout(r, 800 + Math.random() * 1200));
+
+      setFiles((prev: any) =>
+        prev.map((f: any) => (f.id === fileId ? { ...f, status: "done" } : f)),
+      );
+    }
+
+    setAgentRunning(false);
+  };
+
+  const doneCount = files.filter((file: any) => file.status === "done").length;
+  const analyzingFile = files.find((file: any) => file.status === "analyzing");
+  const canAddMore = files.length < MAX_IMAGES && !agentRunning;
+
   const updateStatus = (id: any, s: any) =>
     setStatuses((p) => ({ ...p, [id]: s }));
 
@@ -117,10 +152,40 @@ export default function AgentPage() {
   });
 
   const counts = {
+    uploaded: files.length,
+    processed: doneCount,
     pending: ITEMS.filter(
       (i) => !statuses[i.id] || statuses[i.id] === "pending",
     ).length,
     published: ITEMS.filter((i) => statuses[i.id] === "accepted").length,
+  };
+
+  const statusIcon = (status: any) => {
+    if (status === "done") return "check_circle";
+    if (status === "analyzing") return "progress_activity";
+    return "image";
+  };
+
+  const statusColour = (status: any) => {
+    if (status === "done") return "text-emerald-600";
+    if (status === "analyzing") return "text-[#775a19] animate-spin";
+
+    return "text-[#5f5e5e]/30";
+  };
+
+  const statusLabel = (status: any) => {
+    if (status === "done") return "done";
+    if (status === "analyzing") return "analyzing...";
+
+    return "ready";
+  };
+
+  // formatting bytes, kilobytes, and megabytes
+  const formatSize = (bytes: any) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1048576) return `${(bytes / 1024).toFixed(0)} KB`;
+
+    return `${(bytes / 1048576).toFixed(1)} MB`;
   };
 
   return (
