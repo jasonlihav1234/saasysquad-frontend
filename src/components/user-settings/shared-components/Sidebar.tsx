@@ -8,7 +8,7 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
-export type SidebarActivePage = "account" | "purchases" | "sales";
+export type SidebarActivePage = "account" | "purchases" | "sales" | "saved";
 
 interface NavItem {
   id: SidebarActivePage;
@@ -20,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { id: "account", label: "Account Details", href: "/settings" },
   { id: "purchases", label: "Purchases", href: "/purchases" },
   { id: "sales", label: "Sales", href: "/sales" },
+  { id: "saved", label: "Saved", href: "/saved" },
 ];
 
 interface SidebarProps {
