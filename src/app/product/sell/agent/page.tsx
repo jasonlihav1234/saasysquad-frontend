@@ -49,6 +49,8 @@ const ITEMS = [
   },
 ];
 
+const TABS = ["All", "Pending", "Accepted", "Denied"];
+
 export default function AgentPage() {
   const [activeTab, setActiveTab] = useState<string>("All");
   const [statuses, setStatuses] = useState({});
@@ -112,10 +114,25 @@ export default function AgentPage() {
 
         <section className="flex justify-between items-end mb-12">
           <div>
-            <h2>Review board</h2>
-            <div></div>
+            <h2 className={`${gelasio.className} text-4xl tracking-tight mb-4`}>
+              Review board
+            </h2>
+            <div className="flex gap-8">
+              {TABS.map((tab) => (
+                <button
+                  key={tab}
+                  className={`${roboto.className} transition-all duration-200 bg-transparent border-none pb-2 text-[11px] uppercase tracking-[0.15em] cursor-pointer border-b-2 ${activeTab === tab ? "text-[#1a1c1b] border-b-[#755a10] font-medium" : "text-[#5f5e5e]/60 border-b-transparent hover:text-[#1a1c1b]"}`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
-          <button>Approve all</button>
+          <button
+            className={`${roboto.className} bg-[#775a19] text-white border-none px-10 py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer hover:opacity-90 transition-opacity`}
+          >
+            Approve all
+          </button>
         </section>
       </main>
     </>
