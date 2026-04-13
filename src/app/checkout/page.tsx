@@ -9,47 +9,6 @@ import { useUser } from "@/components/providers/UserProvider";
 import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 export default function CheckoutPage() {
-  const [subtotal, setSubtotal] = useState<number>(0);
-  const [cartLoading, setCartLoading] = useState(true);
-  const { tier, loading } = useUser();
-  const feePercents: Record<string, number> = {
-    free: 10,
-    pro: 5,
-    enterprise: 2,
-  };
-  const currentFeePercent = feePercents[tier] || 10;
-  const standardFeePercent = 10; // baseline to show savings
-
-  useEffect(() => {
-    async function getCart() {
-      try {
-        const cart = await fetch("https://sassysquad-backend.vercel.app/get", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        });
-
-        if (cart.ok) {
-          const data = await cart.json();
-          setSubtotal(data.subtotal || 0);
-        } else {
-          console.log("Failed to fetch cart");
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setCartLoading(false);
-      }
-    }
-
-    getCart();
-  }, []);
-
-  if (loading) {
-    return <div className="animate-pulse bg-gray-200 h-g w-20 rounded"></div>;
-  }
-
   const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
   );
