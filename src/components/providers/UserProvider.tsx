@@ -1,53 +1,61 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 
-const UserContext = createContext({
+type Tier = "free" | "pro" | "enterprise";
+
+interface UserContextType {
+  tier: Tier;
+  loading: boolean;
+  refreshTier: () => Promise<void>;
+}
+
+const UserContext = createContext<UserContextType>({
   tier: "free",
   loading: true,
-  setTier: (t: string) => {},
+  refreshTier: async () => {},
 });
 
-export const userProvider = ({ children }: { children: React.ReactNode }) => {
-  const [tier, setTier] = useState<string>("free");
-  const [loading, setLoading] = useState<boolean>(true);
+export const UserProvider = ({ children }: { children: ReactNode }) => {
+  const [tier, setTier] = useState<Tier>("free");
+  const [loading, setLoading] = useState(true);
+
+  const fetchTier = async () => {
+    setLoading(true);
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      setTier("free");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("https://sassysquad-backend.vercel.app/profile", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setTier(data.tier || "free");
+    } catch (e) {
+      setTier("free");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTier = async () => {
-      const token = localStorage.getItem("accessToken");
-
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
-      try {
-        const res = await fetch(
-          "https://sassysquad-backend.vercel.app/profile",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        if (res.ok) {
-          const data = await res.json();
-          setTier(data.subscription_tier);
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchTier();
   }, []);
 
   return (
-    <UserContext.Provider value={{ tier, setTier, loading }}>
+    <UserContext.Provider value={{ tier, loading, refreshTier: fetchTier }}>
       {children}
     </UserContext.Provider>
   );
