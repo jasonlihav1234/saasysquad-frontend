@@ -66,7 +66,7 @@ const TIERS: Tier[] = [
     priceSuffix: "/yr",
     badge: "Recommended",
     cta: "Elevate Experience",
-    ctaStyle: "bg-[#775a19] text-white hover:brightness-100",
+    ctaStyle: "bg-[#775a19] text-white hover:brightness-110",
     cardStyle: "bg-white shadow-[0_10px_40px_-10px_rgba(26,28,27,0.04)]",
     prominent: true,
     features: [
@@ -211,9 +211,38 @@ export default function SubscribePage() {
                   </div>
                 ))}
               </div>
+
+              <div className="mt-16">
+                <div className={`${gelasio.className} text-4xl mb-8`}>
+                  {tier.price}
+                  <span
+                    className={`${roboto.className} text-sm font-light text-[#5f5e5e]`}
+                  >
+                    {tier.priceSuffix}
+                  </span>
+                </div>
+                <button
+                  className={`${roboto.className} w-full py-4 text-xs uppercase tracking-widest font-medium transition-all duration-300 cursor-pointer border-none ${tier.ctaStyle}`}
+                >
+                  {tier.cta}
+                </button>
+              </div>
             </div>
           ))}
         </div>
+
+        <div>
+          <img></img>
+          <div></div>
+          <div>
+            <h3>
+              "True curation is not the collection of objects, but the selection
+              of meaning."
+            </h3>
+            <p>- The Founder's Note</p>
+          </div>
+        </div>
+        
       </main>
     </div>
   );
