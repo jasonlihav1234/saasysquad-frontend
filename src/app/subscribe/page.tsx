@@ -8,7 +8,29 @@ import { useEffect, useState } from "react";
 const roboto = Roboto({ subsets: ["latin"], style: ["normal", "italic"] });
 const gelasio = Gelasio({ subsets: ["latin"], style: ["normal", "italic"] });
 
-const TIERS = [
+interface TierFeature {
+  icon: string;
+  text: string;
+  enabled: boolean;
+  filled?: boolean;
+  sub?: string;
+}
+
+interface Tier {
+  name: string;
+  subtitle: string;
+  subtitleAccent?: boolean;
+  price: string;
+  priceSuffix: string;
+  badge?: string;
+  cta: string;
+  ctaStyle: string;
+  cardStyle: string;
+  prominent: boolean;
+  features: TierFeature[];
+}
+
+const TIERS: Tier[] = [
   {
     name: "Free",
     subtitle: "Complimentary Entry",
@@ -39,6 +61,7 @@ const TIERS = [
   {
     name: "Pro",
     subtitle: "Professional Standard",
+    subtitleAccent: true,
     price: "$450",
     priceSuffix: "/yr",
     badge: "Recommended",
@@ -155,6 +178,26 @@ export default function SubscribePage() {
                 >
                   {tier.name}
                 </h2>
+                <p
+                  className={`${roboto.className} text-xs uppercase tracking-widest ${tier.subtitleAccent ? "text-[#775a19] font-semibold" : "text-[#5f5e5e]/60"}`}
+                >
+                  {tier.subtitle}
+                </p>
+              </div>
+
+              <div className="mb-auto space-y-8">
+                {tier.features.map((feat, j) => (
+                  <div
+                    key={j}
+                    className={`flex items-start gap-4 ${!feat.enabled ? "opacity-30" : ""}`}
+                  >
+                    <span
+                      className={`material-symbols-outlined text-lg ${feat.enabled ? "text-[#775a19]" : ""} ${feat.filled ? "filled" : ""}`}
+                    >
+                      {feat.icon}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           ))}
