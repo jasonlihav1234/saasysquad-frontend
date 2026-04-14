@@ -1,5 +1,6 @@
 "use client";
 
+import { turborepoTraceAccess } from "next/dist/build/turborepo-access-trace";
 import { flightRouterStateSchema } from "next/dist/server/app-render/types";
 import { Gelasio, Roboto } from "next/font/google";
 import { useEffect, useState } from "react";
@@ -131,9 +132,33 @@ export default function SubscribePage() {
             Choose Your Path in <br />
             <span className="italic font-normal">The Althair</span>
           </h1>
-          <div className="mt-8 h-px w-24 bg-[#775a19]">
-          </div>
+          <div className="mt-8 h-px w-24 bg-[#775a19]"></div>
         </header>
+
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          {TIERS.map((tier, i) => (
+            <div
+              key={tier.name}
+              className={`lg:col-span-4 ${tier.cardStyle} flex flex-col h-full transition-all duration-700 ease-[cubic-bezier(0.25, 0.1, 0.25, 1)] ${tier.prominent ? "pg-12 lg:-mt-12 relative z-10" : "p-10 border-t-0"}`}
+            >
+              {tier.badge && (
+                <div
+                  className={`${roboto.className} absolute top-0 right-0 bg-[#775a19] text-white px-4 py-2 text-[0.6rem] tracking-[0.2em] uppercase`}
+                >
+                  {tier.badge}
+                </div>
+              )}
+
+              <div className="mb-12">
+                <h2
+                  className={`${gelasio.className} ${tier.prominent ? "text-4xl" : "text-3xl"} mb-2`}
+                >
+                  {tier.name}
+                </h2>
+              </div>
+            </div>
+          ))}
+        </div>
       </main>
     </div>
   );
