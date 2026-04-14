@@ -36,7 +36,7 @@ export default function ForgotPasswordPage() {
 
     try {
       const response = await fetch(
-        "https://sassysquad-backend.vercel.app/auth/forgot-password",
+        "https://sassysquad-backend.vercel.app/v2/auth/forgot-password",
         {
           method: "POST",
           headers: {

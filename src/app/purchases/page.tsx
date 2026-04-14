@@ -1,52 +1,78 @@
+"use client";
+
+import "material-symbols";
+import { PurchasesProfileFetch } from "@/app/purchases/PurchasesProfileFetch";
 import PurchaseOrderItem, {
-  type PurchaseOrderItemProps,
+  purchaseRowToItemProps,
+  type PurchaseOrderRow,
 } from "@/components/user-settings/purchases/PurchaseOrderItem";
 import Sidebar from "@/components/user-settings/shared-components/Sidebar";
 import Footer from "@/components/universal/Footer";
 import PageSectionHeading from "@/components/user-settings/shared-components/PageSectionHeading";
 import SubpageHeader from "@/components/user-settings/shared-components/SubpageHeader";
-import { Roboto } from "next/font/google";
+import { Gelasio, Roboto } from "next/font/google";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const roboto = Roboto({
   subsets: ["latin"],
   style: ["normal", "italic"],
 });
 
-const STATUS_TABS = ["All Orders", "Processing", "In Transit", "Delivered"];
+const gelasio = Gelasio({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+});
 
-const SAMPLE_ORDERS: PurchaseOrderItemProps[] = [
-  {
-    imageSrc: "",
-    status: "delivered",
-    productTitle: "Height Adjusting Desk",
-    orderNumber: "AT-89012",
-    dateLabel: "October 12, 2026",
-    price: "$1,240.00",
-    actionLabel: "View Details",
-  },
-  {
-    imageSrc: "",
-    status: "in_transit",
-    productTitle: "Lounge Chair",
-    orderNumber: "AT-90234",
-    dateLabel: "October 28, 2026",
-    price: "$4,850.00",
-    actionLabel: "View Details",
-  },
-  {
-    imageSrc: "",
-    status: "processing",
-    productTitle: "Floor Lamp",
-    orderNumber: "AT-91442",
-    dateLabel: "November 02, 2026",
-    price: "$890.00",
-    actionLabel: "View Details",
-  },
-];
+const STATUS_TABS = [
+  "All Orders",
+  "Processing",
+  "In Transit",
+  "Delivered",
+] as const;
+
+type SortOrder = "newest" | "oldest";
 
 export default function PurchasesPage() {
+  const [purchases, setPurchases] = useState<PurchaseOrderRow[]>([]);
+  const [activeStatusTab, setActiveStatusTab] =
+    useState<(typeof STATUS_TABS)[number]>("All Orders");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("newest");
+  const [isSortOpen, setIsSortOpen] = useState(false);
+  const sortDropdownRef = useRef<HTMLDivElement>(null);
+
+  const filteredAndSortedPurchases = useMemo(() => {
+    let rows = [...purchases];
+    if (activeStatusTab === "Processing") {
+      rows = rows.filter((r) => r.status === "processing");
+    } else if (activeStatusTab === "In Transit") {
+      rows = rows.filter((r) => r.status === "in_transit");
+    } else if (activeStatusTab === "Delivered") {
+      rows = rows.filter((r) => r.status === "delivered");
+    }
+    rows.sort((a, b) =>
+      sortOrder === "newest"
+        ? b.orderedAtMs - a.orderedAtMs
+        : a.orderedAtMs - b.orderedAtMs,
+    );
+    return rows;
+  }, [purchases, activeStatusTab, sortOrder]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        sortDropdownRef.current &&
+        !sortDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsSortOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
+      <PurchasesProfileFetch onLoaded={setPurchases} />
       <SubpageHeader title="Purchases" />
 
       <div className="flex flex-1 overflow-hidden">
@@ -57,24 +83,73 @@ export default function PurchasesPage() {
             <header className="w-full flex justify-between items-end pb-10">
               <PageSectionHeading
                 title="Your Purchases"
-                description="Page description here"
+                description="View all your purchases"
               />
 
               <div className="flex items-center space-x-8 pb-1">
-                <div className="flex items-center space-x-2 cursor-pointer group">
-                  <span
-                    className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#5f5e5e]/60`}
+                <div className="relative" ref={sortDropdownRef}>
+                  <button
+                    type="button"
+                    className="flex items-center space-x-2 cursor-pointer group"
+                    onClick={() => setIsSortOpen((open) => !open)}
                   >
-                    Sort By
-                  </span>
-                  <span
-                    className={`${roboto.className} text-[0.7rem] uppercase tracking-widest font-bold`}
-                  >
-                    Date: Newest
-                  </span>
-                  <span className="material-symbols-outlined text-xs uppercase">
-                    Expand More
-                  </span>
+                    <span
+                      className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#5f5e5e]/60`}
+                    >
+                      Sort By
+                    </span>
+                    <span
+                      className={`${roboto.className} text-[0.7rem] uppercase tracking-widest font-bold`}
+                    >
+                      {sortOrder === "newest" ? "Newest" : "Oldest"}
+                    </span>
+                    <span
+                      className={`material-symbols-outlined text-sm transition-transform ${isSortOpen ? "rotate-180" : ""}`}
+                    >
+                      expand_more
+                    </span>
+                  </button>
+                  {isSortOpen && (
+                    <ul
+                      className="absolute right-0 top-full z-20 mt-2 min-w-[10rem] bg-white border border-[#d1c5b4] shadow-lg py-1"
+                      role="listbox"
+                    >
+                      <li role="option">
+                        <button
+                          type="button"
+                          className={`${roboto.className} w-full text-left px-4 py-3 text-[0.7rem] uppercase tracking-widest transition-colors ${
+                            sortOrder === "newest"
+                              ? "bg-[#775a19]/10 text-[#775a19] font-bold"
+                              : "text-[#5f5e5e] hover:bg-[#775a19]/5 hover:text-[#775a19]"
+                          }`}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => {
+                            setSortOrder("newest");
+                            setIsSortOpen(false);
+                          }}
+                        >
+                          Newest
+                        </button>
+                      </li>
+                      <li role="option">
+                        <button
+                          type="button"
+                          className={`${roboto.className} w-full text-left px-4 py-3 text-[0.7rem] uppercase tracking-widest transition-colors ${
+                            sortOrder === "oldest"
+                              ? "bg-[#775a19]/10 text-[#775a19] font-bold"
+                              : "text-[#5f5e5e] hover:bg-[#775a19]/5 hover:text-[#775a19]"
+                          }`}
+                          onMouseDown={(e) => e.preventDefault()}
+                          onClick={() => {
+                            setSortOrder("oldest");
+                            setIsSortOpen(false);
+                          }}
+                        >
+                          Oldest
+                        </button>
+                      </li>
+                    </ul>
+                  )}
                 </div>
               </div>
             </header>
@@ -82,11 +157,12 @@ export default function PurchasesPage() {
             <nav className="w-full border-b border-[#d1c5b4]/10">
               <div className="flex space-x-12">
                 {STATUS_TABS.map((label) => {
-                  const isActive = label === "All Orders";
+                  const isActive = label === activeStatusTab;
                   return (
                     <button
                       key={label}
                       type="button"
+                      onClick={() => setActiveStatusTab(label)}
                       className={`${roboto.className} pb-4 text-[0.7rem] uppercase tracking-widest transition-colors ${
                         isActive
                           ? "border-b border-[#775a19] text-[#775a19] font-bold"
@@ -101,9 +177,40 @@ export default function PurchasesPage() {
             </nav>
 
             <section className="w-full py-12 space-y-12">
-              {SAMPLE_ORDERS.map((order) => (
-                <PurchaseOrderItem key={order.orderNumber} {...order} />
-              ))}
+              {filteredAndSortedPurchases.length > 0 ? (
+                filteredAndSortedPurchases.map((row) => (
+                  <PurchaseOrderItem
+                    key={row.orderNumber}
+                    {...purchaseRowToItemProps(row)}
+                  />
+                ))
+              ) : purchases.length > 0 ? (
+                <div className="text-center py-6">
+                  <h1
+                    className={`${gelasio.className} text-3xl md:text-4xl font-bold text-[#1a1c1b] mb-4 tracking-tight`}
+                  >
+                    No orders in this category.
+                  </h1>
+                  <p
+                    className={`${roboto.className} text-[#5f5e5e] text-base max-w-md mx-auto leading-relaxed`}
+                  >
+                    Try another tab or view all orders.
+                  </p>
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <h1
+                    className={`${gelasio.className} text-3xl md:text-4xl font-bold text-[#1a1c1b] mb-4 tracking-tight`}
+                  >
+                    No purchases so far.
+                  </h1>
+                  <p
+                    className={`${roboto.className} text-[#5f5e5e] text-base max-w-md mx-auto leading-relaxed`}
+                  >
+                    Make a purchase to get started.
+                  </p>
+                </div>
+              )}
             </section>
           </div>
 

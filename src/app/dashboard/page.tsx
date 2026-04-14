@@ -339,7 +339,7 @@ function DashboardContent() {
   const handleSearchSubmit = async (e: any) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    let searchString =
+    const searchString =
       formData.get("search-string")?.toString().toLowerCase() || "";
 
     const executeSearch = async (searchString: string) => {
@@ -755,14 +755,17 @@ function DashboardContent() {
       >
         {hasItems ? (
           <>
-            <header className="mb-20 -mx-12 px-12 pt-32 pb-32 bg-[#F4F3F1] flex flex-col md:flex-row justify-between items-end gap-8">
+            <header 
+              className="mb-20 -mx-12 px-12 pt-32 pb-32 bg-cover bg-center flex flex-col md:flex-row justify-between items-end gap-8"
+              style={{ backgroundImage: `url('https://plus.unsplash.com/premium_photo-1709533328991-cd6191a4186c?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')` }}
+            >
               <div className="max-w-2xl">
                 <h1
-                  className={`text-6xl md:text-7xl ${gelasio.className} tracking-tighter text-[#1a1c1b]`}
+                  className={`text-6xl md:text-7xl ${gelasio.className} tracking-tighter text-[white]`}
                 >
                   The Althaïr
                   <br></br>
-                  <span className="italic text-[#5f5e5e] font-normal">
+                  <span className="italic text-[white] font-normal">
                     Catalog
                   </span>
                 </h1>
