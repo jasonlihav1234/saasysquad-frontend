@@ -196,6 +196,18 @@ export default function SubscribePage() {
                     >
                       {feat.icon}
                     </span>
+                    <div className="flex flex-col">
+                      <span
+                        className={`text-sm ${feat.sub ? "font-semibold text-[#1a1c1b]" : "text-[#4e4639]"} leading-relaxed ${!feat.enabled ? "line-through" : ""}`}
+                      >
+                        {feat.text}
+                      </span>
+                      {feat.sub && (
+                        <span className="text-xs text-[#4e4639] leading-relaxed">
+                          {feat.sub}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
