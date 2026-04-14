@@ -103,10 +103,20 @@ const TIERS = [
 ];
 
 export default function SubscribePage() {
+  const [headerVisible, setHeaderVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    const t0 = setTimeout(() => setHeaderVisible(true), 100);
+
+    return () => [t0].forEach(clearTimeout);
+  }, []);
+
   return (
-    <div>
-      <main>
-        <header>
+    <div className="min-h-screen bg-[#faf9f7] text-[#1a1c1b]">
+      <main className="pt-40 pb-24 px-6 md:px-12 max-w-screen-2xl mx-auto">
+        <header
+          className={`mb-24 max-w-3xl transition-all duration-1000 ease-[cubic-bezier(0.25, 0.1, 0.25, 0.1)] ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
+        >
           <p>Pricing & Membership</p>
           <h1>
             Choose Your Path in <br />
