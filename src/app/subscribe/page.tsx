@@ -1,3 +1,5 @@
+"use client";
+
 import { flightRouterStateSchema } from "next/dist/server/app-render/types";
 import { Gelasio, Roboto } from "next/font/google";
 import { useEffect, useState } from "react";
@@ -101,5 +103,17 @@ const TIERS = [
 ];
 
 export default function SubscribePage() {
-  return <h1>Test Page</h1>;
+  return (
+    <div>
+      <main>
+        <header>
+          <p>Pricing & Membership</p>
+          <h1>
+            Choose Your Path in <br />
+            <span>The Althair</span>
+          </h1>
+        </header>
+      </main>
+    </div>
+  );
 }
