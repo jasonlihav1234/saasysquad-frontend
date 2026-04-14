@@ -4,6 +4,9 @@ import { flightRouterStateSchema } from "next/dist/server/app-render/types";
 import { Gelasio, Roboto } from "next/font/google";
 import { useEffect, useState } from "react";
 
+const roboto = Roboto({ subsets: ["latin"], style: ["normal", "italic"] });
+const gelasio = Gelasio({ subsets: ["latin"], style: ["normal", "italic"] });
+
 const TIERS = [
   {
     name: "Free",
@@ -117,11 +120,19 @@ export default function SubscribePage() {
         <header
           className={`mb-24 max-w-3xl transition-all duration-1000 ease-[cubic-bezier(0.25, 0.1, 0.25, 0.1)] ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
-          <p>Pricing & Membership</p>
-          <h1>
+          <p
+            className={`${roboto.className} text-[0.75rem] uppercase tracking-[0.2em] text-[#775a19] mb-4`}
+          >
+            Pricing & Membership
+          </p>
+          <h1
+            className={`${roboto.className} text-5xl md:text-7xl font-bold tracking-tight text-[#1a1c1b] leading-tight`}
+          >
             Choose Your Path in <br />
-            <span>The Althair</span>
+            <span className="italic font-normal">The Althair</span>
           </h1>
+          <div className="mt-8 h-px w-24 bg-[#775a19]">
+          </div>
         </header>
       </main>
     </div>
