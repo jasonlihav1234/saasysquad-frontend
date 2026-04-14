@@ -231,18 +231,27 @@ export default function SubscribePage() {
           ))}
         </div>
 
-        <div>
-          <img></img>
-          <div></div>
-          <div>
-            <h3>
-              "True curation is not the collection of objects, but the selection
-              of meaning."
+        <div
+          className={`mt-32 relative h-[500px] w-full overflow-hidden transition-all duration-1000`}
+        >
+          <img
+            alt="Luxury Interior"
+            className="w-full h-full object-cover"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2lcuHAiUHBjV4RF9pNgwaGKEBH4MpNl4f_4LBvhlFem3YhjdpRYAS8zpufuJluPiBKS7fzClywc5EX1qAIinG3GRuNufJMqggA606nfS9C2z0_gMUlCvqJCM2PuH_ATAmD32KWeIHACCjbn3Igz7Tu5zmLKaWLPg_dWnivaA8zAdKNXKz3HHenaGADZpeWQjagSRNG0kMMjrfQQvTJ18r-8LNwm5tAXMIeUpCTfFHHX00rkFrcs71GrnN0Ci2_DXgA9zH66wDgHiy"
+          ></img>
+          <div className="absolute inset-0 bg-[#e3e2e0]/20 mix-blend-multiply"></div>
+          <div className="absolute bottom-12 left-12 max-w-lg bg-[#faf9f7]/90 backdrop-blur-md p-10">
+            <h3 className={`${gelasio.className} text-3xl mb-4 italic`}>
+              Luxury is not in the expense, but in the intentional curation of
+              functional beauty.
             </h3>
-            <p>- The Founder's Note</p>
+            <p
+              className={`${roboto.className} text-xs uppercase tracking-widest text-[#775a19]`}
+            >
+              - The Founder's Note
+            </p>
           </div>
         </div>
-        
       </main>
     </div>
   );
