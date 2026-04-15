@@ -4,6 +4,7 @@ import { turborepoTraceAccess } from "next/dist/build/turborepo-access-trace";
 import { flightRouterStateSchema } from "next/dist/server/app-render/types";
 import { Gelasio, Roboto } from "next/font/google";
 import { useEffect, useState } from "react";
+import "material-symbols";
 
 const roboto = Roboto({ subsets: ["latin"], style: ["normal", "italic"] });
 const gelasio = Gelasio({ subsets: ["latin"], style: ["normal", "italic"] });
@@ -162,7 +163,7 @@ export default function SubscribePage() {
           {TIERS.map((tier, i) => (
             <div
               key={tier.name}
-              className={`lg:col-span-4 ${tier.cardStyle} flex flex-col h-full transition-all duration-700 ease-[cubic-bezier(0.25, 0.1, 0.25, 1)] ${tier.prominent ? "pg-12 lg:-mt-12 relative z-10" : "p-10 border-t-0"}`}
+              className={`lg:col-span-4 ${tier.cardStyle} flex flex-col h-full transition-all duration-700 ease-[cubic-bezier(0.25, 0.1, 0.25, 1)] ${tier.prominent ? "p-10 relative z-10" : "p-10 border-t-0"}`}
             >
               {tier.badge && (
                 <div
@@ -198,12 +199,12 @@ export default function SubscribePage() {
                     </span>
                     <div className="flex flex-col">
                       <span
-                        className={`text-sm ${feat.sub ? "font-semibold text-[#1a1c1b]" : "text-[#4e4639]"} leading-relaxed ${!feat.enabled ? "line-through" : ""}`}
+                        className={`text-sm ${roboto.className} ${feat.sub ? "font-semibold text-[#1a1c1b]" : "text-[#4e4639]"} leading-relaxed ${!feat.enabled ? "line-through" : ""}`}
                       >
                         {feat.text}
                       </span>
                       {feat.sub && (
-                        <span className="text-xs text-[#4e4639] leading-relaxed">
+                        <span className={`text-xs text-[#4e4639] leading-relaxed ${roboto.className}`}>
                           {feat.sub}
                         </span>
                       )}
