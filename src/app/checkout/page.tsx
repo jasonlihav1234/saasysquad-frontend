@@ -5,8 +5,6 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
-import { useUser } from "@/components/providers/UserProvider";
-import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 export default function CheckoutPage() {
   const stripePromise = loadStripe(
