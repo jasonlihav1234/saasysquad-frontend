@@ -9,8 +9,6 @@ import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, Suspense } from "react";
 import ItemCard from "@/components/dashboard/ItemCard";
-import { testItems } from "./pageData";
-import { Tracing } from "trace_events";
 
 // probably should make this user/dashboard
 
@@ -142,7 +140,6 @@ function DashboardContent() {
         );
 
         if (categoryResponse.status === 200) {
-          // console.log("HEre");
           const data = await categoryResponse.json();
           const filteredCategories = data.categories.map((category: any) =>
             category.category_name.toUpperCase().replace(/-+/g, " "),
@@ -211,7 +208,7 @@ function DashboardContent() {
     if (topRef.current) {
       topRef.current.scrollIntoView({
         behavior: "auto",
-        block: "start"
+        block: "start",
       });
     }
 
@@ -755,9 +752,11 @@ function DashboardContent() {
       >
         {hasItems ? (
           <>
-            <header 
+            <header
               className="mb-20 -mx-12 px-12 pt-32 pb-32 bg-cover bg-center flex flex-col md:flex-row justify-between items-end gap-8"
-              style={{ backgroundImage: `url('https://plus.unsplash.com/premium_photo-1709533328991-cd6191a4186c?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')` }}
+              style={{
+                backgroundImage: `url('https://plus.unsplash.com/premium_photo-1709533328991-cd6191a4186c?q=80&w=3132&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')`,
+              }}
             >
               <div className="max-w-2xl">
                 <h1
@@ -794,9 +793,6 @@ function DashboardContent() {
               </div>
             </header>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-              {testItems.map((item) => (
-                <ItemCard key={item.item_id} item={item} />
-              ))}
               {currentItems.map((item) => (
                 <ItemCard key={item.item_id} item={item} />
               ))}
