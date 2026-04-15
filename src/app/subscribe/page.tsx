@@ -5,6 +5,7 @@ import { flightRouterStateSchema } from "next/dist/server/app-render/types";
 import { Gelasio, Roboto } from "next/font/google";
 import { useEffect, useState } from "react";
 import "material-symbols";
+import { useUser } from "@/components/providers/UserProvider";
 
 const roboto = Roboto({ subsets: ["latin"], style: ["normal", "italic"] });
 const gelasio = Gelasio({ subsets: ["latin"], style: ["normal", "italic"] });
@@ -131,6 +132,7 @@ const TIERS: Tier[] = [
 ];
 
 export default function SubscribePage() {
+  const { tier: currentTier, loading } = useUser();
   const [headerVisible, setHeaderVisible] = useState<boolean>(false);
 
   useEffect(() => {
@@ -223,7 +225,7 @@ export default function SubscribePage() {
                   </span>
                 </div>
                 <button
-                  className={`${roboto.className} w-full py-4 text-xs uppercase tracking-widest font-medium transition-all duration-300 cursor-pointer border-none ${tier.ctaStyle}`}
+                  className={`${roboto.className} ${tier.name.toLowerCase() === currentTier ? "disabled" : ""} w-full py-4 text-xs uppercase tracking-widest font-medium transition-all duration-300 cursor-pointer border-none ${tier.ctaStyle}`}
                 >
                   {tier.cta}
                 </button>
