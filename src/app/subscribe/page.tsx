@@ -296,7 +296,7 @@ export default function SubscribePage() {
 
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#1a1c1b]">
-      <main className="pt-40 pb-24 px-6 md:px-12 max-w-screen-2xl mx-auto">
+      <main className="pt-15 pb-24 px-6 md:px-12 max-w-screen-2xl mx-auto">
         <header
           className={`mb-24 max-w-3xl transition-all duration-1000 ease-[cubic-bezier(0.25, 0.1, 0.25, 0.1)] ${headerVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}
         >
@@ -313,6 +313,36 @@ export default function SubscribePage() {
           </h1>
           <div className="mt-8 h-px w-24 bg-[#775a19]"></div>
         </header>
+
+        {upgradeResult && (
+          <div className="mb-12 px-6 py-4 bg-emerald-50 border border-emerald-200 flex items-center justify-between transition-all duration-500">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-emerald-600">check_circle</span>
+              <span className={`${roboto.className} text-sm text-emerald-800`}>{upgradeResult}</span>
+            </div>
+            <button
+              onClick={() => setUpgradeResult(null)}
+              className="text-emerald-600 hover:text-emerald-800 bg-transparent border-none cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-lg">close</span>
+            </button>
+          </div>
+        )}
+
+        {checkoutError && (
+          <div className="mb-12 px-6 py-4 bg-red-50 border border-red-200 flex items-center justify-between transition-all duration-500">
+            <div className="flex items-center gap-3">
+              <span className="material-symbols-outlined text-red-500">error</span>
+              <span className={`${roboto.className} text-sm text-red-800`}>{checkoutError}</span>
+            </div>
+            <button
+              onClick={() => setCheckoutError(null)}
+              className="text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-lg">close</span>
+            </button>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           {TIERS.map((tier, i) => (
