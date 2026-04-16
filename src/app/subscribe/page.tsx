@@ -134,12 +134,35 @@ const TIERS: Tier[] = [
 export default function SubscribePage() {
   const { tier: currentTier, loading } = useUser();
   const [headerVisible, setHeaderVisible] = useState<boolean>(false);
+  const [cardsVisible, setCardsVisible] = useState<boolean[]>([
+    false,
+    false,
+    false,
+  ]);
+  const [quoteVisible, setQuoteVisible] = useState<boolean>(false);
+
+  const [checkoutTier, setCheckoutTier] = useState<string | null>(null);
+  const [checkoutSecret, setCheckoutSecret] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState<boolean>(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
+
+  const [upgradeResult, setUpgradeResult] = useState<string | null>(null);
 
   useEffect(() => {
     const t0 = setTimeout(() => setHeaderVisible(true), 100);
+    const t1 = setTimeout(() => setCardsVisible([true, false, false]), 300);
+    const t2 = setTimeout(() => setCardsVisible([true, true, false]), 450);
+    const t3 = setTimeout(() => setCardsVisible([true, true, true]), 600);
+    const t4 = setTimeout(() => setQuoteVisible(true), 900);
 
-    return () => [t0].forEach(clearTimeout);
+    return () => [t0, t1, t2, t3, t4].forEach(clearTimeout);
   }, []);
+
+  const closeCheckout = () => {
+    setCheckoutTier(null);
+    setCheckoutSecret(null);
+    setCheckoutError(null);
+  }:
 
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#1a1c1b]">
@@ -206,7 +229,9 @@ export default function SubscribePage() {
                         {feat.text}
                       </span>
                       {feat.sub && (
-                        <span className={`text-xs text-[#4e4639] leading-relaxed ${roboto.className}`}>
+                        <span
+                          className={`text-xs text-[#4e4639] leading-relaxed ${roboto.className}`}
+                        >
                           {feat.sub}
                         </span>
                       )}
