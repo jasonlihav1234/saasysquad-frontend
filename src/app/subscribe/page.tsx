@@ -213,6 +213,50 @@ export default function SubscribePage() {
     };
   };
 
+  const handleSubscribe = useCallback(
+    async (tierId: string) => {
+      if (tierId === "free") {
+        if (
+          !confirm(
+            "This will cancel your subscription at the end of the billing period. Continue?",
+          )
+        ) {
+          return;
+        }
+
+        setCheckoutLoading(true);
+        setCheckoutError(null);
+
+        try {
+          const res = await fetch(
+            "https://sassysquad-backend.vercel.app/v1/subscription/cancel",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            },
+          );
+
+          const data = await res.json();
+
+          if (!res.ok) {
+            throw new Error(data.message || "Cancellation failed");
+          }
+
+          setUpgradeResult(data.message);
+        } catch (error: any) {
+          setCheckoutError(error.message);
+        } finally {
+          setCheckoutLoading(false);
+        }
+
+        return;
+      }
+    },
+    [currentTier],
+  );
+
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#1a1c1b]">
       <main className="pt-40 pb-24 px-6 md:px-12 max-w-screen-2xl mx-auto">
