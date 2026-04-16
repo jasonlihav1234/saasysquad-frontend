@@ -131,6 +131,8 @@ const TIERS: Tier[] = [
   },
 ];
 
+const TIER_ORDER: Record<string, number> = { free: 0, pro: 1, enterprise: 2 };
+
 export default function SubscribePage() {
   const { tier: currentTier, loading } = useUser();
   const [headerVisible, setHeaderVisible] = useState<boolean>(false);
@@ -162,7 +164,54 @@ export default function SubscribePage() {
     setCheckoutTier(null);
     setCheckoutSecret(null);
     setCheckoutError(null);
-  }:
+  };
+
+  // determine button state by tier
+
+  const getButtonState = (tierId: string) => {
+    if (loading) {
+      return {
+        label: "Loading...",
+        disabled: true,
+      };
+    }
+
+    if (tierId === currentTier) {
+      return {
+        label: "Current Plan",
+        disabled: true,
+      };
+    }
+
+    if (tierId === "free") {
+      if (currentTier !== "free") {
+        return {
+          label: "Cancel & Downgrade",
+          disabled: false,
+        };
+      }
+
+      return {
+        label: "Current Plan",
+        disabled: true,
+      };
+    }
+
+    const currentOrder = TIER_ORDER[currentTier || "free"] ?? 0;
+    const targetOrder = TIER_ORDER[tierId] ?? 0;
+
+    if (targetOrder > currentOrder) {
+      return {
+        label: TIERS.find((t: any) => t.id === tierId)?.cta || "Upgrade",
+        disabled: false,
+      };
+    }
+
+    return {
+      label: "Switch Plan",
+      disabled: true,
+    };
+  };
 
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#1a1c1b]">
