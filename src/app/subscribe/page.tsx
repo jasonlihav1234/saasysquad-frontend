@@ -1,9 +1,7 @@
 "use client";
 
-import { turborepoTraceAccess } from "next/dist/build/turborepo-access-trace";
-import { flightRouterStateSchema } from "next/dist/server/app-render/types";
 import { Gelasio, Roboto } from "next/font/google";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import "material-symbols";
 import { useUser } from "@/components/providers/UserProvider";
 
@@ -252,6 +250,45 @@ export default function SubscribePage() {
         }
 
         return;
+      }
+
+      setCheckoutLoading(true);
+      setCheckoutError(null);
+      setCheckoutTier(tierId);
+
+      try {
+        const res = await fetch(
+          "https://sassysquad-backend.vercel.app/v1/subscription/checkout",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ tier: tierId }),
+          },
+        );
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.message || "Failed to start checkout");
+        }
+
+        if (data.upgraded) {
+          setUpgradeResult(
+            `Subscription updated to ${tierId}. Proration applied.`,
+          );
+          setCheckoutTier(null);
+          setCheckoutLoading(false);
+          return;
+        }
+
+        setCheckoutSecret(data.clientSecret);
+      } catch (error: any) {
+        setCheckoutError(error.message);
+        setCheckoutTier(null);
+      } finally {
+        setCheckoutLoading(false);
       }
     },
     [currentTier],
