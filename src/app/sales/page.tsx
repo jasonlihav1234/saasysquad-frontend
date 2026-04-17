@@ -600,6 +600,41 @@ function AnalyticsTier({
   );
 }
 
+function formatCurrency(val: number | string | undefined | null): string {
+  const n = Number(val ?? 0);
+  if (isNaN(n)) return "$0.00";
+
+  return `$${n.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })}`;
+}
+
+function formatDate(dateStr: string | undefined | null): string {
+  if (!dateStr) return "-";
+
+  try {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric"
+    });
+  } catch {
+    return "-";
+  }
+}
+
+function mapSaleStatus(status: string | undefined): SaleRowItem["status"] {
+  if (!status) return "awaiting_shipment";
+
+  const s = status.toLowerCase();
+  if (s.includes("deliver")) return "delivered";
+  if (s.includes("ship")) return "awaiting_shipment";
+  if (s.includes("cancel")) return "cancelled";
+
+  return "awaiting_shipment";
+}
+
 export default function SalesPage() {
   const { tier, userId, loading: userLoading } = useUser();
 

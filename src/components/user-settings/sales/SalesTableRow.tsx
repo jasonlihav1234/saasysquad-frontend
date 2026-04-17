@@ -10,7 +10,7 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
-export type SaleStatus = "awaiting_shipment" | "delivered";
+export type SaleStatus = "awaiting_shipment" | "delivered" | "cancelled";
 
 export interface SaleRowItem {
   id: string;
