@@ -42,13 +42,10 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      const res = await fetch(
-        "https://sassysquad-backend-git-story-sa-7b9802-jasons-projects-ac5e4f90.vercel.app/profile",
-        {
-          method: "GET",
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      const res = await fetch("https://sassysquad-backend.vercel.app/profile", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const data = await res.json();
       setTier(data.response[0].subscription_tier || "free");
       setUserId(data.response[0].user_id || null);

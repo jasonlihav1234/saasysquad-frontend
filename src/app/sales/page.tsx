@@ -55,8 +55,7 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
-const backendUrl: string =
-  "https://sassysquad-backend-git-story-sa-0b5945-jasons-projects-ac5e4f90.vercel.app";
+const backendUrl: string = "https://sassysquad-backend.vercel.app";
 
 const statCardShell =
   "bg-[#efeeec] p-10 flex flex-col justify-center items-center text-center";
