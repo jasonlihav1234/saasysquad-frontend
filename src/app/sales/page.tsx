@@ -13,7 +13,37 @@ import SalesTableRow, {
 } from "@/components/user-settings/sales/SalesTableRow";
 import { Gelasio, Roboto } from "next/font/google";
 import { useUser } from "@/components/providers/UserProvider";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import Link from "next/Link";
+import { resumeAndPrerenderToNodeStream } from "react-dom/static";
+
+interface BasicAnalytics {
+  revenueThisQuarter: number;
+  revenueThisMonth: number;
+  ordersThisQuarter: number;
+  itemsSoldTotal: number;
+  activeListings: number;
+  monthOverMonth: number | null;
+}
+
+interface ProAnalytics {
+  conversionRate: number | null;
+  averageOrderValue: number;
+  viewsToSales: number;
+  repeatBuyerRate: number;
+  topCategory: { name: string; revenue: number } | null;
+  revenueByMonth: { month: string; revenue: number }[];
+}
+
+interface EnterpriseAnalytics {
+  forecastNextQuarter: number;
+  customerLifetimeValue: number;
+  uniqueBuyers: number;
+  churnRiskCount: number;
+  inventoryTurnoverDays: number;
+  competitivePosition: "leading" | "strong" | "mid" | "emerging";
+  marketShareSegment: number;
+}
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -24,6 +54,9 @@ const roboto = Roboto({
   subsets: ["latin"],
   style: ["normal", "italic"],
 });
+
+const backendUrl: string =
+  "https://saasysquad-frontend-git-story-s-10518e-jasons-projects-ac5e4f90.vercel.app";
 
 const statCardShell =
   "bg-[#efeeec] p-10 flex flex-col justify-center items-center text-center";
@@ -93,18 +126,72 @@ function hasAccess(
 }
 
 export default function SalesPage() {
-  const { tier, loading } = useUser();
+  const { tier, loading: userLoading } = useUser();
 
   const [basic, setBasic] = useState<any>(null);
   const [pro, setPro] = useState<any>(null);
   const [enterprise, setEnterprise] = useState<any>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   const canAccessPro = hasAccess(tier, "pro");
   const canAccessEnterprise = hasAccess(tier, "enterprise");
 
   useEffect(() => {
-    // fetch the real endpoints for the analytics
+    if (userLoading) return;
+
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      setAnalyticsLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    const fetchJson = async <T,>(path: string): Promise<T | null> => {
+      try {
+        const res = await fetch(`${backendUrl}${path}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!res.ok) return null;
+
+        return (await res.json()) as T;
+      } catch (error: any) {
+        console.log(error);
+        return null;
+      }
+    };
+
+    const loadAll = async () => {
+      const [basicData, proData, enterpriseData] = await Promise.all([
+        fetchJson<BasicAnalytics>("/v1/analytics/basic"),
+        canAccessPro ? fetchJson<ProAnalytics>("/v1/analytics/pro") : null,
+        canAccessEnterprise
+          ? fetchJson<EnterpriseAnalytics>("/v1/analytics/enterprise")
+          : null,
+      ]);
+
+      if (cancelled) return;
+
+      setBasic(basicData);
+      setPro(proData);
+      setEnterprise(enterpriseData);
+
+      if (!basicData) {
+        setFetchError("Could not load analytics. Please refresh.");
+      }
+
+      setAnalyticsLoading(false);
+    };
+
+    loadAll();
+
+    return () => {
+      cancelled = true;
+    };
   }, [canAccessPro, canAccessEnterprise]);
 
   return (
