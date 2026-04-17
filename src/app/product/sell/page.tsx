@@ -632,7 +632,7 @@ export default function SellProducePage() {
                       list="category-suggestions"
                       name="category"
                       id="category"
-                      className="pl-4 focus:outline-0 w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-[#d1c5b4]/50"
+                      className="pl-4 text-black focus:outline-0 w-full bg-[#e9e8e6] border-none border-b border-[#d1c5b4] py-3 px-0 focus:border-[#775a19] transition-colors text-lg placeholder:italic placeholder:text-black/50"
                       placeholder="Specify other..."
                       type="text"
                       value={category}
@@ -683,7 +683,7 @@ export default function SellProducePage() {
                       Item Name
                     </label>
                     <input
-                      className={`pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg italic ${gelasio.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
+                      className={`pl-4 bg-[#e9e8e6] border-0 text-black border-b border-outline px-0 py-3 text-lg italic ${gelasio.className} placeholder:text-black/50 focus:ring-0 focus:outline-0`}
                       placeholder="e.g. Mid-Century Oak Table"
                       type="text"
                       name="item-name"
@@ -696,7 +696,7 @@ export default function SellProducePage() {
                       Listing Price
                     </label>
                     <input
-                      className={`pl-4 italic bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${gelasio.className} placeholder:text-[#d1c5b4] focus:ring-0 focus:outline-0`}
+                      className={`pl-4 italic text-black bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${gelasio.className} placeholder:text-black/50 focus:ring-0 focus:outline-0`}
                       placeholder="0.00"
                       type="number"
                       step="0.01"
@@ -735,7 +735,7 @@ export default function SellProducePage() {
                         }}
                         onFocus={() => setIsTagOpen(true)}
                         onKeyDown={handleKeyDown}
-                        className={`${gelasio.className} italic pl-2 bg-transparent border-0 focus:ring-0 focus:outline-0 text-sm p-0 flex-grow pt-1.25 pb-1.25 placeholder:text-[#a7a5a5]`}
+                        className={`${gelasio.className} text-black italic pl-2 bg-transparent border-0 focus:ring-0 focus:outline-0 text-sm p-0 flex-grow pt-1.25 pb-1.25 placeholder:text-black/50`}
                         placeholder="Add tags..."
                         type="text"
                         name="tags"
@@ -774,7 +774,7 @@ export default function SellProducePage() {
                       Inventory Count
                     </label>
                     <input
-                      className={`italic pl-4 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 text-lg ${gelasio.className} focus:ring-0 focus:outline-0`}
+                      className={`italic pl-4 bg-[#e9e8e6] text-black border-0 border-b border-outline px-0 py-3 text-lg ${gelasio.className} focus:ring-0 focus:outline-0`}
                       type="number"
                       name="quantity"
                     ></input>
@@ -787,7 +787,7 @@ export default function SellProducePage() {
                     </label>
                     <textarea
                       rows={4}
-                      className={`pl-4 italic bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${gelasio.className} placeholder:text-[#d1c5b4] focus:ring-0 resize-none focus:outline-0`}
+                      className={`pl-4 text-black italic bg-[#e9e8e6] border-0 border-b border-[#7f7667] px-0 py-3 text-md ${gelasio.className} placeholder:text-black/50 focus:ring-0 resize-none focus:outline-0`}
                       placeholder="Describe the materials, history, and craftmanship..."
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
