@@ -56,7 +56,7 @@ const roboto = Roboto({
 });
 
 const backendUrl: string =
-  "https://saasysquad-frontend-git-story-s-10518e-jasons-projects-ac5e4f90.vercel.app";
+  "https://sassysquad-backend-git-story-sa-0b5945-jasons-projects-ac5e4f90.vercel.app";
 
 const statCardShell =
   "bg-[#efeeec] p-10 flex flex-col justify-center items-center text-center";
@@ -667,7 +667,7 @@ export default function SalesPage() {
     return () => {
       cancelled = true;
     };
-  }, [canAccessPro, canAccessEnterprise]);
+  }, [canAccessPro, canAccessEnterprise, userLoading]);
 
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
@@ -746,57 +746,6 @@ export default function SalesPage() {
             </AnalyticsTier>
 
             <section className="pb-24">
-              <div className="grid grid-cols-12 gap-8">
-                <div className="col-span-12 md:col-span-5 bg-[#f4f3f1] p-10 flex flex-col justify-between">
-                  <div>
-                    <span
-                      className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}
-                    >
-                      Performance Overview
-                    </span>
-                    <h2
-                      className={`${gelasio.className} text-5xl font-light text-[#1a1c1b]`}
-                    >
-                      $12,450.00
-                    </h2>
-                    <p
-                      className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}
-                    >
-                      Total Revenue this Quarter
-                    </p>
-                  </div>
-                  <div className="mt-12 flex items-center gap-2 text-[#775a19]">
-                    <span className="material-symbols-outlined">
-                      trending_up
-                    </span>
-                    <span className={`${roboto.className} text-sm font-bold`}>
-                      +12.4% from last month
-                    </span>
-                  </div>
-                </div>
-
-                <div className="col-span-12 md:col-span-7 grid grid-cols-2 gap-8">
-                  <div className={statCardShell}>
-                    <h3
-                      className={`${gelasio.className} text-4xl mb-1 text-[#1a1c1b]`}
-                    >
-                      8
-                    </h3>
-                    <p className={statCardCaption}>Active Listings</p>
-                  </div>
-                  <div className={statCardShell}>
-                    <h3
-                      className={`${gelasio.className} text-4xl mb-1 text-[#1a1c1b]`}
-                    >
-                      24
-                    </h3>
-                    <p className={statCardCaption}>Items Sold</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="pb-24">
               <div className="flex justify-between items-end mb-10">
                 <div className="max-w-md">
                   <h3 className={`${gelasio.className} text-3xl mb-4`}>
@@ -805,7 +754,7 @@ export default function SalesPage() {
                   <p
                     className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed`}
                   >
-                    Sales tab description here.
+                    Your most recent orders and their fulfillment status.
                   </p>
                 </div>
               </div>
@@ -834,6 +783,7 @@ export default function SalesPage() {
                 </table>
               </div>
             </section>
+
             <section className="pb-24">
               <div className="flex justify-between items-center mb-10">
                 <h3 className={`${gelasio.className} text-3xl`}>
@@ -860,7 +810,6 @@ export default function SalesPage() {
                 {ACTIVE_LISTINGS.map((listing) => (
                   <ActiveListingCard key={listing.title} {...listing} />
                 ))}
-
                 <button
                   type="button"
                   className="group cursor-pointer border-2 border-dashed border-[#d1c5b4]/30 hover:border-[#775a19]/50 transition-colors text-left w-full"
@@ -877,7 +826,7 @@ export default function SalesPage() {
                     <p
                       className={`${roboto.className} text-[0.6rem] text-[#5f5e5e]/40 mt-2 px-4`}
                     >
-                      Description here (Upload Image here).
+                      Upload an image to create a new listing.
                     </p>
                   </div>
                 </button>
