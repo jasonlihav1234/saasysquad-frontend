@@ -140,7 +140,9 @@ function MetricBox({
 }) {
   return (
     <div className="bg-[#efeeec] p-6 flex flex-col justify-center min-h-[120px]">
-      <p className={`${roboto.className} text-[0.6rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-2`}>
+      <p
+        className={`${roboto.className} text-[0.6rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-2`}
+      >
         {label}
       </p>
       <h4
@@ -151,30 +153,41 @@ function MetricBox({
         {value}
       </h4>
       {sublabel && (
-        <p className={`${roboto.className} text-[0.65rem] text-[#5f5e5e]/50 mt-1`}>
+        <p
+          className={`${roboto.className} text-[0.65rem] text-[#5f5e5e]/50 mt-1`}
+        >
           {sublabel}
         </p>
       )}
     </div>
   );
 }
- 
-function MiniBarChart({ data }: { data: { month: string; revenue: number }[] }) {
+
+function MiniBarChart({
+  data,
+}: {
+  data: { month: string; revenue: number }[];
+}) {
   const max = useMemo(() => Math.max(...data.map((d) => d.revenue), 1), [data]);
- 
+
   return (
     <div className="flex items-end justify-between gap-4 h-32">
       {data.map((d) => {
         const heightPct = (d.revenue / max) * 100;
         return (
-          <div key={d.month} className="flex-1 flex flex-col items-center gap-2">
+          <div
+            key={d.month}
+            className="flex-1 flex flex-col items-center gap-2"
+          >
             <div className="w-full flex items-end h-24">
               <div
                 className="w-full bg-[#775a19] transition-all duration-500"
                 style={{ height: `${heightPct}%` }}
               />
             </div>
-            <span className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60`}>
+            <span
+              className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60`}
+            >
               {d.month}
             </span>
           </div>
@@ -183,10 +196,12 @@ function MiniBarChart({ data }: { data: { month: string; revenue: number }[] }) 
     </div>
   );
 }
- 
+
 function Skeleton({ className = "" }: { className?: string }) {
   return (
-    <span className={`inline-block bg-[#d1c5b4]/30 animate-pulse ${className}`} />
+    <span
+      className={`inline-block bg-[#d1c5b4]/30 animate-pulse ${className}`}
+    />
   );
 }
 
@@ -203,7 +218,7 @@ function BasicSection({
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
       })}`;
- 
+
   const mom = data?.monthOverMonth;
   const momLabel = loading
     ? "—"
@@ -211,18 +226,24 @@ function BasicSection({
       ? `${mom >= 0 ? "+" : ""}${mom}% from last month`
       : "Not enough history yet";
   const momPositive = (mom ?? 0) >= 0;
- 
+
   return (
     <div className="grid grid-cols-12 gap-8">
       <div className="col-span-12 md:col-span-5 bg-[#f4f3f1] p-10 flex flex-col justify-between min-h-[220px]">
         <div>
-          <span className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}>
+          <span
+            className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}
+          >
             Performance Overview
           </span>
-          <h2 className={`${gelasio.className} text-5xl font-light text-[#1a1c1b]`}>
+          <h2
+            className={`${gelasio.className} text-5xl font-light text-[#1a1c1b]`}
+          >
             {loading ? <Skeleton className="h-12 w-48" /> : revenue}
           </h2>
-          <p className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}>
+          <p
+            className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}
+          >
             Total Revenue this Quarter
           </p>
         </div>
@@ -232,20 +253,30 @@ function BasicSection({
           <span className="material-symbols-outlined">
             {momPositive ? "trending_up" : "trending_down"}
           </span>
-          <span className={`${roboto.className} text-sm font-bold`}>{momLabel}</span>
+          <span className={`${roboto.className} text-sm font-bold`}>
+            {momLabel}
+          </span>
         </div>
       </div>
- 
+
       <div className="col-span-12 md:col-span-7 grid grid-cols-2 gap-8">
         <div className={statCardShell}>
           <h3 className={`${gelasio.className} text-4xl mb-1 text-[#1a1c1b]`}>
-            {loading ? <Skeleton className="h-10 w-12" /> : (data?.activeListings ?? 0)}
+            {loading ? (
+              <Skeleton className="h-10 w-12" />
+            ) : (
+              (data?.activeListings ?? 0)
+            )}
           </h3>
           <p className={statCardCaption}>Active Listings</p>
         </div>
         <div className={statCardShell}>
           <h3 className={`${gelasio.className} text-4xl mb-1 text-[#1a1c1b]`}>
-            {loading ? <Skeleton className="h-10 w-12" /> : (data?.itemsSoldTotal ?? 0)}
+            {loading ? (
+              <Skeleton className="h-10 w-12" />
+            ) : (
+              (data?.itemsSoldTotal ?? 0)
+            )}
           </h3>
           <p className={statCardCaption}>Items Sold</p>
         </div>
@@ -267,7 +298,7 @@ const MOCK_PRO: ProAnalytics = {
     { month: "Oct", revenue: 6240 },
   ],
 };
- 
+
 const MOCK_ENTERPRISE: EnterpriseAnalytics = {
   forecastNextQuarter: 18200,
   customerLifetimeValue: 1840,
@@ -286,15 +317,19 @@ function ProSection({
   loading: boolean;
 }) {
   const d = data ?? MOCK_PRO;
- 
+
   return (
     <div className="grid grid-cols-12 gap-8">
       <div className="col-span-12 md:col-span-6 bg-[#f4f3f1] p-10 flex flex-col justify-between min-h-[280px]">
         <div>
-          <span className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}>
+          <span
+            className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}
+          >
             Conversion Rate
           </span>
-          <h2 className={`${gelasio.className} text-6xl font-light text-[#1a1c1b]`}>
+          <h2
+            className={`${gelasio.className} text-6xl font-light text-[#1a1c1b]`}
+          >
             {loading ? (
               <Skeleton className="h-16 w-36" />
             ) : d.conversionRate !== null ? (
@@ -303,7 +338,9 @@ function ProSection({
               "—"
             )}
           </h2>
-          <p className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}>
+          <p
+            className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}
+          >
             Views converting to purchases
           </p>
         </div>
@@ -315,32 +352,46 @@ function ProSection({
             : "Not enough view data yet"}
         </div>
       </div>
- 
+
       <div className="col-span-12 md:col-span-6 grid grid-cols-1 gap-8">
         <div className="bg-[#efeeec] p-8 flex items-center justify-between">
           <div>
             <p className={statCardCaption}>Average Order Value</p>
             <h3 className={`${gelasio.className} text-3xl mt-2 text-[#1a1c1b]`}>
-              {loading ? <Skeleton className="h-8 w-24" /> : `$${d.averageOrderValue.toFixed(2)}`}
+              {loading ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                `$${d.averageOrderValue.toFixed(2)}`
+              )}
             </h3>
           </div>
-          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">payments</span>
+          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">
+            payments
+          </span>
         </div>
         <div className="bg-[#efeeec] p-8 flex items-center justify-between">
           <div>
             <p className={statCardCaption}>Repeat Buyer Rate</p>
             <h3 className={`${gelasio.className} text-3xl mt-2 text-[#1a1c1b]`}>
-              {loading ? <Skeleton className="h-8 w-16" /> : `${d.repeatBuyerRate}%`}
+              {loading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                `${d.repeatBuyerRate}%`
+              )}
             </h3>
           </div>
-          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">refresh</span>
+          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">
+            refresh
+          </span>
         </div>
       </div>
- 
+
       <div className="col-span-12 bg-[#faf9f7] border border-[#d1c5b4]/30 p-10">
         <div className="flex justify-between items-end mb-6">
           <div>
-            <p className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-1`}>
+            <p
+              className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-1`}
+            >
               Revenue · Last 6 months
             </p>
             <h3 className={`${gelasio.className} text-2xl text-[#1a1c1b]`}>
@@ -348,7 +399,7 @@ function ProSection({
               {loading ? (
                 <Skeleton className="h-7 w-28 inline-block align-middle" />
               ) : (
-                d.topCategory?.name ?? "—"
+                (d.topCategory?.name ?? "—")
               )}
             </h3>
           </div>
@@ -370,6 +421,101 @@ function ProSection({
           <p className={`${roboto.className} text-sm text-[#5f5e5e]/60 italic`}>
             No sales data in the last 6 months.
           </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function EnterpriseSection({
+  data,
+  loading,
+}: {
+  data: EnterpriseAnalytics | null;
+  loading: boolean;
+}) {
+  const d = data ?? MOCK_ENTERPRISE;
+
+  return (
+    <div className="grid grid-cols-12 gap-8">
+      <div className="col-span-12 md:col-span-6 bg-[#1a1c1b] text-white p-10 flex flex-col justify-between min-h-[280px]">
+        <div>
+          <span
+            className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-white/60 mb-2 block`}
+          >
+            Forecast · Next Quarter
+          </span>
+          <h2 className={`${gelasio.className} text-6xl font-light`}>
+            {loading ? (
+              <Skeleton className="h-16 w-48 bg-white/10" />
+            ) : (
+              `$${d.forecastNextQuarter.toLocaleString()}`
+            )}
+          </h2>
+          <p
+            className={`${roboto.className} text-sm text-white/60 mt-2 italic`}
+          >
+            Projected based on current trajectory
+          </p>
+        </div>
+        <div className="mt-6 flex items-center gap-3">
+          <span className="material-symbols-outlined text-white/40">
+            auto_graph
+          </span>
+          <span className={`${roboto.className} text-xs text-white/60`}>
+            Based on last 6 months · updates hourly
+          </span>
+        </div>
+      </div>
+
+      <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4">
+        <MetricBox
+          label="Market Position"
+          value={loading ? "—" : `${d.marketShareSegment}%`}
+          sublabel="percentile in segment"
+        />
+        <MetricBox
+          label="Position"
+          value={loading ? "—" : d.competitivePosition}
+          sublabel="vs. competitors"
+          valueStyle="capitalize"
+        />
+        <MetricBox
+          label="Customer LTV"
+          value={loading ? "—" : `$${d.customerLifetimeValue.toLocaleString()}`}
+          sublabel={`${d.uniqueBuyers} unique buyers`}
+        />
+        <MetricBox
+          label="Churn Risk"
+          value={loading ? "—" : d.churnRiskCount}
+          sublabel="customers at risk"
+          accent={d.churnRiskCount > 0 ? "warning" : undefined}
+        />
+      </div>
+
+      <div className="col-span-12 bg-[#faf9f7] border border-[#d1c5b4]/30 p-8 flex items-center justify-between">
+        <div>
+          <p
+            className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-1`}
+          >
+            Inventory Turnover
+          </p>
+          <h3 className={`${gelasio.className} text-2xl text-[#1a1c1b]`}>
+            {loading ? (
+              <Skeleton className="h-7 w-48" />
+            ) : d.inventoryTurnoverDays > 0 ? (
+              <>Every {d.inventoryTurnoverDays} days</>
+            ) : (
+              "No sold-out items yet"
+            )}
+          </h3>
+        </div>
+        {!loading && d.inventoryTurnoverDays > 0 && (
+          <div
+            className={`${roboto.className} text-xs text-[#5f5e5e]/70 max-w-xs text-right`}
+          >
+            Average time from listing to selling out.
+          </div>
         )}
       </div>
     </div>
@@ -453,8 +599,6 @@ function AnalyticsTier({
     </section>
   );
 }
-
-
 
 export default function SalesPage() {
   const { tier, loading: userLoading } = useUser();
