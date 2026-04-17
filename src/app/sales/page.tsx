@@ -208,7 +208,27 @@ export default function SalesPage() {
                 title="Your Sales"
                 description="Page description here"
               />
+              {!userLoading && tier && (
+                <span
+                  className={`${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] px-3 py-1 border ${
+                    tier === "enterprise"
+                      ? "border-[#1a1c1b] text-[#1a1c1b]"
+                      : tier === "pro"
+                        ? "border-[#775a19] text-[#775a19]"
+                        : "border-[#5f5e5e]/40 text-[#5f5e5e]"
+                  }`}
+                >
+                  {tier} plan
+                </span>
+              )}
             </header>
+
+            {fetchError && (
+              <div className="mb-10 px-6 py-4 bg-red-50 border border-red-200 flex items-center gap-3">
+                <span className="material-symbols-outlined text-red-500">error</span>
+                <span className={`${roboto.className} text-sm text-red-800`}>{fetchError}</span>
+              </div>
+            )}
 
             <section className="pb-24">
               <div className="grid grid-cols-12 gap-8">
