@@ -10,7 +10,7 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
-export type SaleStatus = "awaiting_shipment" | "delivered";
+export type SaleStatus = "awaiting_shipment" | "delivered" | "cancelled" | "completed";
 
 export interface SaleRowItem {
   id: string;
@@ -22,14 +22,34 @@ export interface SaleRowItem {
   status: SaleStatus;
 }
 
+function getStatusDisplay(status: SaleStatus) {
+  switch (status) {
+    case "awaiting_shipment":
+      return {
+        label: "Awaiting Shipment",
+        badge: "bg-[#fed488]/20 text-[#785a1a]",
+        dot: "bg-[#775a19]",
+      };
+    case "cancelled":
+      return {
+        label: "Cancelled",
+        badge: "bg-red-50 text-red-700",
+        dot: "bg-red-500/70",
+      };
+    case "completed":
+    case "delivered":
+    default:
+      return {
+        label: "Completed",
+        badge: "bg-[#e3e2e0] text-[#5f5e5e]",
+        dot: "bg-[#5f5e5e]/40",
+      };
+  }
+}
+ 
 export default function SalesTableRow({ item }: { item: SaleRowItem }) {
-  const isAwaitingShipment = item.status === "awaiting_shipment";
-  const statusLabel = isAwaitingShipment ? "Awaiting Shipment" : "Delivered";
-  const statusBadgeClass = isAwaitingShipment
-    ? "bg-[#fed488]/20 text-[#785a1a]"
-    : "bg-[#e3e2e0] text-[#5f5e5e]";
-  const statusDotClass = isAwaitingShipment ? "bg-[#775a19]" : "bg-[#5f5e5e]/40";
-
+  const { label, badge, dot } = getStatusDisplay(item.status);
+ 
   return (
     <tr className="bg-[#faf9f7] border-b border-[#d1c5b4]/20">
       <td className="px-6 py-8">
@@ -58,19 +78,11 @@ export default function SalesTableRow({ item }: { item: SaleRowItem }) {
       </td>
       <td className="px-6 py-8">
         <span
-          className={`${roboto.className} inline-flex items-center gap-1.5 px-3 py-1 text-[0.65rem] uppercase tracking-widest ${statusBadgeClass}`}
+          className={`${roboto.className} inline-flex items-center gap-1.5 px-3 py-1 text-[0.65rem] uppercase tracking-widest ${badge}`}
         >
-          <span className={`w-1.5 h-1.5 rounded-full ${statusDotClass}`} />
-          {statusLabel}
+          <span className={`w-1.5 h-1.5 rounded-full ${dot}`} />
+          {label}
         </span>
-      </td>
-      <td className="px-6 py-8 text-right">
-        <button
-          type="button"
-          className="material-symbols-outlined text-[#5f5e5e] cursor-pointer"
-        >
-          more_vert
-        </button>
       </td>
     </tr>
   );
