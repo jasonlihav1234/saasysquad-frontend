@@ -2,7 +2,8 @@
 
 import { Gelasio, Roboto } from "next/font/google";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useUser } from "@/components/providers/UserProvider";
 import Link from "next/link";
 import "material-symbols";
 
@@ -14,6 +15,7 @@ type Status = "loading" | "success" | "processing" | "failed";
 export default function SubscriptionReturnPage() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
+  const { refreshTier } = useUser();
 
   const [status, setStatus] = useState<Status>("loading");
   const [email, setEmail] = useState<string | null>(null);
@@ -31,14 +33,21 @@ export default function SubscriptionReturnPage() {
       return;
     }
 
+    let cancelled = false;
+    let attempts = 0;
+    const MAX_ATTEMPTS = 6;
+
     const checkStatus = async () => {
+      if (cancelled) return;
+
       try {
         const res = await fetch(
-          `https://sassysquad-backend.vercel.app/checkout-session-status?session_id=${sessionId}`,
+          `https://sassysquad-backend-git-story-sa-7b9802-jasons-projects-ac5e4f90.vercel.app/checkout-session-status?session_id=${sessionId}`,
           { method: "GET" },
         );
 
         const data = await res.json();
+        if (cancelled) return;
 
         if (!res.ok) {
           setStatus("failed");
@@ -48,21 +57,29 @@ export default function SubscriptionReturnPage() {
         setEmail(data.customer_email);
 
         if (data.status === "complete") {
-          setStatus("success");
-        } else if (data.status === "open") {
+          refreshTier();
+          if (!cancelled) setStatus("success");
+        } else if (data.status === "open" && attempts < MAX_ATTEMPTS) {
+          ++attempts;
           setStatus("processing");
-          setTimeout(checkStatus, 1500);
+          setTimeout(checkStatus, 800);
         } else {
           setStatus("failed");
         }
       } catch (error) {
         console.log(error);
-        setStatus("failed");
+        if (!cancelled) {
+          refreshTier();
+          setStatus("success");
+        }
       }
     };
 
     checkStatus();
-  }, [sessionId]);
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, refreshTier]);
 
   return (
     <div className="min-h-screen bg-[#faf9f7] text-[#1a1c1b] flex items-center justify-center px-6">
@@ -90,7 +107,7 @@ export default function SubscriptionReturnPage() {
             </p>
           </>
         )}
- 
+
         {status === "success" && (
           <>
             <p
@@ -101,7 +118,8 @@ export default function SubscriptionReturnPage() {
             <h1
               className={`${gelasio.className} text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6`}
             >
-              Your membership is <span className="italic font-normal">active</span>
+              Your membership is{" "}
+              <span className="italic font-normal">active</span>
             </h1>
             <div className="h-px w-24 bg-[#775a19] mx-auto mb-8" />
             <p
@@ -112,7 +130,7 @@ export default function SubscriptionReturnPage() {
                 : "A receipt has been sent to your email."}{" "}
               You can manage your subscription from your account at any time.
             </p>
- 
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/"
@@ -129,7 +147,7 @@ export default function SubscriptionReturnPage() {
             </div>
           </>
         )}
- 
+
         {status === "failed" && (
           <>
             <span className="material-symbols-outlined text-5xl text-red-500 mb-6 inline-block">
@@ -144,7 +162,7 @@ export default function SubscriptionReturnPage() {
               We couldn't confirm your subscription. If you were charged, please
               contact support, otherwise you can try again.
             </p>
- 
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/subscribe"
