@@ -1,7 +1,7 @@
 "use client";
 
 import { Gelasio, Roboto } from "next/font/google";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@/components/providers/UserProvider";
 import Link from "next/link";
@@ -12,7 +12,7 @@ const gelasio = Gelasio({ subsets: ["latin"], style: ["normal", "italic"] });
 
 type Status = "loading" | "success" | "processing" | "failed";
 
-export default function SubscriptionReturnPage() {
+function SubscriptionReturnSuspense() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get("session_id");
   const { refreshTier } = useUser();
@@ -181,5 +181,21 @@ export default function SubscriptionReturnPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SubscriptionReturnPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#faf9f7] flex items-center justify-center">
+          <span className="material-symbols-outlined text-5xl text-[#775a19] animate-spin">
+            progress_activity
+          </span>
+        </div>
+      }
+    >
+      <SubscriptionReturnSuspense />
+    </Suspense>
   );
 }
