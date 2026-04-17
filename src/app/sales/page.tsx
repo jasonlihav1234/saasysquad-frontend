@@ -14,7 +14,7 @@ import SalesTableRow, {
 import { Gelasio, Roboto } from "next/font/google";
 import { useUser } from "@/components/providers/UserProvider";
 import { useEffect, useState, useMemo } from "react";
-import Link from "next/Link";
+import Link from "next/link";
 import { resumeAndPrerenderToNodeStream } from "react-dom/static";
 
 interface BasicAnalytics {
@@ -125,6 +125,71 @@ function hasAccess(
   return user >= required;
 }
 
+function MetricBox({
+  label,
+  value,
+  sublabel,
+  valueStyle,
+  accent,
+}: {
+  label: string;
+  value: string | number;
+  sublabel?: string;
+  valueStyle?: string;
+  accent?: "warning";
+}) {
+  return (
+    <div className="bg-[#efeeec] p-6 flex flex-col justify-center min-h-[120px]">
+      <p className={`${roboto.className} text-[0.6rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-2`}>
+        {label}
+      </p>
+      <h4
+        className={`${gelasio.className} text-2xl ${valueStyle || ""} ${
+          accent === "warning" ? "text-[#ba1a1a]" : "text-[#1a1c1b]"
+        }`}
+      >
+        {value}
+      </h4>
+      {sublabel && (
+        <p className={`${roboto.className} text-[0.65rem] text-[#5f5e5e]/50 mt-1`}>
+          {sublabel}
+        </p>
+      )}
+    </div>
+  );
+}
+ 
+function MiniBarChart({ data }: { data: { month: string; revenue: number }[] }) {
+  const max = useMemo(() => Math.max(...data.map((d) => d.revenue), 1), [data]);
+ 
+  return (
+    <div className="flex items-end justify-between gap-4 h-32">
+      {data.map((d) => {
+        const heightPct = (d.revenue / max) * 100;
+        return (
+          <div key={d.month} className="flex-1 flex flex-col items-center gap-2">
+            <div className="w-full flex items-end h-24">
+              <div
+                className="w-full bg-[#775a19] transition-all duration-500"
+                style={{ height: `${heightPct}%` }}
+              />
+            </div>
+            <span className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60`}>
+              {d.month}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+ 
+function Skeleton({ className = "" }: { className?: string }) {
+  return (
+    <span className={`inline-block bg-[#d1c5b4]/30 animate-pulse ${className}`} />
+  );
+}
+
 interface AnalyticsTierProps {
   label: string;
   tier: string;
@@ -134,7 +199,7 @@ interface AnalyticsTierProps {
   unlockCopy?: string;
   children: React.ReactNode;
 }
- 
+
 function AnalyticsTier({
   label,
   tier,
@@ -157,12 +222,14 @@ function AnalyticsTier({
             </span>
           </div>
           <h3 className={`${gelasio.className} text-3xl mb-3`}>{label}</h3>
-          <p className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed`}>
+          <p
+            className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed`}
+          >
             {description}
           </p>
         </div>
       </div>
- 
+
       <div className="relative">
         <div
           className={`transition-all duration-500 ${
@@ -172,7 +239,7 @@ function AnalyticsTier({
         >
           {children}
         </div>
- 
+
         {locked && (
           <div className="absolute inset-0 flex items-center justify-center p-8">
             <div className="bg-[#faf9f7] border border-[#d1c5b4] p-10 max-w-md text-center shadow-[0_10px_40px_-10px_rgba(26,28,27,0.12)]">
@@ -182,7 +249,9 @@ function AnalyticsTier({
               <h4 className={`${gelasio.className} text-2xl mb-3`}>
                 Reserved for {tier} members
               </h4>
-              <p className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed mb-8`}>
+              <p
+                className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed mb-8`}
+              >
                 {unlockCopy}
               </p>
               <Link
@@ -198,6 +267,8 @@ function AnalyticsTier({
     </section>
   );
 }
+
+
 
 export default function SalesPage() {
   const { tier, loading: userLoading } = useUser();
@@ -299,13 +370,16 @@ export default function SalesPage() {
 
             {fetchError && (
               <div className="mb-10 px-6 py-4 bg-red-50 border border-red-200 flex items-center gap-3">
-                <span className="material-symbols-outlined text-red-500">error</span>
-                <span className={`${roboto.className} text-sm text-red-800`}>{fetchError}</span>
+                <span className="material-symbols-outlined text-red-500">
+                  error
+                </span>
+                <span className={`${roboto.className} text-sm text-red-800`}>
+                  {fetchError}
+                </span>
               </div>
             )}
 
-            <AnalyticsTier>
-            </AnalyticsTier>
+            <AnalyticsTier></AnalyticsTier>
 
             <section className="pb-24">
               <div className="grid grid-cols-12 gap-8">
