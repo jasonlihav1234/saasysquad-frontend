@@ -1,3 +1,5 @@
+"use client";
+
 import "material-symbols";
 import Sidebar from "@/components/user-settings/shared-components/Sidebar";
 import Footer from "@/components/universal/Footer";
@@ -10,6 +12,8 @@ import SalesTableRow, {
   type SaleRowItem,
 } from "@/components/user-settings/sales/SalesTableRow";
 import { Gelasio, Roboto } from "next/font/google";
+import { useUser } from "@/components/providers/UserProvider";
+import { useEffect, useState } from "react";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -31,8 +35,7 @@ const ACTIVE_LISTINGS: ActiveListingCardProps[] = [
     title: "Oak dining chair",
     price: "$850.00",
     stock: 2,
-    imageSrc:
-      "",
+    imageSrc: "",
     imageAlt: "Oak dining chair",
     showQuickManageOverlay: true,
   },
@@ -40,16 +43,14 @@ const ACTIVE_LISTINGS: ActiveListingCardProps[] = [
     title: "Marble Bowl",
     price: "$310.00",
     stock: 1,
-    imageSrc:
-      "",
+    imageSrc: "",
     imageAlt: "Marble Bowl",
   },
   {
     title: "Amber Glass Decanter",
     price: "$145.00",
     stock: 5,
-    imageSrc:
-      "",
+    imageSrc: "",
     imageAlt: "Amber Glass Decanter",
   },
 ];
@@ -75,7 +76,37 @@ const SALES_ROWS: SaleRowItem[] = [
   },
 ];
 
+const TIER_ORDER: any = {
+  free: 0,
+  pro: 1,
+  enterprise: 2,
+};
+
+function hasAccess(
+  userTier: string | undefined,
+  requiredTier: string,
+): boolean {
+  const user = TIER_ORDER[userTier || "free"] ?? 0;
+  const required = TIER_ORDER[requiredTier] ?? 0;
+
+  return user >= required;
+}
+
 export default function SalesPage() {
+  const { tier, loading } = useUser();
+
+  const [basic, setBasic] = useState<any>(null);
+  const [pro, setPro] = useState<any>(null);
+  const [enterprise, setEnterprise] = useState<any>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+
+  const canAccessPro = hasAccess(tier, "pro");
+  const canAccessEnterprise = hasAccess(tier, "enterprise");
+
+  useEffect(() => {
+    // fetch the real endpoints for the analytics
+  }, [canAccessPro, canAccessEnterprise]);
+
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
       <SubpageHeader title="Sales" />
@@ -113,10 +144,10 @@ export default function SalesPage() {
                     </p>
                   </div>
                   <div className="mt-12 flex items-center gap-2 text-[#775a19]">
-                    <span className="material-symbols-outlined">trending_up</span>
-                    <span
-                      className={`${roboto.className} text-sm font-bold`}
-                    >
+                    <span className="material-symbols-outlined">
+                      trending_up
+                    </span>
+                    <span className={`${roboto.className} text-sm font-bold`}>
                       +12.4% from last month
                     </span>
                   </div>
