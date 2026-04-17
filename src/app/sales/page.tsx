@@ -635,6 +635,28 @@ function mapSaleStatus(status: string | undefined): SaleRowItem["status"] {
   return "awaiting_shipment";
 }
 
+function EmptyState({
+  icon, title, copy, ctaLabel, ctaHref,
+}: {
+  icon: string; title: string; copy: string; ctaLabel?: string; ctaHref?: string;
+}) {
+  return (
+    <div className="border border-dashed border-[#d1c5b4]/50 bg-[#f4f3f1]/30 p-12 text-center">
+      <span className="material-symbols-outlined text-4xl text-[#5f5e5e]/30 mb-4 inline-block">{icon}</span>
+      <h4 className={`${gelasio.className} text-xl mb-2 text-[#1a1c1b]`}>{title}</h4>
+      <p className={`${roboto.className} text-sm text-[#5f5e5e]/70 max-w-md mx-auto mb-6`}>{copy}</p>
+      {ctaLabel && ctaHref && (
+        <Link
+          href={ctaHref}
+          className={`${roboto.className} inline-block px-8 py-3 bg-[#775a19] text-white text-[0.65rem] uppercase tracking-[0.2em] font-medium hover:brightness-110 transition-all no-underline`}
+        >
+          {ctaLabel}
+        </Link>
+      )}
+    </div>
+  );
+}
+
 export default function SalesPage() {
   const { tier, userId, loading: userLoading } = useUser();
 
