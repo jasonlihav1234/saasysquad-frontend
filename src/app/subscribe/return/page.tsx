@@ -42,7 +42,7 @@ export default function SubscriptionReturnPage() {
 
       try {
         const res = await fetch(
-          `https://sassysquad-backend-git-story-sa-7b9802-jasons-projects-ac5e4f90.vercel.app/checkout-session-status?session_id=${sessionId}`,
+          `https://sassysquad-backend.vercel.app/checkout-session-status?session_id=${sessionId}`,
           { method: "GET" },
         );
 
@@ -133,13 +133,13 @@ export default function SubscriptionReturnPage() {
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="/"
+                href="/dashboard"
                 className={`${roboto.className} px-8 py-4 bg-[#775a19] text-white text-xs uppercase tracking-widest font-medium hover:brightness-110 transition-all duration-300 no-underline`}
               >
                 Begin curating
               </Link>
               <Link
-                href="/account"
+                href="/settings"
                 className={`${roboto.className} px-8 py-4 border border-[#d1c5b4] text-[#5f5e5e] text-xs uppercase tracking-widest font-medium hover:bg-[#f4f3f1] transition-all duration-300 no-underline`}
               >
                 View account

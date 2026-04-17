@@ -4,9 +4,21 @@ import { Gelasio, Roboto } from "next/font/google";
 import { useEffect, useState, useCallback } from "react";
 import "material-symbols";
 import { useUser } from "@/components/providers/UserProvider";
+import { loadStripe } from "@stripe/stripe-js";
+import {
+  EmbeddedCheckoutProvider,
+  EmbeddedCheckout,
+} from "@stripe/react-stripe-js";
 
 const roboto = Roboto({ subsets: ["latin"], style: ["normal", "italic"] });
 const gelasio = Gelasio({ subsets: ["latin"], style: ["normal", "italic"] });
+
+const stripePromise = loadStripe(
+  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
+);
+
+const backendUrl =
+  "https://sassysquad-backend-git-story-sa-7b9802-jasons-projects-ac5e4f90.vercel.app";
 
 interface TierFeature {
   icon: string;
@@ -17,6 +29,7 @@ interface TierFeature {
 }
 
 interface Tier {
+  id: string;
   name: string;
   subtitle: string;
   subtitleAccent?: boolean;
@@ -32,6 +45,7 @@ interface Tier {
 
 const TIERS: Tier[] = [
   {
+    id: "free",
     name: "Free",
     subtitle: "Complimentary Entry",
     price: "$0",
@@ -59,6 +73,7 @@ const TIERS: Tier[] = [
     ],
   },
   {
+    id: "pro",
     name: "Pro",
     subtitle: "Professional Standard",
     subtitleAccent: true,
@@ -95,6 +110,7 @@ const TIERS: Tier[] = [
     ],
   },
   {
+    id: "enterprise",
     name: "Enterprise",
     subtitle: "Enterprise Partnership",
     price: "$700",
@@ -132,7 +148,8 @@ const TIERS: Tier[] = [
 const TIER_ORDER: Record<string, number> = { free: 0, pro: 1, enterprise: 2 };
 
 export default function SubscribePage() {
-  const { tier: currentTier, loading } = useUser();
+  const { tier: currentTier, loading, refreshTier } = useUser();
+  console.log(currentTier);
   const [headerVisible, setHeaderVisible] = useState<boolean>(false);
   const [cardsVisible, setCardsVisible] = useState<boolean[]>([
     false,
@@ -182,16 +199,9 @@ export default function SubscribePage() {
     }
 
     if (tierId === "free") {
-      if (currentTier !== "free") {
-        return {
-          label: "Cancel & Downgrade",
-          disabled: false,
-        };
-      }
-
       return {
-        label: "Current Plan",
-        disabled: true,
+        label: "Cancel & Downgrade",
+        disabled: false,
       };
     }
 
@@ -207,7 +217,7 @@ export default function SubscribePage() {
 
     return {
       label: "Switch Plan",
-      disabled: true,
+      disabled: false,
     };
   };
 
@@ -226,15 +236,13 @@ export default function SubscribePage() {
         setCheckoutError(null);
 
         try {
-          const res = await fetch(
-            "https://sassysquad-backend.vercel.app/v1/subscription/cancel",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
+          const res = await fetch(`${backendUrl}/v1/subscription/cancel`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
-          );
+          });
 
           const data = await res.json();
 
@@ -243,6 +251,7 @@ export default function SubscribePage() {
           }
 
           setUpgradeResult(data.message);
+          refreshTier();
         } catch (error: any) {
           setCheckoutError(error.message);
         } finally {
@@ -257,16 +266,14 @@ export default function SubscribePage() {
       setCheckoutTier(tierId);
 
       try {
-        const res = await fetch(
-          "https://sassysquad-backend.vercel.app/v1/subscription/checkout",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ tier: tierId }),
+        const res = await fetch(`${backendUrl}/v1/subscription/checkout`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-        );
+          body: JSON.stringify({ tier: tierId }),
+        });
 
         const data = await res.json();
 
@@ -280,6 +287,7 @@ export default function SubscribePage() {
           );
           setCheckoutTier(null);
           setCheckoutLoading(false);
+          refreshTier();
           return;
         }
 
@@ -291,7 +299,7 @@ export default function SubscribePage() {
         setCheckoutLoading(false);
       }
     },
-    [currentTier],
+    [currentTier, refreshTier],
   );
 
   return (
@@ -317,8 +325,12 @@ export default function SubscribePage() {
         {upgradeResult && (
           <div className="mb-12 px-6 py-4 bg-emerald-50 border border-emerald-200 flex items-center justify-between transition-all duration-500">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-emerald-600">check_circle</span>
-              <span className={`${roboto.className} text-sm text-emerald-800`}>{upgradeResult}</span>
+              <span className="material-symbols-outlined text-emerald-600">
+                check_circle
+              </span>
+              <span className={`${roboto.className} text-sm text-emerald-800`}>
+                {upgradeResult}
+              </span>
             </div>
             <button
               onClick={() => setUpgradeResult(null)}
@@ -332,8 +344,12 @@ export default function SubscribePage() {
         {checkoutError && (
           <div className="mb-12 px-6 py-4 bg-red-50 border border-red-200 flex items-center justify-between transition-all duration-500">
             <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-red-500">error</span>
-              <span className={`${roboto.className} text-sm text-red-800`}>{checkoutError}</span>
+              <span className="material-symbols-outlined text-red-500">
+                error
+              </span>
+              <span className={`${roboto.className} text-sm text-red-800`}>
+                {checkoutError}
+              </span>
             </div>
             <button
               onClick={() => setCheckoutError(null)}
@@ -345,89 +361,164 @@ export default function SubscribePage() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {TIERS.map((tier, i) => (
-            <div
-              key={tier.name}
-              className={`lg:col-span-4 ${tier.cardStyle} flex flex-col h-full transition-all duration-700 ease-[cubic-bezier(0.25, 0.1, 0.25, 1)] ${tier.prominent ? "p-10 relative z-10" : "p-10 border-t-0"}`}
-            >
-              {tier.badge && (
-                <div
-                  className={`${roboto.className} absolute top-0 right-0 bg-[#775a19] text-white px-4 py-2 text-[0.6rem] tracking-[0.2em] uppercase`}
-                >
-                  {tier.badge}
-                </div>
-              )}
+          {TIERS.map((tier: any, i: any) => {
+            const btn = getButtonState(tier.id);
+            const isCurrent = tier.id === currentTier;
+            const isProcessing = checkoutLoading && checkoutTier === tier.id;
 
-              <div className="mb-12">
-                <h2
-                  className={`${gelasio.className} ${tier.prominent ? "text-4xl" : "text-3xl"} mb-2`}
-                >
-                  {tier.name}
-                </h2>
-                <p
-                  className={`${roboto.className} text-xs uppercase tracking-widest ${tier.subtitleAccent ? "text-[#775a19] font-semibold" : "text-[#5f5e5e]/60"}`}
-                >
-                  {tier.subtitle}
-                </p>
-              </div>
-
-              <div className="mb-auto space-y-8">
-                {tier.features.map((feat, j) => (
+            return (
+              <div
+                key={tier.id}
+                className={`lg:col-span-4 ${tier.cardStyle} flex flex-col h-full transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] relative ${
+                  tier.prominent ? "p-10 z-10" : "p-10 border-t-0"
+                } ${
+                  cardsVisible[i]
+                    ? "opacity-100 translate-y-0"
+                    : "opacity-0 translate-y-12"
+                }`}
+              >
+                {/* Badge */}
+                {tier.badge && (
                   <div
-                    key={j}
-                    className={`flex items-start gap-4 ${!feat.enabled ? "opacity-30" : ""}`}
+                    className={`${roboto.className} absolute top-0 right-0 bg-[#775a19] text-white px-4 py-2 text-[0.6rem] tracking-[0.2em] uppercase`}
                   >
-                    <span
-                      className={`material-symbols-outlined text-lg ${feat.enabled ? "text-[#775a19]" : ""} ${feat.filled ? "filled" : ""}`}
-                    >
-                      {feat.icon}
-                    </span>
-                    <div className="flex flex-col">
-                      <span
-                        className={`text-sm ${roboto.className} ${feat.sub ? "font-semibold text-[#1a1c1b]" : "text-[#4e4639]"} leading-relaxed ${!feat.enabled ? "line-through" : ""}`}
-                      >
-                        {feat.text}
-                      </span>
-                      {feat.sub && (
-                        <span
-                          className={`text-xs text-[#4e4639] leading-relaxed ${roboto.className}`}
-                        >
-                          {feat.sub}
-                        </span>
-                      )}
-                    </div>
+                    {tier.badge}
                   </div>
-                ))}
-              </div>
+                )}
 
-              <div className="mt-16">
-                <div className={`${gelasio.className} text-4xl mb-8`}>
-                  {tier.price}
-                  <span
-                    className={`${roboto.className} text-sm font-light text-[#5f5e5e]`}
+                {/* Current tier indicator */}
+                {isCurrent && (
+                  <div
+                    className={`${roboto.className} absolute top-0 left-0 bg-[#1a1c1b] text-white px-4 py-2 text-[0.6rem] tracking-[0.2em] uppercase`}
                   >
-                    {tier.priceSuffix}
-                  </span>
+                    Current
+                  </div>
+                )}
+
+                {/* Title */}
+                <div className="mb-12">
+                  <h2
+                    className={`${gelasio.className} ${tier.prominent ? "text-4xl" : "text-3xl"} mb-2`}
+                  >
+                    {tier.name}
+                  </h2>
+                  <p
+                    className={`${roboto.className} text-xs uppercase tracking-widest ${tier.subtitleAccent ? "text-[#775a19] font-semibold" : "text-[#5f5e5e]/60"}`}
+                  >
+                    {tier.subtitle}
+                  </p>
                 </div>
-                <button
-                  className={`${roboto.className} ${tier.name.toLowerCase() === currentTier ? "disabled" : ""} w-full py-4 text-xs uppercase tracking-widest font-medium transition-all duration-300 cursor-pointer border-none ${tier.ctaStyle}`}
-                >
-                  {tier.cta}
-                </button>
+
+                {/* Features */}
+                <div className="mb-auto space-y-8">
+                  {tier.features.map((feat: any, j: any) => (
+                    <div
+                      key={j}
+                      className={`flex items-start gap-4 ${!feat.enabled ? "opacity-30" : ""}`}
+                    >
+                      <span
+                        className={`material-symbols-outlined text-lg ${feat.enabled ? "text-[#775a19]" : ""} ${feat.filled ? "filled" : ""}`}
+                      >
+                        {feat.icon}
+                      </span>
+                      <div className="flex flex-col">
+                        <span
+                          className={`text-sm ${roboto.className} ${feat.sub ? "font-semibold text-[#1a1c1b]" : "text-[#4e4639]"} leading-relaxed ${!feat.enabled ? "line-through" : ""}`}
+                        >
+                          {feat.text}
+                        </span>
+                        {feat.sub && (
+                          <span
+                            className={`text-xs text-[#4e4639] leading-relaxed ${roboto.className}`}
+                          >
+                            {feat.sub}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Price + CTA */}
+                <div className="mt-16">
+                  <div className={`${gelasio.className} text-4xl mb-8`}>
+                    {tier.price}
+                    <span
+                      className={`${roboto.className} text-sm font-light text-[#5f5e5e]`}
+                    >
+                      {tier.priceSuffix}
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => !btn.disabled && handleSubscribe(tier.id)}
+                    disabled={btn.disabled || isProcessing}
+                    className={`${roboto.className} w-full py-4 text-xs uppercase tracking-widest font-medium transition-all duration-300 cursor-pointer border-none flex items-center justify-center gap-2 ${
+                      btn.disabled
+                        ? "bg-[#e3e2e0] text-[#5f5e5e]/40 !cursor-not-allowed"
+                        : isProcessing
+                          ? "bg-[#775a19] text-white cursor-wait"
+                          : tier.ctaStyle
+                    }`}
+                  >
+                    {isProcessing && (
+                      <span className="material-symbols-outlined animate-spin text-sm">
+                        progress_activity
+                      </span>
+                    )}
+                    {isProcessing ? "Loading…" : btn.label}
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
+        {/* ── Embedded Checkout Modal ────────────────────────────────── */}
+        {checkoutSecret && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-[#1a1c1b]/60 backdrop-blur-sm transition-opacity duration-300"
+              onClick={closeCheckout}
+            />
+
+            {/* Checkout container */}
+            <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white p-8">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className={`${gelasio.className} text-2xl`}>
+                  Complete Subscription
+                </h3>
+                <button
+                  onClick={closeCheckout}
+                  className="text-[#5f5e5e] hover:text-[#1a1c1b] bg-transparent border-none cursor-pointer"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+              <EmbeddedCheckoutProvider
+                stripe={stripePromise}
+                options={{ clientSecret: checkoutSecret }}
+              >
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
+            </div>
+          </div>
+        )}
+
+        {/* ── Lifestyle Image + Quote ─────────────────────────────────── */}
         <div
-          className={`mt-32 relative h-[500px] w-full overflow-hidden transition-all duration-1000`}
+          className={`mt-32 relative h-[500px] w-full overflow-hidden transition-all duration-1000 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
+            quoteVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-12"
+          }`}
         >
           <img
             alt="Luxury Interior"
             className="w-full h-full object-cover"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuC2lcuHAiUHBjV4RF9pNgwaGKEBH4MpNl4f_4LBvhlFem3YhjdpRYAS8zpufuJluPiBKS7fzClywc5EX1qAIinG3GRuNufJMqggA606nfS9C2z0_gMUlCvqJCM2PuH_ATAmD32KWeIHACCjbn3Igz7Tu5zmLKaWLPg_dWnivaA8zAdKNXKz3HHenaGADZpeWQjagSRNG0kMMjrfQQvTJ18r-8LNwm5tAXMIeUpCTfFHHX00rkFrcs71GrnN0Ci2_DXgA9zH66wDgHiy"
-          ></img>
-          <div className="absolute inset-0 bg-[#e3e2e0]/20 mix-blend-multiply"></div>
+          />
+          <div className="absolute inset-0 bg-[#e3e2e0]/20 mix-blend-multiply" />
           <div className="absolute bottom-12 left-12 max-w-lg bg-[#faf9f7]/90 backdrop-blur-md p-10">
             <h3 className={`${gelasio.className} text-3xl mb-4 italic`}>
               Luxury is not in the expense, but in the intentional curation of
@@ -436,7 +527,7 @@ export default function SubscribePage() {
             <p
               className={`${roboto.className} text-xs uppercase tracking-widest text-[#775a19]`}
             >
-              - The Founder's Note
+              — The Founder's Note
             </p>
           </div>
         </div>
