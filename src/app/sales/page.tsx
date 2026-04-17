@@ -606,7 +606,7 @@ function formatCurrency(val: number | string | undefined | null): string {
 
   return `$${n.toLocaleString(undefined, {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2
+    maximumFractionDigits: 2,
   })}`;
 }
 
@@ -617,7 +617,7 @@ function formatDate(dateStr: string | undefined | null): string {
     return new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
-      year: "numeric"
+      year: "numeric",
     });
   } catch {
     return "-";
@@ -631,20 +631,37 @@ function mapSaleStatus(status: string | undefined): SaleRowItem["status"] {
   if (s.includes("deliver")) return "delivered";
   if (s.includes("ship")) return "awaiting_shipment";
   if (s.includes("cancel")) return "cancelled";
+  if (s.includes("completed")) return "completed";
 
   return "awaiting_shipment";
 }
 
 function EmptyState({
-  icon, title, copy, ctaLabel, ctaHref,
+  icon,
+  title,
+  copy,
+  ctaLabel,
+  ctaHref,
 }: {
-  icon: string; title: string; copy: string; ctaLabel?: string; ctaHref?: string;
+  icon: string;
+  title: string;
+  copy: string;
+  ctaLabel?: string;
+  ctaHref?: string;
 }) {
   return (
     <div className="border border-dashed border-[#d1c5b4]/50 bg-[#f4f3f1]/30 p-12 text-center">
-      <span className="material-symbols-outlined text-4xl text-[#5f5e5e]/30 mb-4 inline-block">{icon}</span>
-      <h4 className={`${gelasio.className} text-xl mb-2 text-[#1a1c1b]`}>{title}</h4>
-      <p className={`${roboto.className} text-sm text-[#5f5e5e]/70 max-w-md mx-auto mb-6`}>{copy}</p>
+      <span className="material-symbols-outlined text-4xl text-[#5f5e5e]/30 mb-4 inline-block">
+        {icon}
+      </span>
+      <h4 className={`${gelasio.className} text-xl mb-2 text-[#1a1c1b]`}>
+        {title}
+      </h4>
+      <p
+        className={`${roboto.className} text-sm text-[#5f5e5e]/70 max-w-md mx-auto mb-6`}
+      >
+        {copy}
+      </p>
       {ctaLabel && ctaHref && (
         <Link
           href={ctaHref}
@@ -660,13 +677,28 @@ function EmptyState({
 export default function SalesPage() {
   const { tier, userId, loading: userLoading } = useUser();
 
-  const [basic, setBasic] = useState<any>(null);
-  const [pro, setPro] = useState<any>(null);
-  const [enterprise, setEnterprise] = useState<any>(null);
+  const [basic, setBasic] = useState<BasicAnalytics | null>(null);
+  const [pro, setPro] = useState<ProAnalytics | null>(null);
+  const [enterprise, setEnterprise] = useState<EnterpriseAnalytics | null>(
+    null,
+  );
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [activeListings, setActiveListings] = useState<any>([]);
-  const [recentSales, setRecentSales] = useState<any>([]);
+
+  const [sales, setSales] = useState<SaleRowItem[] | null>(null);
+  const [salesLoading, setSalesLoading] = useState(true);
+  const [salesVisible, setSalesVisible] = useState(5);
+
+  const [listings, setListings] = useState<ActiveListingCardProps[] | null>(
+    null,
+  );
+  const [listingsLoading, setListingsLoading] = useState(true);
+  const [listingsVisible, setListingsVisible] = useState(8);
+
+  const [search, setSearch] = useState("");
+
+  const SALES_PAGE_SIZE = 5;
+  const LISTINGS_PAGE_SIZE = 8;
 
   const canAccessPro = hasAccess(tier, "pro");
   const canAccessEnterprise = hasAccess(tier, "enterprise");
@@ -677,6 +709,8 @@ export default function SalesPage() {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setAnalyticsLoading(false);
+      setSalesLoading(false);
+      setListingsLoading(false);
       return;
     }
 
@@ -685,53 +719,104 @@ export default function SalesPage() {
     const fetchJson = async <T,>(path: string): Promise<T | null> => {
       try {
         const res = await fetch(`${backendUrl}${path}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
-
         if (!res.ok) return null;
-
         return (await res.json()) as T;
-      } catch (error: any) {
-        console.log(error);
+      } catch (err) {
+        console.error(`Failed to fetch ${path}:`, err);
         return null;
       }
     };
 
-    const loadAll = async () => {
-      const [basicData, proData, enterpriseData, listingsData, salesData] =
-        await Promise.all([
-          fetchJson<BasicAnalytics>("/v1/analytics/basic"),
-          canAccessPro ? fetchJson<ProAnalytics>("/v1/analytics/pro") : null,
-          canAccessEnterprise
-            ? fetchJson<EnterpriseAnalytics>("/v1/analytics/enterprise")
-            : null,
-          fetchJson<ActiveListingCardProps[]>(`/users/${userId}/items`),
-          fetchJson<SaleRowItem[]>(`/users/${userId}/sales`),
-        ]);
+    const loadAnalytics = async () => {
+      const [basicData, proData, enterpriseData] = await Promise.all([
+        fetchJson<BasicAnalytics>("/v1/analytics/basic"),
+        canAccessPro ? fetchJson<ProAnalytics>("/v1/analytics/pro") : null,
+        canAccessEnterprise
+          ? fetchJson<EnterpriseAnalytics>("/v1/analytics/enterprise")
+          : null,
+      ]);
 
       if (cancelled) return;
-
       setBasic(basicData);
       setPro(proData);
       setEnterprise(enterpriseData);
-      setActiveListings(listingsData.items || ACTIVE_LISTINGS);
-      setRecentSales(salesData.orders || SALES_ROWS);
-
-      if (!basicData) {
+      if (!basicData)
         setFetchError("Could not load analytics. Please refresh.");
-      }
-
       setAnalyticsLoading(false);
     };
 
-    loadAll();
+    const loadSalesAndListings = async () => {
+      const [salesRes, listingsRes] = await Promise.all([
+        fetchJson<any>(`/users/${userId}/sales`),
+        fetchJson<any>(`/users/${userId}/items`),
+      ]);
+
+      if (cancelled) return;
+
+      console.log("[sales] raw response:", salesRes);
+      console.log("[listings] raw response:", listingsRes);
+
+      const rawSales: any = Array.isArray(salesRes)
+        ? salesRes
+        : Array.isArray(salesRes?.sales)
+          ? salesRes.sales
+          : Array.isArray(salesRes?.data)
+            ? salesRes.data
+            : Array.isArray(salesRes?.orders)
+              ? salesRes.orders
+              : [];
+
+      const mappedSales: SaleRowItem[] = rawSales.map((s: any) => ({
+        id: s.order_id,
+        productTitle: s.item_name ?? s.order_name ?? "Order",
+        sku: s.order_id.slice(0, 8).toUpperCase(),
+        orderDate: formatDate(s.created_at ?? s.issue_date),
+        customer: s.buyer_name ?? "Customer",
+        price: formatCurrency(s.total_cost),
+        status: mapSaleStatus(s.status),
+      }));
+
+      setSales(mappedSales);
+      setSalesLoading(false);
+
+      const rawListings: any = Array.isArray(listingsRes)
+        ? listingsRes
+        : Array.isArray(listingsRes?.items)
+          ? listingsRes.items
+          : Array.isArray(listingsRes?.data)
+            ? listingsRes.data
+            : [];
+
+      const mappedListings: ActiveListingCardProps[] = rawListings
+        .filter((item: any) => item.quantity_available > 0)
+        .map((item: any) => ({
+          title: item.item_name,
+          price: formatCurrency(item.price),
+          stock: item.quantity_available,
+          imageSrc: item.image_url ?? "",
+          imageAlt: item.item_name,
+        }));
+
+      setListings(mappedListings);
+      setListingsLoading(false);
+    };
+
+    loadAnalytics();
+    loadSalesAndListings();
 
     return () => {
       cancelled = true;
     };
-  }, [canAccessPro, canAccessEnterprise, userLoading]);
+  }, [userLoading, canAccessPro, canAccessEnterprise]);
+
+  const filteredListings = useMemo(() => {
+    if (!listings) return [];
+    const q = search.toLowerCase().trim();
+    if (!q) return listings;
+    return listings.filter((l) => l.title.toLowerCase().includes(q));
+  }, [listings, search]);
 
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
@@ -745,7 +830,7 @@ export default function SalesPage() {
             <header className="w-full flex justify-between items-end pb-10">
               <PageSectionHeading
                 title="Your Sales"
-                description="Page description here"
+                description="Performance, insights, and forecasting tailored to your plan."
               />
               {!userLoading && tier && (
                 <span
@@ -823,40 +908,69 @@ export default function SalesPage() {
                 </div>
               </div>
 
-              <div className="overflow-hidden">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr
-                      className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e] bg-[#f4f3f1]`}
-                    >
-                      <th className="px-6 py-4 font-medium">Product Detail</th>
-                      <th className="px-6 py-4 font-medium">Order Date</th>
-                      <th className="px-6 py-4 font-medium">Customer</th>
-                      <th className="px-6 py-4 font-medium">Price</th>
-                      <th className="px-6 py-4 font-medium">Status</th>
-                      <th className="px-6 py-4 font-medium text-right">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentSales.length === 0 && !analyticsLoading ? (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="px-6 py-12 text-center text-[#5f5e5e]/60 text-sm italic"
+              {salesLoading ? (
+                <div className="space-y-2">
+                  {[0, 1, 2].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
+                </div>
+              ) : sales && sales.length > 0 ? (
+                <>
+                  <div className="overflow-hidden">
+                    <table className="w-full text-left border-collapse">
+                      <thead>
+                        <tr
+                          className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e] bg-[#f4f3f1]`}
                         >
-                          No recent sales to display.
-                        </td>
-                      </tr>
-                    ) : (
-                      recentSales.map((item: any) => (
-                        <SalesTableRow key={item.id} item={item} />
-                      ))
+                          <th className="px-6 py-4 font-medium">
+                            Product Detail
+                          </th>
+                          <th className="px-6 py-4 font-medium">Order Date</th>
+                          <th className="px-6 py-4 font-medium">Customer</th>
+                          <th className="px-6 py-4 font-medium">Price</th>
+                          <th className="px-6 py-4 font-medium">Status</th>
+                          <th className="px-6 py-4 font-medium text-right">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sales.slice(0, salesVisible).map((item) => (
+                          <SalesTableRow key={item.id} item={item} />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <div className="mt-8 flex items-center justify-between">
+                    <p
+                      className={`${roboto.className} text-xs text-[#5f5e5e]/60`}
+                    >
+                      Showing {Math.min(salesVisible, sales.length)} of{" "}
+                      {sales.length} {sales.length === 1 ? "sale" : "sales"}
+                    </p>
+                    {salesVisible < sales.length && (
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSalesVisible((n) => n + SALES_PAGE_SIZE)
+                        }
+                        className={`${roboto.className} px-6 py-3 border border-[#d1c5b4] text-[#5f5e5e] text-[0.65rem] uppercase tracking-[0.2em] font-medium hover:bg-[#f4f3f1] transition-all cursor-pointer`}
+                      >
+                        Load{" "}
+                        {Math.min(SALES_PAGE_SIZE, sales.length - salesVisible)}{" "}
+                        more
+                      </button>
                     )}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
+                </>
+              ) : (
+                <EmptyState
+                  icon="receipt_long"
+                  title="No sales yet"
+                  copy="When buyers purchase your listings, their orders will appear here."
+                />
+              )}
             </section>
 
             <section className="pb-24">
@@ -872,6 +986,8 @@ export default function SalesPage() {
                     <input
                       id="sales-inventory-search"
                       type="search"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
                       placeholder="Search inventory..."
                       className={`${roboto.className} bg-[#f4f3f1] border-b border-[#d1c5b4]/30 px-4 py-2 text-xs focus:outline-none focus:border-[#775a19] w-64 transition-all`}
                     />
@@ -881,31 +997,93 @@ export default function SalesPage() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-                {activeListings.map((listing: any) => (
-                  <ActiveListingCard key={listing.title} {...listing} />
-                ))}
-                <button
-                  type="button"
-                  className="group cursor-pointer border-2 border-dashed border-[#d1c5b4]/30 hover:border-[#775a19]/50 transition-colors text-left w-full"
-                >
-                  <div className="aspect-[4/5] flex flex-col items-center justify-center text-center p-8">
-                    <span className="material-symbols-outlined text-4xl text-[#5f5e5e]/30 group-hover:text-[#775a19] transition-colors mb-4">
-                      add_circle
-                    </span>
-                    <p
-                      className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#5f5e5e]/60`}
+
+              {listingsLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                  {[0, 1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="aspect-[4/5] w-full" />
+                  ))}
+                </div>
+              ) : listings && listings.length > 0 ? (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
+                    {(search
+                      ? filteredListings
+                      : filteredListings.slice(0, listingsVisible)
+                    ).map((listing) => (
+                      <ActiveListingCard key={listing.title} {...listing} />
+                    ))}
+
+                    {search && filteredListings.length === 0 && (
+                      <div className="col-span-full py-12 text-center">
+                        <p
+                          className={`${roboto.className} text-sm text-[#5f5e5e]/60`}
+                        >
+                          No listings match "{search}".
+                        </p>
+                      </div>
+                    )}
+
+                    <Link
+                      href="/sell"
+                      className="group cursor-pointer border-2 border-dashed border-[#d1c5b4]/30 hover:border-[#775a19]/50 transition-colors text-left w-full no-underline"
                     >
-                      New Listing
-                    </p>
-                    <p
-                      className={`${roboto.className} text-[0.6rem] text-[#5f5e5e]/40 mt-2 px-4`}
-                    >
-                      Upload an image to create a new listing.
-                    </p>
+                      <div className="aspect-[4/5] flex flex-col items-center justify-center text-center p-8">
+                        <span className="material-symbols-outlined text-4xl text-[#5f5e5e]/30 group-hover:text-[#775a19] transition-colors mb-4">
+                          add_circle
+                        </span>
+                        <p
+                          className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#5f5e5e]/60`}
+                        >
+                          New Listing
+                        </p>
+                        <p
+                          className={`${roboto.className} text-[0.6rem] text-[#5f5e5e]/40 mt-2 px-4`}
+                        >
+                          Upload an image to create a new listing.
+                        </p>
+                      </div>
+                    </Link>
                   </div>
-                </button>
-              </div>
+
+                  {!search && (
+                    <div className="mt-10 flex items-center justify-between">
+                      <p
+                        className={`${roboto.className} text-xs text-[#5f5e5e]/60`}
+                      >
+                        Showing{" "}
+                        {Math.min(listingsVisible, filteredListings.length)} of{" "}
+                        {filteredListings.length}{" "}
+                        {filteredListings.length === 1 ? "listing" : "listings"}
+                      </p>
+                      {listingsVisible < filteredListings.length && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setListingsVisible((n) => n + LISTINGS_PAGE_SIZE)
+                          }
+                          className={`${roboto.className} px-6 py-3 border border-[#d1c5b4] text-[#5f5e5e] text-[0.65rem] uppercase tracking-[0.2em] font-medium hover:bg-[#f4f3f1] transition-all cursor-pointer`}
+                        >
+                          Load{" "}
+                          {Math.min(
+                            LISTINGS_PAGE_SIZE,
+                            filteredListings.length - listingsVisible,
+                          )}{" "}
+                          more
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <EmptyState
+                  icon="inventory_2"
+                  title="No active listings"
+                  copy="Create your first listing to start selling. It only takes a minute."
+                  ctaLabel="Create listing"
+                  ctaHref="/sell"
+                />
+              )}
             </section>
           </div>
           <div className="p-8 md:p-12 lg:p-16 max-w">
