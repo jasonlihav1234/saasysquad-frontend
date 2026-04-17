@@ -731,6 +731,20 @@ export default function SalesPage() {
               />
             </AnalyticsTier>
 
+            <AnalyticsTier
+              label="Market Intelligence"
+              tier="Enterprise"
+              tierColor="#1a1c1b"
+              description="Forecasting, competitive positioning, and customer lifetime value."
+              locked={!canAccessEnterprise}
+              unlockCopy="Predict next quarter's revenue, understand your position against competitors, and identify customers at risk of churn before you lose them."
+            >
+              <EnterpriseSection
+                data={canAccessEnterprise ? enterprise : MOCK_ENTERPRISE}
+                loading={analyticsLoading && canAccessEnterprise}
+              />
+            </AnalyticsTier>
+
             <section className="pb-24">
               <div className="grid grid-cols-12 gap-8">
                 <div className="col-span-12 md:col-span-5 bg-[#f4f3f1] p-10 flex flex-col justify-between">
