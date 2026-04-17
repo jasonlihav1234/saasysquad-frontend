@@ -254,6 +254,128 @@ function BasicSection({
   );
 }
 
+const MOCK_PRO: ProAnalytics = {
+  conversionRate: 3.8,
+  averageOrderValue: 518.75,
+  viewsToSales: 2834,
+  repeatBuyerRate: 28,
+  topCategory: { name: "Furniture", revenue: 6240 },
+  revenueByMonth: [
+    { month: "Jul", revenue: 3200 },
+    { month: "Aug", revenue: 4100 },
+    { month: "Sep", revenue: 5150 },
+    { month: "Oct", revenue: 6240 },
+  ],
+};
+ 
+const MOCK_ENTERPRISE: EnterpriseAnalytics = {
+  forecastNextQuarter: 18200,
+  customerLifetimeValue: 1840,
+  uniqueBuyers: 62,
+  churnRiskCount: 3,
+  inventoryTurnoverDays: 47,
+  competitivePosition: "strong",
+  marketShareSegment: 75.4,
+};
+
+function ProSection({
+  data,
+  loading,
+}: {
+  data: ProAnalytics | null;
+  loading: boolean;
+}) {
+  const d = data ?? MOCK_PRO;
+ 
+  return (
+    <div className="grid grid-cols-12 gap-8">
+      <div className="col-span-12 md:col-span-6 bg-[#f4f3f1] p-10 flex flex-col justify-between min-h-[280px]">
+        <div>
+          <span className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}>
+            Conversion Rate
+          </span>
+          <h2 className={`${gelasio.className} text-6xl font-light text-[#1a1c1b]`}>
+            {loading ? (
+              <Skeleton className="h-16 w-36" />
+            ) : d.conversionRate !== null ? (
+              `${d.conversionRate}%`
+            ) : (
+              "—"
+            )}
+          </h2>
+          <p className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}>
+            Views converting to purchases
+          </p>
+        </div>
+        <div className={`${roboto.className} text-xs text-[#5f5e5e]/60 mt-6`}>
+          {d.conversionRate !== null
+            ? d.conversionRate > 2.1
+              ? "Industry avg: 2.1% — you're outperforming"
+              : "Industry avg: 2.1%"
+            : "Not enough view data yet"}
+        </div>
+      </div>
+ 
+      <div className="col-span-12 md:col-span-6 grid grid-cols-1 gap-8">
+        <div className="bg-[#efeeec] p-8 flex items-center justify-between">
+          <div>
+            <p className={statCardCaption}>Average Order Value</p>
+            <h3 className={`${gelasio.className} text-3xl mt-2 text-[#1a1c1b]`}>
+              {loading ? <Skeleton className="h-8 w-24" /> : `$${d.averageOrderValue.toFixed(2)}`}
+            </h3>
+          </div>
+          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">payments</span>
+        </div>
+        <div className="bg-[#efeeec] p-8 flex items-center justify-between">
+          <div>
+            <p className={statCardCaption}>Repeat Buyer Rate</p>
+            <h3 className={`${gelasio.className} text-3xl mt-2 text-[#1a1c1b]`}>
+              {loading ? <Skeleton className="h-8 w-16" /> : `${d.repeatBuyerRate}%`}
+            </h3>
+          </div>
+          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">refresh</span>
+        </div>
+      </div>
+ 
+      <div className="col-span-12 bg-[#faf9f7] border border-[#d1c5b4]/30 p-10">
+        <div className="flex justify-between items-end mb-6">
+          <div>
+            <p className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-1`}>
+              Revenue · Last 6 months
+            </p>
+            <h3 className={`${gelasio.className} text-2xl text-[#1a1c1b]`}>
+              Top category:{" "}
+              {loading ? (
+                <Skeleton className="h-7 w-28 inline-block align-middle" />
+              ) : (
+                d.topCategory?.name ?? "—"
+              )}
+            </h3>
+          </div>
+          <span className={`${roboto.className} text-xs text-[#5f5e5e]/70`}>
+            {loading ? (
+              <Skeleton className="h-4 w-20" />
+            ) : d.topCategory ? (
+              `$${d.topCategory.revenue.toLocaleString()} this period`
+            ) : (
+              ""
+            )}
+          </span>
+        </div>
+        {loading ? (
+          <Skeleton className="h-32 w-full" />
+        ) : d.revenueByMonth.length > 0 ? (
+          <MiniBarChart data={d.revenueByMonth} />
+        ) : (
+          <p className={`${roboto.className} text-sm text-[#5f5e5e]/60 italic`}>
+            No sales data in the last 6 months.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface AnalyticsTierProps {
   label: string;
   tier: string;
