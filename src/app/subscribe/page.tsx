@@ -17,8 +17,7 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
 );
 
-const backendUrl =
-  "https://sassysquad-backend-git-story-sa-7b9802-jasons-projects-ac5e4f90.vercel.app";
+const backendUrl = "https://sassysquad-backend.vercel.app";
 
 interface TierFeature {
   icon: string;
@@ -377,7 +376,6 @@ export default function SubscribePage() {
                     : "opacity-0 translate-y-12"
                 }`}
               >
-                {/* Badge */}
                 {tier.badge && (
                   <div
                     className={`${roboto.className} absolute top-0 right-0 bg-[#775a19] text-white px-4 py-2 text-[0.6rem] tracking-[0.2em] uppercase`}
@@ -386,7 +384,6 @@ export default function SubscribePage() {
                   </div>
                 )}
 
-                {/* Current tier indicator */}
                 {isCurrent && (
                   <div
                     className={`${roboto.className} absolute top-0 left-0 bg-[#1a1c1b] text-white px-4 py-2 text-[0.6rem] tracking-[0.2em] uppercase`}
@@ -395,7 +392,6 @@ export default function SubscribePage() {
                   </div>
                 )}
 
-                {/* Title */}
                 <div className="mb-12">
                   <h2
                     className={`${gelasio.className} ${tier.prominent ? "text-4xl" : "text-3xl"} mb-2`}
@@ -409,7 +405,6 @@ export default function SubscribePage() {
                   </p>
                 </div>
 
-                {/* Features */}
                 <div className="mb-auto space-y-8">
                   {tier.features.map((feat: any, j: any) => (
                     <div
@@ -439,7 +434,6 @@ export default function SubscribePage() {
                   ))}
                 </div>
 
-                {/* Price + CTA */}
                 <div className="mt-16">
                   <div className={`${gelasio.className} text-4xl mb-8`}>
                     {tier.price}
@@ -473,16 +467,13 @@ export default function SubscribePage() {
           })}
         </div>
 
-        {/* ── Embedded Checkout Modal ────────────────────────────────── */}
         {checkoutSecret && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
             <div
               className="absolute inset-0 bg-[#1a1c1b]/60 backdrop-blur-sm transition-opacity duration-300"
               onClick={closeCheckout}
             />
 
-            {/* Checkout container */}
             <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white p-8">
               <div className="flex justify-between items-center mb-6">
                 <h3 className={`${gelasio.className} text-2xl`}>
@@ -505,7 +496,6 @@ export default function SubscribePage() {
           </div>
         )}
 
-        {/* ── Lifestyle Image + Quote ─────────────────────────────────── */}
         <div
           className={`mt-32 relative h-[500px] w-full overflow-hidden transition-all duration-1000 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
             quoteVisible
