@@ -42,7 +42,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      setTier(data.tier || "free");
+      setTier(data.response[0].subscription_tier || "free");
     } catch (e) {
       setTier("free");
     } finally {
