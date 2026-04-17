@@ -688,6 +688,9 @@ export default function SalesPage() {
   const [sales, setSales] = useState<SaleRowItem[] | null>(null);
   const [salesLoading, setSalesLoading] = useState(true);
   const [salesVisible, setSalesVisible] = useState(5);
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "awaiting_shipment" | "delivered"
+  >("all");
 
   const [listings, setListings] = useState<ActiveListingCardProps[] | null>(
     null,
@@ -811,6 +814,16 @@ export default function SalesPage() {
     };
   }, [userLoading, canAccessPro, canAccessEnterprise]);
 
+  const filteredSales = useMemo(() => {
+    if (!sales) return [];
+    if (statusFilter === "all") return sales;
+    return sales.filter((s) => s.status === statusFilter);
+  }, [sales, statusFilter]);
+
+  useEffect(() => {
+    setSalesVisible(5);
+  }, [statusFilter]);
+
   const filteredListings = useMemo(() => {
     if (!listings) return [];
     const q = search.toLowerCase().trim();
@@ -895,7 +908,7 @@ export default function SalesPage() {
             </AnalyticsTier>
 
             <section className="pb-24">
-              <div className="flex justify-between items-end mb-10">
+              <div className="flex justify-between items-end mb-10 gap-8 flex-wrap">
                 <div className="max-w-md">
                   <h3 className={`${gelasio.className} text-3xl mb-4`}>
                     Recent Sales
@@ -906,6 +919,35 @@ export default function SalesPage() {
                     Your most recent orders and their fulfillment status.
                   </p>
                 </div>
+
+                {sales && sales.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <label
+                      htmlFor="sales-status-filter"
+                      className={`${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e]/60`}
+                    >
+                      Status
+                    </label>
+                    <select
+                      id="sales-status-filter"
+                      value={statusFilter}
+                      onChange={(e) =>
+                        setStatusFilter(e.target.value as typeof statusFilter)
+                      }
+                      className={`${roboto.className} bg-[#f4f3f1] border-b border-[#d1c5b4]/30 px-4 py-2 text-xs focus:outline-none focus:border-[#775a19] cursor-pointer transition-all appearance-none pr-8 bg-no-repeat bg-[right_0.5rem_center]`}
+                      style={{
+                        backgroundImage:
+                          "url(\"data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235f5e5e' stroke-width='2'%3e%3cpolyline points='6 9 12 15 18 9'/%3e%3c/svg%3e\")",
+                      }}
+                    >
+                      <option value="all">All</option>
+                      <option value="awaiting_shipment">
+                        Awaiting shipment
+                      </option>
+                      <option value="completed">Delivered</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
               {salesLoading ? (
@@ -914,7 +956,7 @@ export default function SalesPage() {
                     <Skeleton key={i} className="h-16 w-full" />
                   ))}
                 </div>
-              ) : sales && sales.length > 0 ? (
+              ) : filteredSales.length > 0 ? (
                 <>
                   <div className="overflow-hidden">
                     <table className="w-full text-left border-collapse">
@@ -929,13 +971,10 @@ export default function SalesPage() {
                           <th className="px-6 py-4 font-medium">Customer</th>
                           <th className="px-6 py-4 font-medium">Price</th>
                           <th className="px-6 py-4 font-medium">Status</th>
-                          <th className="px-6 py-4 font-medium text-right">
-                            Action
-                          </th>
                         </tr>
                       </thead>
                       <tbody>
-                        {sales.slice(0, salesVisible).map((item) => (
+                        {filteredSales.slice(0, salesVisible).map((item) => (
                           <SalesTableRow key={item.id} item={item} />
                         ))}
                       </tbody>
@@ -946,10 +985,13 @@ export default function SalesPage() {
                     <p
                       className={`${roboto.className} text-xs text-[#5f5e5e]/60`}
                     >
-                      Showing {Math.min(salesVisible, sales.length)} of{" "}
-                      {sales.length} {sales.length === 1 ? "sale" : "sales"}
+                      Showing {Math.min(salesVisible, filteredSales.length)} of{" "}
+                      {filteredSales.length}{" "}
+                      {filteredSales.length === 1 ? "sale" : "sales"}
+                      {statusFilter !== "all" &&
+                        ` (${statusFilter.replace("_", " ")})`}
                     </p>
-                    {salesVisible < sales.length && (
+                    {salesVisible < filteredSales.length && (
                       <button
                         type="button"
                         onClick={() =>
@@ -958,12 +1000,21 @@ export default function SalesPage() {
                         className={`${roboto.className} px-6 py-3 border border-[#d1c5b4] text-[#5f5e5e] text-[0.65rem] uppercase tracking-[0.2em] font-medium hover:bg-[#f4f3f1] transition-all cursor-pointer`}
                       >
                         Load{" "}
-                        {Math.min(SALES_PAGE_SIZE, sales.length - salesVisible)}{" "}
+                        {Math.min(
+                          SALES_PAGE_SIZE,
+                          filteredSales.length - salesVisible,
+                        )}{" "}
                         more
                       </button>
                     )}
                   </div>
                 </>
+              ) : sales && sales.length > 0 ? (
+                <EmptyState
+                  icon="filter_alt_off"
+                  title={`No ${statusFilter.replace("_", " ")} sales`}
+                  copy={`No orders currently match "${statusFilter.replace("_", " ")}". Try a different filter.`}
+                />
               ) : (
                 <EmptyState
                   icon="receipt_long"
