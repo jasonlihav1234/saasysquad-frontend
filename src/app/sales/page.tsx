@@ -601,13 +601,15 @@ function AnalyticsTier({
 }
 
 export default function SalesPage() {
-  const { tier, loading: userLoading } = useUser();
+  const { tier, userId, loading: userLoading } = useUser();
 
   const [basic, setBasic] = useState<any>(null);
   const [pro, setPro] = useState<any>(null);
   const [enterprise, setEnterprise] = useState<any>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
+  const [activeListings, setActiveListings] = useState<any>([]);
+  const [recentSales, setRecentSales] = useState<any>([]);
 
   const canAccessPro = hasAccess(tier, "pro");
   const canAccessEnterprise = hasAccess(tier, "enterprise");
@@ -641,19 +643,24 @@ export default function SalesPage() {
     };
 
     const loadAll = async () => {
-      const [basicData, proData, enterpriseData] = await Promise.all([
-        fetchJson<BasicAnalytics>("/v1/analytics/basic"),
-        canAccessPro ? fetchJson<ProAnalytics>("/v1/analytics/pro") : null,
-        canAccessEnterprise
-          ? fetchJson<EnterpriseAnalytics>("/v1/analytics/enterprise")
-          : null,
-      ]);
+      const [basicData, proData, enterpriseData, listingsData, salesData] =
+        await Promise.all([
+          fetchJson<BasicAnalytics>("/v1/analytics/basic"),
+          canAccessPro ? fetchJson<ProAnalytics>("/v1/analytics/pro") : null,
+          canAccessEnterprise
+            ? fetchJson<EnterpriseAnalytics>("/v1/analytics/enterprise")
+            : null,
+          fetchJson<ActiveListingCardProps[]>(`/users/${userId}/items`),
+          fetchJson<SaleRowItem[]>(`/users/${userId}/sales`),
+        ]);
 
       if (cancelled) return;
 
       setBasic(basicData);
       setPro(proData);
       setEnterprise(enterpriseData);
+      setActiveListings(listingsData.items || ACTIVE_LISTINGS);
+      setRecentSales(salesData.orders || SALES_ROWS);
 
       if (!basicData) {
         setFetchError("Could not load analytics. Please refresh.");
@@ -776,9 +783,20 @@ export default function SalesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {SALES_ROWS.map((item) => (
-                      <SalesTableRow key={item.id} item={item} />
-                    ))}
+                    {recentSales.length === 0 && !analyticsLoading ? (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="px-6 py-12 text-center text-[#5f5e5e]/60 text-sm italic"
+                        >
+                          No recent sales to display.
+                        </td>
+                      </tr>
+                    ) : (
+                      recentSales.map((item: any) => (
+                        <SalesTableRow key={item.id} item={item} />
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -807,7 +825,7 @@ export default function SalesPage() {
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-                {ACTIVE_LISTINGS.map((listing) => (
+                {activeListings.map((listing: any) => (
                   <ActiveListingCard key={listing.title} {...listing} />
                 ))}
                 <button
