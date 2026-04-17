@@ -190,6 +190,70 @@ function Skeleton({ className = "" }: { className?: string }) {
   );
 }
 
+function BasicSection({
+  data,
+  loading,
+}: {
+  data: BasicAnalytics | null;
+  loading: boolean;
+}) {
+  const revenue = loading
+    ? "—"
+    : `$${(data?.revenueThisQuarter ?? 0).toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      })}`;
+ 
+  const mom = data?.monthOverMonth;
+  const momLabel = loading
+    ? "—"
+    : mom !== null && mom !== undefined
+      ? `${mom >= 0 ? "+" : ""}${mom}% from last month`
+      : "Not enough history yet";
+  const momPositive = (mom ?? 0) >= 0;
+ 
+  return (
+    <div className="grid grid-cols-12 gap-8">
+      <div className="col-span-12 md:col-span-5 bg-[#f4f3f1] p-10 flex flex-col justify-between min-h-[220px]">
+        <div>
+          <span className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}>
+            Performance Overview
+          </span>
+          <h2 className={`${gelasio.className} text-5xl font-light text-[#1a1c1b]`}>
+            {loading ? <Skeleton className="h-12 w-48" /> : revenue}
+          </h2>
+          <p className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}>
+            Total Revenue this Quarter
+          </p>
+        </div>
+        <div
+          className={`mt-12 flex items-center gap-2 ${momPositive ? "text-[#775a19]" : "text-red-600"}`}
+        >
+          <span className="material-symbols-outlined">
+            {momPositive ? "trending_up" : "trending_down"}
+          </span>
+          <span className={`${roboto.className} text-sm font-bold`}>{momLabel}</span>
+        </div>
+      </div>
+ 
+      <div className="col-span-12 md:col-span-7 grid grid-cols-2 gap-8">
+        <div className={statCardShell}>
+          <h3 className={`${gelasio.className} text-4xl mb-1 text-[#1a1c1b]`}>
+            {loading ? <Skeleton className="h-10 w-12" /> : (data?.activeListings ?? 0)}
+          </h3>
+          <p className={statCardCaption}>Active Listings</p>
+        </div>
+        <div className={statCardShell}>
+          <h3 className={`${gelasio.className} text-4xl mb-1 text-[#1a1c1b]`}>
+            {loading ? <Skeleton className="h-10 w-12" /> : (data?.itemsSoldTotal ?? 0)}
+          </h3>
+          <p className={statCardCaption}>Items Sold</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface AnalyticsTierProps {
   label: string;
   tier: string;
