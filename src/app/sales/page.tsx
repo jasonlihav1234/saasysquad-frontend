@@ -709,7 +709,27 @@ export default function SalesPage() {
               </div>
             )}
 
-            <AnalyticsTier></AnalyticsTier>
+            <AnalyticsTier
+              label="Overview"
+              tier="Included"
+              description="Core performance metrics available to all members."
+            >
+              <BasicSection data={basic} loading={analyticsLoading} />
+            </AnalyticsTier>
+
+            <AnalyticsTier
+              label="Advanced Insights"
+              tier="Pro"
+              tierColor="#775a19"
+              description="Conversion metrics, buyer behavior, and trend analysis."
+              locked={!canAccessPro}
+              unlockCopy="Unlock deeper insights into how your listings perform, which categories drive revenue, and how often buyers return."
+            >
+              <ProSection
+                data={canAccessPro ? pro : MOCK_PRO}
+                loading={analyticsLoading && canAccessPro}
+              />
+            </AnalyticsTier>
 
             <section className="pb-24">
               <div className="grid grid-cols-12 gap-8">
