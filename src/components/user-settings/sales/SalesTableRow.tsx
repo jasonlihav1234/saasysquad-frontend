@@ -10,7 +10,11 @@ const roboto = Roboto({
   style: ["normal", "italic"],
 });
 
-export type SaleStatus = "awaiting_shipment" | "delivered" | "cancelled" | "completed";
+export type SaleStatus =
+  | "awaiting_shipment"
+  | "delivered"
+  | "cancelled"
+  | "completed";
 
 export interface SaleRowItem {
   id: string;
@@ -19,6 +23,7 @@ export interface SaleRowItem {
   orderDate: string;
   customer: string;
   price: string;
+  payout: string;
   status: SaleStatus;
 }
 
@@ -46,10 +51,10 @@ function getStatusDisplay(status: SaleStatus) {
       };
   }
 }
- 
+
 export default function SalesTableRow({ item }: { item: SaleRowItem }) {
   const { label, badge, dot } = getStatusDisplay(item.status);
- 
+
   return (
     <tr className="bg-[#faf9f7] border-b border-[#d1c5b4]/20">
       <td className="px-6 py-8">
@@ -75,6 +80,9 @@ export default function SalesTableRow({ item }: { item: SaleRowItem }) {
       </td>
       <td className={`${gelasio.className} px-6 py-8 text-lg text-[#1a1c1b]`}>
         {item.price}
+      </td>
+      <td className={`${gelasio.className} px-6 py-8 text-lg text-[#1a1c1b]`}>
+        {item.payout}
       </td>
       <td className="px-6 py-8">
         <span
