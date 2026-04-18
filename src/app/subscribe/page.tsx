@@ -34,6 +34,7 @@ interface Tier {
   subtitleAccent?: boolean;
   price: string;
   priceSuffix: string;
+  priceFinePrint?: string;
   badge?: string;
   cta: string;
   ctaStyle: string;
@@ -48,7 +49,7 @@ const TIERS: Tier[] = [
     name: "Free",
     subtitle: "Complimentary Entry",
     price: "$0",
-    priceSuffix: "/yr",
+    priceSuffix: "/mo",
     cta: "Join the Althair",
     ctaStyle: "bg-[#5f5e5e] text-white hover:bg-[#1a1c1b]",
     cardStyle: "bg-[#f4f3f1]",
@@ -65,8 +66,8 @@ const TIERS: Tier[] = [
         enabled: true,
       },
       {
-        icon: "block",
-        text: "AI-powered item recommendations",
+        icon: "percent",
+        text: "Sales fees (13%)",
         enabled: true,
       },
     ],
@@ -76,8 +77,9 @@ const TIERS: Tier[] = [
     name: "Pro",
     subtitle: "Professional Standard",
     subtitleAccent: true,
-    price: "$450",
-    priceSuffix: "/yr",
+    price: "$30",
+    priceSuffix: "/mo",
+    priceFinePrint: "Billed annually at $360 — one payment for 12 months",
     badge: "Recommended",
     cta: "Elevate Experience",
     ctaStyle: "bg-[#775a19] text-white hover:brightness-110",
@@ -98,12 +100,12 @@ const TIERS: Tier[] = [
       },
       {
         icon: "insights",
-        text: "Advanced collection analytics",
+        text: "Advanced collection analytics & Market Prediction",
         enabled: true,
       },
       {
         icon: "percent",
-        text: "Reduction transactions fees (5%)",
+        text: "Reduced sales fees (12.5%)",
         enabled: true,
       },
     ],
@@ -112,8 +114,9 @@ const TIERS: Tier[] = [
     id: "enterprise",
     name: "Enterprise",
     subtitle: "Enterprise Partnership",
-    price: "$700",
-    priceSuffix: "/yr",
+    price: "$100",
+    priceSuffix: "/mo",
+    priceFinePrint: "Billed annually at $1,200 — one payment for 12 months",
     cta: "Simplify workflows",
     ctaStyle: "bg-[#1a1c1b] text-[#faf9f7] hover:bg-[#5f5e5e]",
     cardStyle: "bg-[#e9e8e6]",
@@ -126,18 +129,19 @@ const TIERS: Tier[] = [
         enabled: true,
       },
       {
-        icon: "support_agent",
-        text: "Priority support 24/7",
-        enabled: true,
-      },
-      {
-        icon: "handshake",
-        text: "Further reduced fees (2.5%)",
+        icon: "query_stats",
+        text: "Advanced Analytics",
+        sub: "Regression models for future revenue, churn rates, and more",
         enabled: true,
       },
       {
         icon: "all_inclusive",
         text: "Includes all Curator features",
+        enabled: true,
+      },
+      {
+        icon: "percent",
+        text: "Further reduced sales fees (12%)",
         enabled: true,
       },
     ],
@@ -148,7 +152,6 @@ const TIER_ORDER: Record<string, number> = { free: 0, pro: 1, enterprise: 2 };
 
 export default function SubscribePage() {
   const { tier: currentTier, loading, refreshTier } = useUser();
-  console.log(currentTier);
   const [headerVisible, setHeaderVisible] = useState<boolean>(false);
   const [cardsVisible, setCardsVisible] = useState<boolean[]>([
     false,
@@ -180,28 +183,17 @@ export default function SubscribePage() {
     setCheckoutError(null);
   };
 
-  // determine button state by tier
-
   const getButtonState = (tierId: string) => {
     if (loading) {
-      return {
-        label: "Loading...",
-        disabled: true,
-      };
+      return { label: "Loading...", disabled: true };
     }
 
     if (tierId === currentTier) {
-      return {
-        label: "Current Plan",
-        disabled: true,
-      };
+      return { label: "Current Plan", disabled: true };
     }
 
     if (tierId === "free") {
-      return {
-        label: "Cancel & Downgrade",
-        disabled: false,
-      };
+      return { label: "Cancel & Downgrade", disabled: false };
     }
 
     const currentOrder = TIER_ORDER[currentTier || "free"] ?? 0;
@@ -214,10 +206,7 @@ export default function SubscribePage() {
       };
     }
 
-    return {
-      label: "Switch Plan",
-      disabled: false,
-    };
+    return { label: "Switch Plan", disabled: false };
   };
 
   const handleSubscribe = useCallback(
@@ -435,7 +424,7 @@ export default function SubscribePage() {
                 </div>
 
                 <div className="mt-16">
-                  <div className={`${gelasio.className} text-4xl mb-8`}>
+                  <div className={`${gelasio.className} text-4xl mb-2`}>
                     {tier.price}
                     <span
                       className={`${roboto.className} text-sm font-light text-[#5f5e5e]`}
@@ -443,6 +432,17 @@ export default function SubscribePage() {
                       {tier.priceSuffix}
                     </span>
                   </div>
+
+                  {tier.priceFinePrint ? (
+                    <p
+                      className={`${roboto.className} text-[0.65rem] text-[#5f5e5e]/70 italic mb-6 leading-relaxed`}
+                    >
+                      {tier.priceFinePrint}
+                    </p>
+                  ) : (
+                    <div className="mb-6 h-[1.1rem]" aria-hidden="true" />
+                  )}
+
                   <button
                     onClick={() => !btn.disabled && handleSubscribe(tier.id)}
                     disabled={btn.disabled || isProcessing}
