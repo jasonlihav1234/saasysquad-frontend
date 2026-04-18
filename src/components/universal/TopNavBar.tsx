@@ -21,6 +21,7 @@ const gelasio = Gelasio({
 const navLinks = [
   { href: "/dashboard", label: "Catalog" },
   { href: "/product/sell", label: "Sell Items" },
+  { href: "/product/sell/agent", label: "Agent"}
 ];
 
 interface TopNavBarProps {
