@@ -16,6 +16,7 @@ import {
 } from "react";
 import { getFallbackRouteParams } from "next/dist/server/request/fallback-params";
 import { useUser } from "@/components/providers/UserProvider";
+import { authFetch } from "../../../../lib/api";
 
 const SELLER_COMMISSION_PERCENT: Record<string, number> = {
   free: 13,
@@ -67,114 +68,41 @@ export default function SellProducePage() {
 
   const rate = commissionRate(tier);
   const priceNum = Number(listingPrice);
-  const payout = !isNaN(priceNum) && priceNum > 0
-    ? priceNum * (1 - rate / 100)
-    : 0;
+  const payout =
+    !isNaN(priceNum) && priceNum > 0 ? priceNum * (1 - rate / 100) : 0;
 
   useEffect(() => {
-    const fetchCategories = async () => {
+    const fetchMetadata = async () => {
       try {
-        const response = await fetch(
-          "https://sassysquad-backend.vercel.app/categories",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          },
-        );
+        const [catRes, tagRes] = await Promise.all([
+          authFetch("https://sassysquad-backend.vercel.app/categories"),
+          authFetch("https://sassysquad-backend.vercel.app/tags"),
+        ]);
 
-        let body = null;
-
-        if (response.status === 401) {
-          const refreshResponse = await fetch(
-            "https://sassysquad-backend.vercel.app/auth/refresh",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                refreshToken: localStorage.getItem("refreshToken"),
-              }),
-            },
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          const formattedCategories = catData.categories.map((entry: any) =>
+            entry.category_name.split("-").join(" ").toUpperCase(),
           );
-
-          const refreshBody = await refreshResponse.json();
-          localStorage.setItem("accessToken", refreshBody.accessToken);
-          localStorage.setItem("refreshToken", refreshBody.refreshToken);
-
-          const categoryResponse = await fetch(
-            "https://sassysquad-backend.vercel.app/categories",
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              },
-            },
-          );
-
-          body = await categoryResponse.json();
-        } else {
-          body = await response.json();
+          setDbCategories(formattedCategories);
         }
 
-        const filteredCategories = body.categories.map((entry: any) => {
-          return entry.category_name.split("-").join(" ").toUpperCase();
-        });
-
-        setDbCategories(filteredCategories);
-
-        const tagResponse = await fetch(
-          "https://sassysquad-backend.vercel.app/tags",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          },
-        );
-        let tagBody = null;
-
-        if (tagResponse.status === 401) {
-          const refreshResponse2 = await fetch(
-            "https://sassysquad-backend.vercel.app/auth/refresh",
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                refreshToken: localStorage.getItem("refreshToken"),
-              }),
-            },
+        if (tagRes.ok) {
+          const tagData = await tagRes.json();
+          const formattedTags = tagData.tags.map((tag: any) =>
+            tag.tag_name.split("-").join(" ").toUpperCase(),
           );
-
-          const refreshBody2 = await refreshResponse2.json();
-          localStorage.setItem("accessToken", refreshBody2.accessToken);
-          localStorage.setItem("refreshToken", refreshBody2.refreshToken);
-
-          const tagNewResponse = await fetch(
-            "https://sassysquad-backend.vercel.app/tags",
-            {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              },
-            },
-          );
-
-          tagBody = await tagNewResponse.json();
-        } else {
-          tagBody = await tagResponse.json();
+          setTags(formattedTags);
         }
-        const filteredTags = tagBody.tags.map((tag: any) => {
-          return tag.tag_name.split("-").join(" ").toUpperCase();
-        });
-
-        setTags(filteredTags);
-      } catch (error) {
-        alert(error);
+      } catch (error: any) {
+        console.error("Failed to fetch metadata:", error);
+        if (error !== "Session expired") {
+          alert("An error occurred while loading form data.");
+        }
       }
     };
 
-    fetchCategories();
+    fetchMetadata();
   }, []);
 
   useEffect(() => {
@@ -408,35 +336,61 @@ export default function SellProducePage() {
         className={`w-64 bg-[#F5F3EF] text-[#2D2D2D] ${roboto.className} min-h-screen flex overflow-hidden flex-col justify_between border-r border-[#D1CFC9]/50 shrink-0`}
       >
         <div className="p-8 pt-10 border-b border-[#775a19]">
-          <h1 className={`${gelasio.className} italic text-xl text-[#2D2D2D] mb-1 tracking-wide`}>
+          <h1
+            className={`${gelasio.className} italic text-xl text-[#2D2D2D] mb-1 tracking-wide`}
+          >
             Member Dashboard
           </h1>
         </div>
         <nav className="mt-8 px-4">
           <ul className="space-y-2">
-            <Link href="/dashboard" className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors">
-              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none -translate-y-[2px]">shopping_bag</span>
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
+            >
+              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none -translate-y-[2px]">
+                shopping_bag
+              </span>
               Catalog
             </Link>
-            <Link href="/purchases" className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors">
-              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">sell</span>
+            <Link
+              href="/purchases"
+              className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
+            >
+              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
+                sell
+              </span>
               Purchases
             </Link>
-            <Link href="/sales" className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors">
-              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">Orders</span>
+            <Link
+              href="/sales"
+              className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
+            >
+              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
+                Orders
+              </span>
               Sales
             </Link>
-            <Link href="/messages" className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors">
-              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">Forum</span>
+            <Link
+              href="/messages"
+              className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
+            >
+              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
+                Forum
+              </span>
               Messages
             </Link>
           </ul>
         </nav>
       </aside>
       <div className="flex flex-col flex-1">
-        <header className={`top-0 w-full z-50 glass-nav ${roboto.className} antialiased tracking-tight`}>
+        <header
+          className={`top-0 w-full z-50 glass-nav ${roboto.className} antialiased tracking-tight`}
+        >
           <div className="flex gap-8 justify-between items-center px-12 py-6 w-full max-w-[1920px] mx-auto">
-            <span className={`text-4xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}>
+            <span
+              className={`text-4xl ${gelasio.className} tracking-tighter text-[#1A1C1B] dark:text-[#FAF9F7]`}
+            >
               The Curated Althaïr
             </span>
             <div className="w-8 h-8 bg-surface-container-highest flex items-center justify-center overflow-hidden">
@@ -451,33 +405,57 @@ export default function SellProducePage() {
             </div>
           </div>
         </header>
-        <main className={`pt-5 pb-24 px-6 md:px-12 flex-groew max-w-[1920px] mx-auto w-full`}>
+        <main
+          className={`pt-5 pb-24 px-6 md:px-12 flex-groew max-w-[1920px] mx-auto w-full`}
+        >
           <div className="grid grid-cols1 lg:grid-cols-12 gap-16">
             <div className="lg:col-span-7 space-y-16">
               <header>
-                <p className={`${gelasio.className} text-5xl font-black tracking-tight leading-tight text-[#1a1c1b]`}>
+                <p
+                  className={`${gelasio.className} text-5xl font-black tracking-tight leading-tight text-[#1a1c1b]`}
+                >
                   List a New Item
                 </p>
               </header>
               <form className="space-y-12" onSubmit={handleFormSubmit}>
                 <label className="group relative aspect-[16/9] bg-[#efeeec] flex flex-col items-center justify-center border border-dashed border-[#d1c5b4] transition-all hover:bg-[#e9e8e6] overflow-hidden cursor-pointer">
-                  <input type="file" accept="image/jpeg, image/png" className="hidden" name="item-image" onChange={handleImageChange} />
+                  <input
+                    type="file"
+                    accept="image/jpeg, image/png"
+                    className="hidden"
+                    name="item-image"
+                    onChange={handleImageChange}
+                  />
                   {imageBase64 ? (
-                    <img src={imageBase64} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
+                    <img
+                      src={imageBase64}
+                      alt="Preview"
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
                   ) : (
                     <>
-                      <span className="material-symbols-outlined !text-4xl text-[#5f5e5e] mb-4">add_photo_alternate</span>
-                      <p className={`${roboto.className} text-xs uppercase- tracking-widest text-[#5f5e5e] uppercase`}>
+                      <span className="material-symbols-outlined !text-4xl text-[#5f5e5e] mb-4">
+                        add_photo_alternate
+                      </span>
+                      <p
+                        className={`${roboto.className} text-xs uppercase- tracking-widest text-[#5f5e5e] uppercase`}
+                      >
                         Upload High-Resolution Image
                       </p>
-                      <p className={`text-[10px] ${roboto.className} mt-2 text-[#5f5e5e]`}>JPG OR PNG (MAX 50MB)</p>
+                      <p
+                        className={`text-[10px] ${roboto.className} mt-2 text-[#5f5e5e]`}
+                      >
+                        JPG OR PNG (MAX 50MB)
+                      </p>
                     </>
                   )}
                 </label>
 
                 <section className="space-y-8">
                   <div className="flex justify-between items-end">
-                    <h3 className={`${gelasio.className} text-2xl`}>Category</h3>
+                    <h3 className={`${gelasio.className} text-2xl`}>
+                      Category
+                    </h3>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     {[
@@ -496,14 +474,24 @@ export default function SellProducePage() {
                             : "border-[#d1c5b4]/30 hover:border-[#5f5e5e] text-[#a7a5a5] hover:text-[#5f5e5e]"
                         }`}
                       >
-                        <span className="material-symbols-outlined text-lg">{c.icon}</span>
-                        <span className="text-[0.7rem] uppercase tracking-widest font-medium">{c.label}</span>
+                        <span className="material-symbols-outlined text-lg">
+                          {c.icon}
+                        </span>
+                        <span className="text-[0.7rem] uppercase tracking-widest font-medium">
+                          {c.label}
+                        </span>
                       </button>
                     ))}
                   </div>
-                  <div className={`pt-4 ${gelasio.className}`} ref={categoryDropdownRef}>
-                    <label className={`block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2 ${roboto.className}`}>
-                      select an existing category or specify a unique classification
+                  <div
+                    className={`pt-4 ${gelasio.className}`}
+                    ref={categoryDropdownRef}
+                  >
+                    <label
+                      className={`block text-[0.65rem] uppercase tracking-[0.2em] text-[#a7a5a5] mb-2 ${roboto.className}`}
+                    >
+                      select an existing category or specify a unique
+                      classification
                     </label>
                     <input
                       list="category-suggestions"
@@ -554,7 +542,9 @@ export default function SellProducePage() {
                 </section>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="flex flex-col gap-2">
-                    <label className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}>
+                    <label
+                      className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                    >
                       Item Name
                     </label>
                     <input
@@ -567,7 +557,9 @@ export default function SellProducePage() {
 
                   {/* ── Listing price with live payout preview ─────────────── */}
                   <div className="flex flex-col gap-2">
-                    <label className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}>
+                    <label
+                      className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                    >
                       Listing Price
                     </label>
                     <input
@@ -589,25 +581,33 @@ export default function SellProducePage() {
                       {priceNum > 0 ? (
                         <>
                           You'll receive{" "}
-                          <span className="font-bold">${payout.toFixed(2)}</span>{" "}
+                          <span className="font-bold">
+                            ${payout.toFixed(2)}
+                          </span>{" "}
                           after our {rate}% commission ({tier ?? "free"} plan)
                         </>
                       ) : (
                         <>
-                          {rate}% commission applies on your {tier ?? "free"} plan
+                          {rate}% commission applies on your {tier ?? "free"}{" "}
+                          plan
                         </>
                       )}
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-2" ref={tagDropdownRef}>
-                    <label className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}>
+                    <label
+                      className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                    >
                       Search Tags
                     </label>
 
                     <div className="relative flex flex-wrap items-center gap-2 bg-[#e9e8e6] border-0 border-b border-outline px-0 py-3 pb-3 pl-3">
                       {selectedTags.map((tag, index) => (
-                        <span key={index} className="flex items-center bg-[#e8e2d9] text-[#1d1b16] text-[10px] px-2 py-1 tracking-tighter">
+                        <span
+                          key={index}
+                          className="flex items-center bg-[#e8e2d9] text-[#1d1b16] text-[10px] px-2 py-1 tracking-tighter"
+                        >
                           {tag}
                           <button
                             type="button"
@@ -659,7 +659,9 @@ export default function SellProducePage() {
                     </div>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}>
+                    <label
+                      className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                    >
                       Inventory Count
                     </label>
                     <input
@@ -669,7 +671,9 @@ export default function SellProducePage() {
                     />
                   </div>
                   <div className="flex flex-col gap-2 col-span-2">
-                    <label className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}>
+                    <label
+                      className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#615e57]`}
+                    >
                       Description
                     </label>
                     <textarea
@@ -684,13 +688,24 @@ export default function SellProducePage() {
 
                 {/* Upgrade nudge — only shown to Free users when they type a price */}
                 {tier === "free" && priceNum > 0 && (
-                  <div className={`${roboto.className} -mt-4 px-6 py-4 bg-[#775a19]/5 border-l-2 border-[#775a19] text-xs text-[#5f5e5e] flex items-center justify-between gap-4`}>
+                  <div
+                    className={`${roboto.className} -mt-4 px-6 py-4 bg-[#775a19]/5 border-l-2 border-[#775a19] text-xs text-[#5f5e5e] flex items-center justify-between gap-4`}
+                  >
                     <span>
                       On Pro you'd receive{" "}
                       <span className="font-bold text-[#775a19]">
-                        ${(priceNum * (1 - SELLER_COMMISSION_PERCENT.pro / 100)).toFixed(2)}
-                      </span>
-                      {" "}(${((priceNum * (1 - SELLER_COMMISSION_PERCENT.pro / 100)) - payout).toFixed(2)} more per sale).
+                        $
+                        {(
+                          priceNum *
+                          (1 - SELLER_COMMISSION_PERCENT.pro / 100)
+                        ).toFixed(2)}
+                      </span>{" "}
+                      ($
+                      {(
+                        priceNum * (1 - SELLER_COMMISSION_PERCENT.pro / 100) -
+                        payout
+                      ).toFixed(2)}{" "}
+                      more per sale).
                     </span>
                     <Link
                       href="/subscribe"
@@ -702,7 +717,9 @@ export default function SellProducePage() {
                 )}
 
                 <div className="flex gap-8 pt-8">
-                  <button className={`flex-1 bg-[#5f5e5e] text-[#ffffff] px-12 py-5 ${roboto.className} text-xs uppercase tracking-[0.2em] hover:bg-[#1a1c1b] transition-all cursor-pointer`}>
+                  <button
+                    className={`flex-1 bg-[#5f5e5e] text-[#ffffff] px-12 py-5 ${roboto.className} text-xs uppercase tracking-[0.2em] hover:bg-[#1a1c1b] transition-all cursor-pointer`}
+                  >
                     Create Item
                   </button>
                 </div>
@@ -713,55 +730,85 @@ export default function SellProducePage() {
                 {insightState === "complete" && (
                   <section className="bg-[#ffffff] p-10 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
-                      <span className="material-symbols-outlined !text-8xl">auto_awesome</span>
+                      <span className="material-symbols-outlined !text-8xl">
+                        auto_awesome
+                      </span>
                     </div>
                     <div className="relative z-10 space-y-6">
-                      <h3 className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}>
+                      <h3
+                        className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}
+                      >
                         Althaïr Insights
                       </h3>
                       <div>
-                        <p className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}>
+                        <p
+                          className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
                           Optimal Price
                         </p>
-                        <span className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}>
+                        <span
+                          className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                        >
                           ${optimalPrice}
                         </span>
                         {optimalPrice > 0 && (
-                          <p className={`${roboto.className} text-[0.65rem] text-[#775a19]/70 mt-2`}>
-                            You'd receive ${(optimalPrice * (1 - rate / 100)).toFixed(2)} after commission
+                          <p
+                            className={`${roboto.className} text-[0.65rem] text-[#775a19]/70 mt-2`}
+                          >
+                            You'd receive $
+                            {(optimalPrice * (1 - rate / 100)).toFixed(2)} after
+                            commission
                           </p>
                         )}
                       </div>
-                      <p className={`${roboto.className} block text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}>
+                      <p
+                        className={`${roboto.className} block text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                      >
                         Suggested Range
                       </p>
                       <div className="flex items-center gap-2">
-                        {suggestedPriceRange && suggestedPriceRange.length >= 2 && (
-                          <>
-                            <span className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}>
-                              ${suggestedPriceRange[0]}
-                            </span>
-                            <span className="text-[#5f5e5e] font-light">—</span>
-                            <span className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}>
-                              ${suggestedPriceRange[1]}
-                            </span>
-                          </>
-                        )}
+                        {suggestedPriceRange &&
+                          suggestedPriceRange.length >= 2 && (
+                            <>
+                              <span
+                                className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                              >
+                                ${suggestedPriceRange[0]}
+                              </span>
+                              <span className="text-[#5f5e5e] font-light">
+                                —
+                              </span>
+                              <span
+                                className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                              >
+                                ${suggestedPriceRange[1]}
+                              </span>
+                            </>
+                          )}
                       </div>
                       <div>
-                        <p className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}>
+                        <p
+                          className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
                           Estimated Volume
                         </p>
                         <div className="flex items-center justify-between">
                           <div className="flex items-baseline gap-1">
-                            <span className={`text-4xl ${gelasio.className} font-black text-[#775a19]`}>
-                              {expectedMonthlyVolume && expectedMonthlyVolume.length >= 2 && (
-                                <span className={`text-4xl ${gelasio.className} font-black text-[#775a19]`}>
-                                  {`${expectedMonthlyVolume[1]}-${expectedMonthlyVolume[0]}`}
-                                </span>
-                              )}
+                            <span
+                              className={`text-4xl ${gelasio.className} font-black text-[#775a19]`}
+                            >
+                              {expectedMonthlyVolume &&
+                                expectedMonthlyVolume.length >= 2 && (
+                                  <span
+                                    className={`text-4xl ${gelasio.className} font-black text-[#775a19]`}
+                                  >
+                                    {`${expectedMonthlyVolume[1]}-${expectedMonthlyVolume[0]}`}
+                                  </span>
+                                )}
                             </span>
-                            <span className={`text-[0.75rem] uppercase tracking-widest font-bold ${roboto.className}`}>
+                            <span
+                              className={`text-[0.75rem] uppercase tracking-widest font-bold ${roboto.className}`}
+                            >
                               Units
                             </span>
                           </div>
@@ -777,10 +824,14 @@ export default function SellProducePage() {
                         </div>
                       </div>
                       <div className="mb-12">
-                        <p className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}>
+                        <p
+                          className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
                           Maximum Expected Revenue
                         </p>
-                        <span className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}>
+                        <span
+                          className={`text-3xl ${gelasio.className} font-bold text-[#1a1c1b]`}
+                        >
                           ${maxExpectedRevenue}
                         </span>
                       </div>
@@ -798,14 +849,20 @@ export default function SellProducePage() {
                 {insightState === "loading" && (
                   <section className="bg-[#ffffff] p-10 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
-                      <span className="material-symbols-outlined !text-8xl animate-pulse">auto_awesome</span>
+                      <span className="material-symbols-outlined !text-8xl animate-pulse">
+                        auto_awesome
+                      </span>
                     </div>
                     <div className="relative z-10 space-y-6">
-                      <h3 className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}>
+                      <h3
+                        className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}
+                      >
                         Atelier Insights
                       </h3>
                       <div>
-                        <p className={`${roboto.className} block text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}>
+                        <p
+                          className={`${roboto.className} block text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
                           Suggested Range
                         </p>
                         <div className="flex items-center gap-2">
@@ -815,7 +872,9 @@ export default function SellProducePage() {
                         </div>
                       </div>
                       <div className="mb-12">
-                        <p className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}>
+                        <p
+                          className={`block ${roboto.className} text-[0.65rem] uppercase tracking-[0.2em] text-[#5f5e5e] mb-4`}
+                        >
                           Estimated Volume
                         </p>
                         <div className="flex items-center justify-between">
@@ -848,22 +907,36 @@ export default function SellProducePage() {
                 {insightState === "awaiting" && (
                   <section className="bg-[#ffffff] p-10 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
-                      <span className="material-symbols-outlined !text-8xl">auto_awesome</span>
+                      <span className="material-symbols-outlined !text-8xl">
+                        auto_awesome
+                      </span>
                     </div>
                     <div className="relative z-10 space-y-6">
-                      <h3 className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}>
+                      <h3
+                        className={`${gelasio.className} text-2xl font-bold tracking-tight text-[#1a1c1b]`}
+                      >
                         Atelier Insights
                       </h3>
-                      <p className={`${roboto.className} text-sm text-[#4e4639] leading-relaxed`}>
-                        Utilize our machine learning model to determine the optimal market value based on historical sales
+                      <p
+                        className={`${roboto.className} text-sm text-[#4e4639] leading-relaxed`}
+                      >
+                        Utilize our machine learning model to determine the
+                        optimal market value based on historical sales
                       </p>
                       <div className="bg-[#f4f3f1] border border-[#d1c5b4] p-8 flex flex-col items-center text-center space-y-4">
-                        <span className="material-symbols-outlined text-[#775a19] !text-4xl">analytics</span>
-                        <p className={`${roboto.className} text-xs uppercase tracking-widest text-[#5f5e5e] font-bold`}>
+                        <span className="material-symbols-outlined text-[#775a19] !text-4xl">
+                          analytics
+                        </span>
+                        <p
+                          className={`${roboto.className} text-xs uppercase tracking-widest text-[#5f5e5e] font-bold`}
+                        >
                           Awaiting Data
                         </p>
-                        <p className={`text-xs text-[#615e57] mt-1 ${roboto.className}`}>
-                          Complete item details to generate a precise estimation.
+                        <p
+                          className={`text-xs text-[#615e57] mt-1 ${roboto.className}`}
+                        >
+                          Complete item details to generate a precise
+                          estimation.
                         </p>
                         <button
                           onClick={() => handleGenerateEstimate()}
