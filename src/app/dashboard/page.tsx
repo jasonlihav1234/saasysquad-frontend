@@ -9,6 +9,7 @@ import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, Suspense } from "react";
 import ItemCard from "@/components/dashboard/ItemCard";
+import { authFetch } from "../../../lib/api";
 
 // probably should make this user/dashboard
 
@@ -62,139 +63,37 @@ function DashboardContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const fetchItems = async (isRetry: boolean = false) => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(
+        const itemRes = await authFetch(
           "https://sassysquad-backend.vercel.app/items",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          },
         );
 
-        if (response.status === 200) {
-          const data = await response.json();
-          setItems(data.items);
-          setTotalPages(Math.ceil(data.items.length / 6));
-        } else if (response.status === 401) {
-          if (isRetry) {
-            throw new Error("Refresh token was also rejected");
-          }
+        if (!itemRes.ok) throw new Error("Failed to fetch items");
 
-          const responseRefresh = await fetch(
-            "https://sassysquad-backend.vercel.app/auth/refresh",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              }),
-            },
-          );
+        const itemData = await itemRes.json();
+        setItems(itemData.items);
+        setTotalPages(Math.ceil(itemData.items.length / 6));
 
-          if (responseRefresh.status === 200) {
-            const body = await responseRefresh.json();
-            localStorage.setItem("accessToken", body.accessToken);
-            localStorage.setItem("refreshToken", body.refreshToken);
-
-            const response2 = await fetch(
-              "https://sassysquad-backend.vercel.app/items",
-              {
-                method: "GET",
-                headers: {
-                  "Content-Type": "application/json",
-                  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                },
-              },
-            );
-
-            if (response2.status === 200) {
-              const data = await response.json();
-              setItems(data.items);
-              setTotalPages(Math.ceil(data.items.length / 6));
-            } else {
-              localStorage.clear();
-              router.push("/login");
-            }
-          } else {
-            // localStorage.clear();
-            // router.push("/login");
-          }
-        } else {
-          throw new Error("Critical failure");
-        }
-
-        const categoryResponse = await fetch(
+        const catRes = await authFetch(
           "https://sassysquad-backend.vercel.app/categories",
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          },
         );
 
-        if (categoryResponse.status === 200) {
-          const data = await categoryResponse.json();
-          const filteredCategories = data.categories.map((category: any) =>
-            category.category_name.toUpperCase().replace(/-+/g, " "),
-          );
+        if (!catRes.ok) throw new Error("Failed to fetch categories");
 
-          setDbCategories(filteredCategories);
-        } else if (categoryResponse.status === 401) {
-          if (isRetry) {
-            throw new Error("Refresh token was also rejected");
-          }
-
-          const responseRefresh = await fetch(
-            "https://sassysquad-backend.vercel.app/auth/refresh",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              }),
-            },
-          );
-
-          if (responseRefresh.status === 200) {
-            const body = await responseRefresh.json();
-            localStorage.setItem("accessToken", body.accessToken);
-            localStorage.setItem("refreshToken", body.refreshToken);
-
-            const categoryResponse2 = await fetch(
-              "https://sassysquad-backend.vercel.app/categories",
-              {
-                method: "GET",
-                headers: {
-                  Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-                },
-              },
-            );
-
-            const data = await categoryResponse.json();
-            setDbCategories(data);
-          } else {
-            localStorage.clear();
-            router.push("/login");
-          }
-        } else {
-          throw new Error("Critical failure");
-        }
+        const catData = await catRes.json();
+        const filteredCategories = catData.categories.map((category: any) =>
+          category.category_name.toUpperCase().replace(/-+/g, " "),
+        );
+        setDbCategories(filteredCategories);
       } catch (error) {
+        console.error("Data fetching error:", error);
         alert(error);
       }
     };
 
-    fetchItems();
-  }, [router]);
+    fetchData();
+  }, []);
 
   const safeItems = items || [];
   const currentItems = safeItems.slice(indexOfFirstItem, indexOfLastItem);
