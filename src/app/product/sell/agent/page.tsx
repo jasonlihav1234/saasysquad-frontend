@@ -173,8 +173,8 @@ export default function AgentPage() {
   const processFile = async (uploadFile: any) => {
     setFiles((prev: any) =>
       prev.map((file: any) =>
-        file.id === uploadFile.id ? { ...file, status: "analyzing" } : file
-      )
+        file.id === uploadFile.id ? { ...file, status: "analyzing" } : file,
+      ),
     );
 
     try {
@@ -185,7 +185,7 @@ export default function AgentPage() {
         {
           method: "POST",
           body: JSON.stringify({ image: base64 }),
-        }
+        },
       );
 
       if (!res.ok) {
@@ -208,18 +208,18 @@ export default function AgentPage() {
 
       setFiles((prev: any) =>
         prev.map((file: any) =>
-          file.id === uploadFile.id ? { ...file, status: "done" } : file
-        )
+          file.id === uploadFile.id ? { ...file, status: "done" } : file,
+        ),
       );
     } catch (error: any) {
       setFiles((prev: any) =>
         prev.map((file: any) =>
           file.id === uploadFile.id
             ? { ...file, status: "error", error: error.message }
-            : file
-        )
+            : file,
+        ),
       );
-      
+
       console.error("Agent Production Error:", error);
     }
   };
@@ -232,53 +232,60 @@ export default function AgentPage() {
     setAgentRunning(false);
   };
 
-const handleAccept = async (draftId: string) => {
-  const draft = drafts.find((d: any) => d.id === draftId);
-  if (!draft) return;
+  const handleAccept = async (draftId: string) => {
+    const draft = drafts.find((d: any) => d.id === draftId);
+    if (!draft) return;
 
-  setDrafts((prev: any) =>
-    prev.map((d: any) => (d.id === draftId ? { ...d, status: "accepting" } : d)),
-  );
+    setDrafts((prev: any) =>
+      prev.map((d: any) =>
+        d.id === draftId ? { ...d, status: "accepting" } : d,
+      ),
+    );
 
-  try {
-    const res = await authFetch(
-      "https://sassysquad-backend.vercel.app/v1/agent/accept",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          title: draft.title,
-          description: draft.description,
-          category: draft.category,
-          tags: draft.tags,
-          imageBase64: draft.imageBase64,
-          suggestedPrice: draft.suggestedPrice,
-          sellerPrice: draft.priceOverride ? parseFloat(draft.priceOverride) : null,
-          quantityAvailable: draft.qtyOverride,
-        }),
+    try {
+      const res = await authFetch(
+        "https://sassysquad-backend.vercel.app/v1/agent/accept",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            title: draft.title,
+            description: draft.description,
+            category: draft.category,
+            tags: draft.tags,
+            imageBase64: draft.imageBase64,
+            suggestedPrice: draft.suggestedPrice,
+            sellerPrice: draft.priceOverride
+              ? parseFloat(draft.priceOverride)
+              : null,
+            quantityAvailable: draft.qtyOverride,
+          }),
+        },
+      );
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to publish");
       }
-    );
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.message || "Failed to publish");
+      setDrafts((prev: any) =>
+        prev.map((d: any) =>
+          d.id === draftId ? { ...d, status: "accepted" } : d,
+        ),
+      );
+    } catch (error: any) {
+      setDrafts((prev: any) =>
+        prev.map((d: any) =>
+          d.id === draftId ? { ...d, status: "pending" } : d,
+        ),
+      );
+
+      console.error("Accept failed:", error.message);
+
+      if (error.message !== "Session expired") {
+        alert(`Error publishing: ${error.message}`);
+      }
     }
-
-    setDrafts((prev: any) =>
-      prev.map((d: any) => (d.id === draftId ? { ...d, status: "accepted" } : d)),
-    );
-
-  } catch (error: any) {
-    setDrafts((prev: any) =>
-      prev.map((d: any) => (d.id === draftId ? { ...d, status: "pending" } : d)),
-    );
-    
-    console.error("Accept failed:", error.message);
-    
-    if (error.message !== "Session expired") {
-      alert(`Error publishing: ${error.message}`);
-    }
-  }
-};
+  };
 
   const handleDeny = (draftId: string) => {
     setDrafts((prev: any) =>
@@ -286,9 +293,15 @@ const handleAccept = async (draftId: string) => {
     );
   };
 
-  const doneCount: any = files.filter((file: any) => file.status === "done").length;
-  const analyzingCount = files.filter((file: any) => file.status === "analyzing").length;
-  const errorCount = files.filter((file: any) => file.status === "error").length;
+  const doneCount: any = files.filter(
+    (file: any) => file.status === "done",
+  ).length;
+  const analyzingCount = files.filter(
+    (file: any) => file.status === "analyzing",
+  ).length;
+  const errorCount = files.filter(
+    (file: any) => file.status === "error",
+  ).length;
 
   const allProcessed =
     files.length > 0 &&
@@ -310,11 +323,16 @@ const handleAccept = async (draftId: string) => {
     );
   };
 
-  const pendingReview = drafts.filter((d: any) => d.status === "pending").length;
-  const publishedCount = drafts.filter((d: any) => d.status === "accepted").length;
+  const pendingReview = drafts.filter(
+    (d: any) => d.status === "pending",
+  ).length;
+  const publishedCount = drafts.filter(
+    (d: any) => d.status === "accepted",
+  ).length;
 
   const skeletonCount = files.filter(
-    (f: any) => f.status === "analyzing" && !drafts.some((d: any) => d.fileId === f.id),
+    (f: any) =>
+      f.status === "analyzing" && !drafts.some((d: any) => d.fileId === f.id),
   ).length;
 
   const filteredItems = drafts.filter((d: any) => {
@@ -335,43 +353,65 @@ const handleAccept = async (draftId: string) => {
             {
               label: "Uploaded",
               val: files.length,
-              sub: files.length === 0 ? "No images yet" : `${files.length} image${files.length !== 1 ? "s" : ""} in session`,
+              sub:
+                files.length === 0
+                  ? "No images yet"
+                  : `${files.length} image${files.length !== 1 ? "s" : ""} in session`,
               bg: "bg-[#f4f3f1]",
             },
             {
               label: "Processed",
               val: doneCount,
-              sub: analyzingCount > 0 ? `${analyzingCount} currently analyzing…`
-                : errorCount > 0 ? `${errorCount} failed`
-                : doneCount > 0 ? "Drafts generated"
-                : "Waiting to start",
+              sub:
+                analyzingCount > 0
+                  ? `${analyzingCount} currently analyzing…`
+                  : errorCount > 0
+                    ? `${errorCount} failed`
+                    : doneCount > 0
+                      ? "Drafts generated"
+                      : "Waiting to start",
               bg: "bg-[#efeeec]",
               processing: analyzingCount > 0,
             },
             {
               label: "Pending review",
               val: pendingReview,
-              sub: pendingReview > 0 ? "Requires seller approval"
-                : drafts.length > 0 ? "All reviewed"
-                : "No drafts yet",
+              sub:
+                pendingReview > 0
+                  ? "Requires seller approval"
+                  : drafts.length > 0
+                    ? "All reviewed"
+                    : "No drafts yet",
               bg: "bg-[#e9e8e6]",
               accent: true,
             },
             {
               label: "Published",
               val: publishedCount,
-              sub: publishedCount > 0 ? "Active live listings" : "None published yet",
+              sub:
+                publishedCount > 0
+                  ? "Active live listings"
+                  : "None published yet",
               bg: "bg-[#e3e2e0]",
             },
           ].map((s, i) => (
-            <div key={i} className={`${s.bg} p-8 border-b border-[#d1c5b4]/15 transition-all duration-300`}>
-              <span className={`block text-[9px] uppercase tracking-[0.15em] mb-2 ${s.accent ? "text-[#775a19]" : "text-[#5f5e5e]"}`}>
+            <div
+              key={i}
+              className={`${s.bg} p-8 border-b border-[#d1c5b4]/15 transition-all duration-300`}
+            >
+              <span
+                className={`block text-[9px] uppercase tracking-[0.15em] mb-2 ${s.accent ? "text-[#775a19]" : "text-[#5f5e5e]"}`}
+              >
                 {s.label}
               </span>
-              <span className={`${gelasio.className} text-4xl font-light transition-all duration-300 ${s.accent ? "text-[#775a19]" : "text-[#1a1c1b]"}`}>
+              <span
+                className={`${gelasio.className} text-4xl font-light transition-all duration-300 ${s.accent ? "text-[#775a19]" : "text-[#1a1c1b]"}`}
+              >
                 {s.val}
               </span>
-              <span className={`block text-[9px] mt-1 transition-colors duration-300 ${s.processing ? "text-[#775a19] animate-pulse" : "text-[#5f5e5e]/60"}`}>
+              <span
+                className={`block text-[9px] mt-1 transition-colors duration-300 ${s.processing ? "text-[#775a19] animate-pulse" : "text-[#5f5e5e]/60"}`}
+              >
                 {s.sub}
               </span>
             </div>
@@ -386,7 +426,9 @@ const handleAccept = async (draftId: string) => {
               onDragLeave={handleDragLeave}
               onClick={() => canAddMore && inputRef.current?.click()}
               className={`relative py-12 px-8 flex flex-col items-center text-center transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
-                files.length > 0 ? "border-b border-dashed border-[#d1c5b4]" : ""
+                files.length > 0
+                  ? "border-b border-dashed border-[#d1c5b4]"
+                  : ""
               } ${isDragging ? "bg-[#e9e8e6] scale-[1.01]" : canAddMore ? "cursor-pointer hover:bg-[#efeeec]" : ""} ${!canAddMore ? "opacity-40 cursor-not-allowed" : ""}`}
             >
               <input
@@ -397,10 +439,14 @@ const handleAccept = async (draftId: string) => {
                 onChange={handleInputChange}
                 className="hidden"
               />
-              <span className={`material-symbols-outlined text-4xl mb-3 transition-all duration-300 ${isDragging ? "text-[#775a19] scale-110" : "text-[#7f7667] scale-100"}`}>
+              <span
+                className={`material-symbols-outlined text-4xl mb-3 transition-all duration-300 ${isDragging ? "text-[#775a19] scale-110" : "text-[#7f7667] scale-100"}`}
+              >
                 upload_file
               </span>
-              <h3 className={`${gelasio.className} text-xl mb-1`}>Drop images here</h3>
+              <h3 className={`${gelasio.className} text-xl mb-1`}>
+                Drop images here
+              </h3>
               <p className="text-[12px] text-[#5f5e5e] max-w-xs mx-auto leading-relaxed">
                 JPEG, PNG, WEBP — up to {MAX_IMAGES} items
               </p>
@@ -408,12 +454,21 @@ const handleAccept = async (draftId: string) => {
 
             {files.length > 0 && (
               <div className="px-6 py-4">
-                <div className={`transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] overflow-hidden ${agentRunning && analyzingCount > 0 ? "max-h-20 opacity-100 mb-3" : "max-h-0 opacity-0 mb-0"}`}>
+                <div
+                  className={`transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] overflow-hidden ${agentRunning && analyzingCount > 0 ? "max-h-20 opacity-100 mb-3" : "max-h-0 opacity-0 mb-0"}`}
+                >
                   <div className="px-3 py-2.5 bg-[#775a19]/5 border border-[#775a19]/10 flex items-center gap-3">
-                    <span className="material-symbols-outlined animate-spin text-[18px] text-[#775a19]">progress_activity</span>
+                    <span className="material-symbols-outlined animate-spin text-[18px] text-[#775a19]">
+                      progress_activity
+                    </span>
                     <span className="text-[12px] text-[#775a19]">
-                      Processing <span className="font-medium">{analyzingCount} image{analyzingCount !== 1 ? "s" : ""}</span>
-                      <span className="text-[#775a19]/50 ml-2">· {doneCount} of {files.length} complete</span>
+                      Processing{" "}
+                      <span className="font-medium">
+                        {analyzingCount} image{analyzingCount !== 1 ? "s" : ""}
+                      </span>
+                      <span className="text-[#775a19]/50 ml-2">
+                        · {doneCount} of {files.length} complete
+                      </span>
                     </span>
                   </div>
                 </div>
@@ -422,25 +477,42 @@ const handleAccept = async (draftId: string) => {
                   {files.map((f: any) => {
                     const isRevealed = revealedFiles.has(f.id);
                     return (
-                      <div key={f.id} className={`group flex items-center gap-3 py-2 px-2 rounded hover:bg-[#efeeec] transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}>
-                        <span className={`material-symbols-outlined text-[18px] ${statusColour(f.status)} flex-shrink-0`}>
+                      <div
+                        key={f.id}
+                        className={`group flex items-center gap-3 py-2 px-2 rounded hover:bg-[#efeeec] transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                      >
+                        <span
+                          className={`material-symbols-outlined text-[18px] ${statusColour(f.status)} flex-shrink-0`}
+                        >
                           {statusIcon(f.status)}
                         </span>
                         <div className="flex-1 min-w-0 flex items-center gap-2">
-                          <span className={`text-[12px] truncate transition-colors duration-200 ${
-                            f.status === "analyzing" ? "text-[#775a19] font-medium"
-                              : f.status === "error" ? "text-red-500" : ""
-                          }`}>
+                          <span
+                            className={`text-[12px] truncate transition-colors duration-200 ${
+                              f.status === "analyzing"
+                                ? "text-[#775a19] font-medium"
+                                : f.status === "error"
+                                  ? "text-red-500"
+                                  : ""
+                            }`}
+                          >
                             {f.name}
                           </span>
-                          <span className="text-[10px] text-[#5f5e5e]/30 flex-shrink-0">{formatSize(f.size)}</span>
+                          <span className="text-[10px] text-[#5f5e5e]/30 flex-shrink-0">
+                            {formatSize(f.size)}
+                          </span>
                         </div>
-                        <span className={`text-[10px] flex-shrink-0 transition-colors duration-200 ${
-                          f.status === "done" ? "text-emerald-600"
-                            : f.status === "analyzing" ? "text-[#775a19] animate-pulse"
-                            : f.status === "error" ? "text-red-500"
-                            : "text-[#5f5e5e]/40"
-                        }`}>
+                        <span
+                          className={`text-[10px] flex-shrink-0 transition-colors duration-200 ${
+                            f.status === "done"
+                              ? "text-emerald-600"
+                              : f.status === "analyzing"
+                                ? "text-[#775a19] animate-pulse"
+                                : f.status === "error"
+                                  ? "text-red-500"
+                                  : "text-[#5f5e5e]/40"
+                          }`}
+                        >
                           {statusLabel(f.status, f.error)}
                         </span>
                         {!agentRunning && (
@@ -451,7 +523,9 @@ const handleAccept = async (draftId: string) => {
                             }}
                             className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-[#5f5e5e]/30 hover:text-red-500 flex-shrink-0 bg-transparent border-none cursor-pointer"
                           >
-                            <span className="material-symbols-outlined text-[16px]">close</span>
+                            <span className="material-symbols-outlined text-[16px]">
+                              close
+                            </span>
                           </button>
                         )}
                       </div>
@@ -505,11 +579,17 @@ const handleAccept = async (draftId: string) => {
           <>
             <section
               className={`flex justify-between items-end mb-12 transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
-                boardVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+                boardVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-8"
               }`}
             >
               <div>
-                <h2 className={`${gelasio.className} text-4xl tracking-tight mb-4`}>Review board</h2>
+                <h2
+                  className={`${gelasio.className} text-4xl tracking-tight mb-4`}
+                >
+                  Review board
+                </h2>
                 <div className="flex gap-8">
                   {TABS.map((tab) => (
                     <button
@@ -523,7 +603,9 @@ const handleAccept = async (draftId: string) => {
                     >
                       {tab}
                       {tab === "Pending" && pendingReview > 0 && (
-                        <span className="ml-1.5 text-[9px] text-[#775a19]">{pendingReview}</span>
+                        <span className="ml-1.5 text-[9px] text-[#775a19]">
+                          {pendingReview}
+                        </span>
                       )}
                     </button>
                   ))}
@@ -559,10 +641,15 @@ const handleAccept = async (draftId: string) => {
                   <article
                     key={draft.id}
                     className={`grid grid-cols-12 gap-12 items-start transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
-                      isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-12"
+                      isRevealed
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 translate-y-12"
                     } ${
-                      draft.status === "denied" ? "!opacity-30 pointer-events-none"
-                        : draft.status === "accepted" ? "!opacity-50" : ""
+                      draft.status === "denied"
+                        ? "!opacity-30 pointer-events-none"
+                        : draft.status === "accepted"
+                          ? "!opacity-50"
+                          : ""
                     }`}
                   >
                     <div className="col-span-4 relative">
@@ -575,14 +662,20 @@ const handleAccept = async (draftId: string) => {
                       </div>
                       <div className="absolute -bottom-6 -right-6 bg-white p-6 shadow-sm border border-[#d1c5b4]/10">
                         <div className="flex items-center gap-1.5 mb-1">
-                          <span className="material-symbols-outlined filled text-sm text-[#775a19]">auto_awesome</span>
+                          <span className="material-symbols-outlined filled text-sm text-[#775a19]">
+                            auto_awesome
+                          </span>
                           <span className="text-[9px] uppercase -tracking-tight text-[#5f5e5e]/80">
                             {isML ? "ML Model" : "AI Estimate"}
                           </span>
                         </div>
                         <span className={`${gelasio.className} text-lg`}>
-                          {isML && draft.pricing.confidence ? `${draft.pricing.confidence * 100}%` : "—"}{" "}
-                          <span className={`${roboto.className} text-xs text-[#5f5e5e]/60 italic`}>
+                          {isML && draft.pricing.confidence
+                            ? `${draft.pricing.confidence * 100}%`
+                            : "—"}{" "}
+                          <span
+                            className={`${roboto.className} text-xs text-[#5f5e5e]/60 italic`}
+                          >
                             {isML ? "confidence" : "no sales history"}
                           </span>
                         </span>
@@ -595,10 +688,17 @@ const handleAccept = async (draftId: string) => {
                           <span className="block text-[9px] uppercase tracking-[0.2em] text-[#775a19] mb-2">
                             {draft.category}
                           </span>
-                          <h3 className={`${gelasio.className} text-[28px] mb-4`}>{draft.title}</h3>
+                          <h3
+                            className={`${gelasio.className} text-[28px] mb-4`}
+                          >
+                            {draft.title}
+                          </h3>
                           <div className="flex gap-2 flex-wrap">
                             {draft.tags.map((tag: any) => (
-                              <span key={tag} className="bg-[#e8e2d9] text-[#1d1b16] text-[8px] px-3 py-1 uppercase tracking-[0.15em]">
+                              <span
+                                key={tag}
+                                className="bg-[#e8e2d9] text-[#1d1b16] text-[8px] px-3 py-1 uppercase tracking-[0.15em]"
+                              >
                                 {tag}
                               </span>
                             ))}
@@ -608,7 +708,9 @@ const handleAccept = async (draftId: string) => {
                           <span className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-1">
                             {isML ? "Optimal price" : "AI Midpoint"}
                           </span>
-                          <span className={`${gelasio.className} text-2xl`}>${draft.suggestedPrice ?? "—"}</span>
+                          <span className={`${gelasio.className} text-2xl`}>
+                            ${draft.suggestedPrice ?? "—"}
+                          </span>
                         </div>
                       </div>
 
@@ -621,14 +723,18 @@ const handleAccept = async (draftId: string) => {
                               </span>
                               <span className="text-xl font-light text-[#1a1c1b]">
                                 {draft.pricing.estVolume || "—"}{" "}
-                                <span className="text-xs text-[#5f5e5e]/40">units</span>
+                                <span className="text-xs text-[#5f5e5e]/40">
+                                  units
+                                </span>
                               </span>
                             </div>
                             <div className="bg-[#faf9f7] p-6">
                               <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
                                 Max revenue potential
                               </span>
-                              <span className={`text-xl font-light text-[#1a1c1b] ${gelasio.className}`}>
+                              <span
+                                className={`text-xl font-light text-[#1a1c1b] ${gelasio.className}`}
+                              >
                                 {draft.pricing.price_range
                                   ? `$${draft.pricing.price_range[0]} — $${draft.pricing.price_range[1]}`
                                   : draft.pricing.suggested_price_range
@@ -640,15 +746,24 @@ const handleAccept = async (draftId: string) => {
                         ) : (
                           <>
                             <div className="bg-[#faf9f7] p-6">
-                              <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">Market range</span>
-                              <span className="text-xl font-light text-[#1a1c1b]">{draft.pricing.range || "—"}</span>
+                              <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
+                                Market range
+                              </span>
+                              <span className="text-xl font-light text-[#1a1c1b]">
+                                {draft.pricing.range || "—"}
+                              </span>
                             </div>
                             <div className="bg-[#faf9f7] p-6">
-                              <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">Est. volume</span>
+                              <span className="block text-[8px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-2">
+                                Est. volume
+                              </span>
                               <span className="text-xl font-light text-[#775a19]">
-                                {Array.isArray(draft.pricing.expected_monthly_volume)
+                                {Array.isArray(
+                                  draft.pricing.expected_monthly_volume,
+                                )
                                   ? `${draft.pricing.expected_monthly_volume[1]}—${draft.pricing.expected_monthly_volume[0]}`
-                                  : draft.pricing.expected_monthly_volume || "Unknown"}
+                                  : draft.pricing.expected_monthly_volume ||
+                                    "Unknown"}
                               </span>
                             </div>
                           </>
@@ -670,11 +785,15 @@ const handleAccept = async (draftId: string) => {
                             <span className="absolute left-1 bottom-[10px] text-[#5f5e5e]/40 text-sm pointer-events-none">
                               $
                             </span>
-                            
+
                             <input
                               value={draft.priceOverride}
                               onChange={(e) =>
-                                updateDraftField(draft.id, "priceOverride", e.target.value)
+                                updateDraftField(
+                                  draft.id,
+                                  "priceOverride",
+                                  e.target.value,
+                                )
                               }
                               disabled={draft.status !== "pending"}
                               placeholder="0.00"
@@ -683,17 +802,23 @@ const handleAccept = async (draftId: string) => {
                           </div>
                           <div
                             className={`${roboto.className} text-[10px] mt-2 transition-all duration-200 ${
-                              payoutPreview > 0 ? "text-[#775a19]" : "text-[#5f5e5e]/50"
+                              payoutPreview > 0
+                                ? "text-[#775a19]"
+                                : "text-[#5f5e5e]/50"
                             }`}
                           >
                             {payoutPreview > 0 ? (
                               <>
                                 You receive{" "}
-                                <span className="font-bold">${payoutPreview.toFixed(2)}</span>{" "}
+                                <span className="font-bold">
+                                  ${payoutPreview.toFixed(2)}
+                                </span>{" "}
                                 after {rate}% commission
                               </>
                             ) : (
-                              <>{rate}% commission on your {tier ?? "free"} plan</>
+                              <>
+                                {rate}% commission on your {tier ?? "free"} plan
+                              </>
                             )}
                           </div>
                         </div>
@@ -705,7 +830,11 @@ const handleAccept = async (draftId: string) => {
                             type="number"
                             value={draft.qtyOverride}
                             onChange={(e) =>
-                              updateDraftField(draft.id, "qtyOverride", parseInt(e.target.value) || 1)
+                              updateDraftField(
+                                draft.id,
+                                "qtyOverride",
+                                parseInt(e.target.value) || 1,
+                              )
                             }
                             min={1}
                             disabled={draft.status !== "pending"}
@@ -719,14 +848,18 @@ const handleAccept = async (draftId: string) => {
                       <div className="flex gap-4">
                         {draft.status === "accepted" ? (
                           <div className="flex-1 flex items-center justify-center gap-2 py-4 bg-emerald-50 border border-emerald-200 transition-all duration-500">
-                            <span className="material-symbols-outlined text-emerald-600 text-lg">check_circle</span>
+                            <span className="material-symbols-outlined text-emerald-600 text-lg">
+                              check_circle
+                            </span>
                             <span className="text-[11px] uppercase tracking-[0.15em] text-emerald-700 font-medium">
                               Published
                             </span>
                           </div>
                         ) : draft.status === "denied" ? (
                           <div className="flex-1 flex items-center justify-center gap-2 py-4 bg-red-50/50 border border-red-200/50 transition-all duration-500">
-                            <span className="text-[11px] uppercase tracking-[0.15em] text-red-400 font-medium">Denied</span>
+                            <span className="text-[11px] uppercase tracking-[0.15em] text-red-400 font-medium">
+                              Denied
+                            </span>
                           </div>
                         ) : (
                           <>
@@ -734,11 +867,15 @@ const handleAccept = async (draftId: string) => {
                               onClick={() => handleAccept(draft.id)}
                               disabled={isAccepting}
                               className={`${roboto.className} flex-1 border-none py-4 text-[11px] uppercase tracking-[0.15em] font-medium cursor-pointer transition-all duration-300 flex items-center justify-center gap-2 ${
-                                isAccepting ? "bg-[#775a19] text-white cursor-wait" : "bg-[#5f5e5e] text-white hover:bg-[#1a1c1b]"
+                                isAccepting
+                                  ? "bg-[#775a19] text-white cursor-wait"
+                                  : "bg-[#5f5e5e] text-white hover:bg-[#1a1c1b]"
                               }`}
                             >
                               {isAccepting && (
-                                <span className="material-symbols-outlined animate-spin text-sm">progress_activity</span>
+                                <span className="material-symbols-outlined animate-spin text-sm">
+                                  progress_activity
+                                </span>
                               )}
                               {isAccepting ? "Publishing…" : "Accept & publish"}
                             </button>
@@ -759,7 +896,10 @@ const handleAccept = async (draftId: string) => {
 
               {activeTab === "All" &&
                 Array.from({ length: skeletonCount }).map((_, i) => (
-                  <article key={`skeleton-${i}`} className="grid grid-cols-12 gap-12 items-start">
+                  <article
+                    key={`skeleton-${i}`}
+                    className="grid grid-cols-12 gap-12 items-start"
+                  >
                     <div className="col-span-4 relative">
                       <div className="bg-[#efeeec] aspect-[4/5] overflow-hidden animate-pulse" />
                       <div className="absolute -bottom-6 -right-6 bg-white p-6 shadow-sm border border-[#d1c5b4]/10">
