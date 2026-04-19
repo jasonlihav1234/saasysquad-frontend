@@ -15,6 +15,7 @@ import { Gelasio, Roboto } from "next/font/google";
 import { useUser } from "@/components/providers/UserProvider";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
+import { authFetch } from "../../../lib/api";
 
 const SELLER_COMMISSION_PERCENT: Record<string, number> = {
   free: 13,
@@ -70,7 +71,10 @@ const statCardCaption = `${roboto.className} text-[0.65rem] uppercase tracking-w
 
 const TIER_ORDER: any = { free: 0, pro: 1, enterprise: 2 };
 
-function hasAccess(userTier: string | undefined, requiredTier: string): boolean {
+function hasAccess(
+  userTier: string | undefined,
+  requiredTier: string,
+): boolean {
   const user = TIER_ORDER[userTier || "free"] ?? 0;
   const required = TIER_ORDER[requiredTier] ?? 0;
   return user >= required;
@@ -109,35 +113,65 @@ function mapSaleStatus(status: string | undefined): SaleRowItem["status"] {
 }
 
 function MetricBox({
-  label, value, sublabel, valueStyle, accent,
+  label,
+  value,
+  sublabel,
+  valueStyle,
+  accent,
 }: {
-  label: string; value: string | number; sublabel?: string; valueStyle?: string; accent?: "warning";
+  label: string;
+  value: string | number;
+  sublabel?: string;
+  valueStyle?: string;
+  accent?: "warning";
 }) {
   return (
     <div className="bg-[#efeeec] p-6 flex flex-col justify-center min-h-[120px]">
-      <p className={`${roboto.className} text-[0.6rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-2`}>
+      <p
+        className={`${roboto.className} text-[0.6rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-2`}
+      >
         {label}
       </p>
-      <h4 className={`${gelasio.className} text-2xl ${valueStyle || ""} ${accent === "warning" ? "text-[#ba1a1a]" : "text-[#1a1c1b]"}`}>
+      <h4
+        className={`${gelasio.className} text-2xl ${valueStyle || ""} ${accent === "warning" ? "text-[#ba1a1a]" : "text-[#1a1c1b]"}`}
+      >
         {value}
       </h4>
-      {sublabel && <p className={`${roboto.className} text-[0.65rem] text-[#5f5e5e]/50 mt-1`}>{sublabel}</p>}
+      {sublabel && (
+        <p
+          className={`${roboto.className} text-[0.65rem] text-[#5f5e5e]/50 mt-1`}
+        >
+          {sublabel}
+        </p>
+      )}
     </div>
   );
 }
 
-function MiniBarChart({ data }: { data: { month: string; revenue: number }[] }) {
+function MiniBarChart({
+  data,
+}: {
+  data: { month: string; revenue: number }[];
+}) {
   const max = useMemo(() => Math.max(...data.map((d) => d.revenue), 1), [data]);
   return (
     <div className="flex items-end justify-between gap-4 h-32">
       {data.map((d) => {
         const heightPct = (d.revenue / max) * 100;
         return (
-          <div key={d.month} className="flex-1 flex flex-col items-center gap-2">
+          <div
+            key={d.month}
+            className="flex-1 flex flex-col items-center gap-2"
+          >
             <div className="w-full flex items-end h-24">
-              <div className="w-full bg-[#775a19] transition-all duration-500" style={{ height: `${heightPct}%` }} />
+              <div
+                className="w-full bg-[#775a19] transition-all duration-500"
+                style={{ height: `${heightPct}%` }}
+              />
             </div>
-            <span className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60`}>
+            <span
+              className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60`}
+            >
               {d.month}
             </span>
           </div>
@@ -148,11 +182,17 @@ function MiniBarChart({ data }: { data: { month: string; revenue: number }[] }) 
 }
 
 function Skeleton({ className = "" }: { className?: string }) {
-  return <span className={`inline-block bg-[#d1c5b4]/30 animate-pulse ${className}`} />;
+  return (
+    <span
+      className={`inline-block bg-[#d1c5b4]/30 animate-pulse ${className}`}
+    />
+  );
 }
 
 function BasicSection({
-  data, loading, tier,
+  data,
+  loading,
+  tier,
 }: {
   data: BasicAnalytics | null;
   loading: boolean;
@@ -174,11 +214,15 @@ function BasicSection({
     <div className="grid grid-cols-12 gap-8">
       <div className="col-span-12 md:col-span-5 bg-[#f4f3f1] p-10 flex flex-col justify-between min-h-[220px]">
         <div>
-          <span className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}>
+          <span
+            className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}
+          >
             Your Earnings · This Quarter
           </span>
 
-          <h2 className={`${gelasio.className} text-5xl font-light text-[#1a1c1b]`}>
+          <h2
+            className={`${gelasio.className} text-5xl font-light text-[#1a1c1b]`}
+          >
             {loading ? <Skeleton className="h-12 w-48" /> : formatCurrency(net)}
           </h2>
 
@@ -188,30 +232,44 @@ function BasicSection({
             </p>
           )}
           {!loading && gross === 0 && (
-            <p className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}>
+            <p
+              className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}
+            >
               No sales yet this quarter
             </p>
           )}
         </div>
 
-        <div className={`mt-12 flex items-center gap-2 ${momPositive ? "text-[#775a19]" : "text-red-600"}`}>
+        <div
+          className={`mt-12 flex items-center gap-2 ${momPositive ? "text-[#775a19]" : "text-red-600"}`}
+        >
           <span className="material-symbols-outlined">
             {momPositive ? "trending_up" : "trending_down"}
           </span>
-          <span className={`${roboto.className} text-sm font-bold`}>{momLabel}</span>
+          <span className={`${roboto.className} text-sm font-bold`}>
+            {momLabel}
+          </span>
         </div>
       </div>
 
       <div className="col-span-12 md:col-span-7 grid grid-cols-2 gap-8">
         <div className={statCardShell}>
           <h3 className={`${gelasio.className} text-4xl mb-1 text-[#1a1c1b]`}>
-            {loading ? <Skeleton className="h-10 w-12" /> : (data?.activeListings ?? 0)}
+            {loading ? (
+              <Skeleton className="h-10 w-12" />
+            ) : (
+              (data?.activeListings ?? 0)
+            )}
           </h3>
           <p className={statCardCaption}>Active Listings</p>
         </div>
         <div className={statCardShell}>
           <h3 className={`${gelasio.className} text-4xl mb-1 text-[#1a1c1b]`}>
-            {loading ? <Skeleton className="h-10 w-12" /> : (data?.itemsSoldTotal ?? 0)}
+            {loading ? (
+              <Skeleton className="h-10 w-12" />
+            ) : (
+              (data?.itemsSoldTotal ?? 0)
+            )}
           </h3>
           <p className={statCardCaption}>Items Sold</p>
         </div>
@@ -244,23 +302,45 @@ const MOCK_ENTERPRISE: EnterpriseAnalytics = {
   marketShareSegment: 75.4,
 };
 
-function ProSection({ data, loading }: { data: ProAnalytics | null; loading: boolean }) {
+function ProSection({
+  data,
+  loading,
+}: {
+  data: ProAnalytics | null;
+  loading: boolean;
+}) {
   const d = data ?? MOCK_PRO;
   return (
     <div className="grid grid-cols-12 gap-8">
       <div className="col-span-12 md:col-span-6 bg-[#f4f3f1] p-10 flex flex-col justify-between min-h-[280px]">
         <div>
-          <span className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}>
+          <span
+            className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}
+          >
             Conversion Rate
           </span>
-          <h2 className={`${gelasio.className} text-6xl font-light text-[#1a1c1b]`}>
-            {loading ? <Skeleton className="h-16 w-36" /> : d.conversionRate !== null ? `${d.conversionRate}%` : "—"}
+          <h2
+            className={`${gelasio.className} text-6xl font-light text-[#1a1c1b]`}
+          >
+            {loading ? (
+              <Skeleton className="h-16 w-36" />
+            ) : d.conversionRate !== null ? (
+              `${d.conversionRate}%`
+            ) : (
+              "—"
+            )}
           </h2>
-          <p className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}>Views converting to purchases</p>
+          <p
+            className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}
+          >
+            Views converting to purchases
+          </p>
         </div>
         <div className={`${roboto.className} text-xs text-[#5f5e5e]/60 mt-6`}>
           {d.conversionRate !== null
-            ? d.conversionRate > 2.1 ? "Industry avg: 2.1% — you're outperforming" : "Industry avg: 2.1%"
+            ? d.conversionRate > 2.1
+              ? "Industry avg: 2.1% — you're outperforming"
+              : "Industry avg: 2.1%"
             : "Not enough view data yet"}
         </div>
       </div>
@@ -270,84 +350,161 @@ function ProSection({ data, loading }: { data: ProAnalytics | null; loading: boo
           <div>
             <p className={statCardCaption}>Average Order Value</p>
             <h3 className={`${gelasio.className} text-3xl mt-2 text-[#1a1c1b]`}>
-              {loading ? <Skeleton className="h-8 w-24" /> : `$${d.averageOrderValue.toFixed(2)}`}
+              {loading ? (
+                <Skeleton className="h-8 w-24" />
+              ) : (
+                `$${d.averageOrderValue.toFixed(2)}`
+              )}
             </h3>
           </div>
-          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">payments</span>
+          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">
+            payments
+          </span>
         </div>
         <div className="bg-[#efeeec] p-8 flex items-center justify-between">
           <div>
             <p className={statCardCaption}>Repeat Buyer Rate</p>
             <h3 className={`${gelasio.className} text-3xl mt-2 text-[#1a1c1b]`}>
-              {loading ? <Skeleton className="h-8 w-16" /> : `${d.repeatBuyerRate}%`}
+              {loading ? (
+                <Skeleton className="h-8 w-16" />
+              ) : (
+                `${d.repeatBuyerRate}%`
+              )}
             </h3>
           </div>
-          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">refresh</span>
+          <span className="material-symbols-outlined text-3xl text-[#775a19]/40">
+            refresh
+          </span>
         </div>
       </div>
 
       <div className="col-span-12 bg-[#faf9f7] border border-[#d1c5b4]/30 p-10">
         <div className="flex justify-between items-end mb-6">
           <div>
-            <p className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-1`}>
+            <p
+              className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-1`}
+            >
               Revenue · Last 6 months
             </p>
             <h3 className={`${gelasio.className} text-2xl text-[#1a1c1b]`}>
               Top category:{" "}
-              {loading ? <Skeleton className="h-7 w-28 inline-block align-middle" /> : (d.topCategory?.name ?? "—")}
+              {loading ? (
+                <Skeleton className="h-7 w-28 inline-block align-middle" />
+              ) : (
+                (d.topCategory?.name ?? "—")
+              )}
             </h3>
           </div>
           <span className={`${roboto.className} text-xs text-[#5f5e5e]/70`}>
-            {loading ? <Skeleton className="h-4 w-20" /> : d.topCategory ? `$${d.topCategory.revenue.toLocaleString()} this period` : ""}
+            {loading ? (
+              <Skeleton className="h-4 w-20" />
+            ) : d.topCategory ? (
+              `$${d.topCategory.revenue.toLocaleString()} this period`
+            ) : (
+              ""
+            )}
           </span>
         </div>
-        {loading ? <Skeleton className="h-32 w-full" /> :
-          d.revenueByMonth.length > 0 ? <MiniBarChart data={d.revenueByMonth} /> :
-          <p className={`${roboto.className} text-sm text-[#5f5e5e]/60 italic`}>No sales data in the last 6 months.</p>}
+        {loading ? (
+          <Skeleton className="h-32 w-full" />
+        ) : d.revenueByMonth.length > 0 ? (
+          <MiniBarChart data={d.revenueByMonth} />
+        ) : (
+          <p className={`${roboto.className} text-sm text-[#5f5e5e]/60 italic`}>
+            No sales data in the last 6 months.
+          </p>
+        )}
       </div>
     </div>
   );
 }
 
-function EnterpriseSection({ data, loading }: { data: EnterpriseAnalytics | null; loading: boolean }) {
+function EnterpriseSection({
+  data,
+  loading,
+}: {
+  data: EnterpriseAnalytics | null;
+  loading: boolean;
+}) {
   const d = data ?? MOCK_ENTERPRISE;
   return (
     <div className="grid grid-cols-12 gap-8">
       <div className="col-span-12 md:col-span-6 bg-[#1a1c1b] text-white p-10 flex flex-col justify-between min-h-[280px]">
         <div>
-          <span className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-white/60 mb-2 block`}>
+          <span
+            className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-white/60 mb-2 block`}
+          >
             Forecast · Next Quarter
           </span>
           <h2 className={`${gelasio.className} text-6xl font-light`}>
-            {loading ? <Skeleton className="h-16 w-48 bg-white/10" /> : `$${d.forecastNextQuarter.toLocaleString()}`}
+            {loading ? (
+              <Skeleton className="h-16 w-48 bg-white/10" />
+            ) : (
+              `$${d.forecastNextQuarter.toLocaleString()}`
+            )}
           </h2>
-          <p className={`${roboto.className} text-sm text-white/60 mt-2 italic`}>Projected based on current trajectory</p>
+          <p
+            className={`${roboto.className} text-sm text-white/60 mt-2 italic`}
+          >
+            Projected based on current trajectory
+          </p>
         </div>
         <div className="mt-6 flex items-center gap-3">
-          <span className="material-symbols-outlined text-white/40">auto_graph</span>
-          <span className={`${roboto.className} text-xs text-white/60`}>Based on last 6 months · updates hourly</span>
+          <span className="material-symbols-outlined text-white/40">
+            auto_graph
+          </span>
+          <span className={`${roboto.className} text-xs text-white/60`}>
+            Based on last 6 months · updates hourly
+          </span>
         </div>
       </div>
 
       <div className="col-span-12 md:col-span-6 grid grid-cols-2 gap-4">
-        <MetricBox label="Market Position" value={loading ? "—" : `${d.marketShareSegment}%`} sublabel="percentile in segment" />
-        <MetricBox label="Position" value={loading ? "—" : d.competitivePosition} sublabel="vs. competitors" valueStyle="capitalize" />
-        <MetricBox label="Customer LTV" value={loading ? "—" : `$${d.customerLifetimeValue.toLocaleString()}`} sublabel={`${d.uniqueBuyers} unique buyers`} />
-        <MetricBox label="Churn Risk" value={loading ? "—" : d.churnRiskCount} sublabel="customers at risk" accent={d.churnRiskCount > 0 ? "warning" : undefined} />
+        <MetricBox
+          label="Market Position"
+          value={loading ? "—" : `${d.marketShareSegment}%`}
+          sublabel="percentile in segment"
+        />
+        <MetricBox
+          label="Position"
+          value={loading ? "—" : d.competitivePosition}
+          sublabel="vs. competitors"
+          valueStyle="capitalize"
+        />
+        <MetricBox
+          label="Customer LTV"
+          value={loading ? "—" : `$${d.customerLifetimeValue.toLocaleString()}`}
+          sublabel={`${d.uniqueBuyers} unique buyers`}
+        />
+        <MetricBox
+          label="Churn Risk"
+          value={loading ? "—" : d.churnRiskCount}
+          sublabel="customers at risk"
+          accent={d.churnRiskCount > 0 ? "warning" : undefined}
+        />
       </div>
 
       <div className="col-span-12 bg-[#faf9f7] border border-[#d1c5b4]/30 p-8 flex items-center justify-between">
         <div>
-          <p className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-1`}>
+          <p
+            className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60 mb-1`}
+          >
             Inventory Turnover
           </p>
           <h3 className={`${gelasio.className} text-2xl text-[#1a1c1b]`}>
-            {loading ? <Skeleton className="h-7 w-48" /> :
-              d.inventoryTurnoverDays > 0 ? <>Every {d.inventoryTurnoverDays} days</> : "No sold-out items yet"}
+            {loading ? (
+              <Skeleton className="h-7 w-48" />
+            ) : d.inventoryTurnoverDays > 0 ? (
+              <>Every {d.inventoryTurnoverDays} days</>
+            ) : (
+              "No sold-out items yet"
+            )}
           </h3>
         </div>
         {!loading && d.inventoryTurnoverDays > 0 && (
-          <div className={`${roboto.className} text-xs text-[#5f5e5e]/70 max-w-xs text-right`}>
+          <div
+            className={`${roboto.className} text-xs text-[#5f5e5e]/70 max-w-xs text-right`}
+          >
             Average time from listing to selling out.
           </div>
         )}
@@ -357,12 +514,23 @@ function EnterpriseSection({ data, loading }: { data: EnterpriseAnalytics | null
 }
 
 interface AnalyticsTierProps {
-  label: string; tier: string; tierColor?: string; description: string;
-  locked?: boolean; unlockCopy?: string; children: React.ReactNode;
+  label: string;
+  tier: string;
+  tierColor?: string;
+  description: string;
+  locked?: boolean;
+  unlockCopy?: string;
+  children: React.ReactNode;
 }
 
 function AnalyticsTier({
-  label, tier, tierColor = "#5f5e5e", description, locked = false, unlockCopy, children,
+  label,
+  tier,
+  tierColor = "#5f5e5e",
+  description,
+  locked = false,
+  unlockCopy,
+  children,
 }: AnalyticsTierProps) {
   return (
     <section className="pb-24">
@@ -377,7 +545,11 @@ function AnalyticsTier({
             </span>
           </div>
           <h3 className={`${gelasio.className} text-3xl mb-3`}>{label}</h3>
-          <p className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed`}>{description}</p>
+          <p
+            className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed`}
+          >
+            {description}
+          </p>
         </div>
       </div>
 
@@ -392,9 +564,17 @@ function AnalyticsTier({
         {locked && (
           <div className="absolute inset-0 flex items-center justify-center p-8">
             <div className="bg-[#faf9f7] border border-[#d1c5b4] p-10 max-w-md text-center shadow-[0_10px_40px_-10px_rgba(26,28,27,0.12)]">
-              <span className="material-symbols-outlined text-3xl text-[#775a19] mb-4 inline-block">lock</span>
-              <h4 className={`${gelasio.className} text-2xl mb-3`}>Reserved for {tier} members</h4>
-              <p className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed mb-8`}>{unlockCopy}</p>
+              <span className="material-symbols-outlined text-3xl text-[#775a19] mb-4 inline-block">
+                lock
+              </span>
+              <h4 className={`${gelasio.className} text-2xl mb-3`}>
+                Reserved for {tier} members
+              </h4>
+              <p
+                className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed mb-8`}
+              >
+                {unlockCopy}
+              </p>
               <Link
                 href="/subscribe"
                 className={`${roboto.className} inline-block px-8 py-4 bg-[#775a19] text-white text-[0.65rem] uppercase tracking-[0.2em] font-medium hover:brightness-110 transition-all duration-300 no-underline`}
@@ -410,15 +590,31 @@ function AnalyticsTier({
 }
 
 function EmptyState({
-  icon, title, copy, ctaLabel, ctaHref,
+  icon,
+  title,
+  copy,
+  ctaLabel,
+  ctaHref,
 }: {
-  icon: string; title: string; copy: string; ctaLabel?: string; ctaHref?: string;
+  icon: string;
+  title: string;
+  copy: string;
+  ctaLabel?: string;
+  ctaHref?: string;
 }) {
   return (
     <div className="border border-dashed border-[#d1c5b4]/50 bg-[#f4f3f1]/30 p-12 text-center">
-      <span className="material-symbols-outlined text-4xl text-[#5f5e5e]/30 mb-4 inline-block">{icon}</span>
-      <h4 className={`${gelasio.className} text-xl mb-2 text-[#1a1c1b]`}>{title}</h4>
-      <p className={`${roboto.className} text-sm text-[#5f5e5e]/70 max-w-md mx-auto mb-6`}>{copy}</p>
+      <span className="material-symbols-outlined text-4xl text-[#5f5e5e]/30 mb-4 inline-block">
+        {icon}
+      </span>
+      <h4 className={`${gelasio.className} text-xl mb-2 text-[#1a1c1b]`}>
+        {title}
+      </h4>
+      <p
+        className={`${roboto.className} text-sm text-[#5f5e5e]/70 max-w-md mx-auto mb-6`}
+      >
+        {copy}
+      </p>
       {ctaLabel && ctaHref && (
         <Link
           href={ctaHref}
@@ -436,16 +632,22 @@ export default function SalesPage() {
 
   const [basic, setBasic] = useState<BasicAnalytics | null>(null);
   const [pro, setPro] = useState<ProAnalytics | null>(null);
-  const [enterprise, setEnterprise] = useState<EnterpriseAnalytics | null>(null);
+  const [enterprise, setEnterprise] = useState<EnterpriseAnalytics | null>(
+    null,
+  );
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
   const [sales, setSales] = useState<SaleRowItem[] | null>(null);
   const [salesLoading, setSalesLoading] = useState(true);
   const [salesVisible, setSalesVisible] = useState(5);
-  const [statusFilter, setStatusFilter] = useState<"all" | "awaiting_shipment" | "delivered">("all");
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "awaiting_shipment" | "delivered"
+  >("all");
 
-  const [listings, setListings] = useState<ActiveListingCardProps[] | null>(null);
+  const [listings, setListings] = useState<ActiveListingCardProps[] | null>(
+    null,
+  );
   const [listingsLoading, setListingsLoading] = useState(true);
   const [listingsVisible, setListingsVisible] = useState(8);
 
@@ -472,13 +674,15 @@ export default function SalesPage() {
 
     const fetchJson = async <T,>(path: string): Promise<T | null> => {
       try {
-        const res = await fetch(`${backendUrl}${path}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${backendUrl}${path}`);
+
         if (!res.ok) return null;
+
         return (await res.json()) as T;
       } catch (err) {
-        console.error(`Failed to fetch ${path}:`, err);
+        if (err !== "Session expired") {
+          console.error(`Failed to fetch ${path}:`, err);
+        }
         return null;
       }
     };
@@ -487,14 +691,17 @@ export default function SalesPage() {
       const [basicData, proData, enterpriseData] = await Promise.all([
         fetchJson<BasicAnalytics>("/v1/analytics/basic"),
         canAccessPro ? fetchJson<ProAnalytics>("/v1/analytics/pro") : null,
-        canAccessEnterprise ? fetchJson<EnterpriseAnalytics>("/v1/analytics/enterprise") : null,
+        canAccessEnterprise
+          ? fetchJson<EnterpriseAnalytics>("/v1/analytics/enterprise")
+          : null,
       ]);
 
       if (cancelled) return;
       setBasic(basicData);
       setPro(proData);
       setEnterprise(enterpriseData);
-      if (!basicData) setFetchError("Could not load analytics. Please refresh.");
+      if (!basicData)
+        setFetchError("Could not load analytics. Please refresh.");
       setAnalyticsLoading(false);
     };
 
@@ -511,16 +718,20 @@ export default function SalesPage() {
 
       const rawSales: any = Array.isArray(salesRes)
         ? salesRes
-        : Array.isArray(salesRes?.sales) ? salesRes.sales
-        : Array.isArray(salesRes?.data) ? salesRes.data
-        : Array.isArray(salesRes?.orders) ? salesRes.orders
-        : [];
+        : Array.isArray(salesRes?.sales)
+          ? salesRes.sales
+          : Array.isArray(salesRes?.data)
+            ? salesRes.data
+            : Array.isArray(salesRes?.orders)
+              ? salesRes.orders
+              : [];
 
       const mappedSales: SaleRowItem[] = rawSales.map((s: any) => {
         const grossNum = Number(s.total_cost ?? 0);
-        const payoutNum = s.seller_payout !== undefined && s.seller_payout !== null
-          ? Number(s.seller_payout)
-          : applyCommission(grossNum, tier);
+        const payoutNum =
+          s.seller_payout !== undefined && s.seller_payout !== null
+            ? Number(s.seller_payout)
+            : applyCommission(grossNum, tier);
 
         return {
           id: s.order_id,
@@ -539,9 +750,11 @@ export default function SalesPage() {
 
       const rawListings: any = Array.isArray(listingsRes)
         ? listingsRes
-        : Array.isArray(listingsRes?.items) ? listingsRes.items
-        : Array.isArray(listingsRes?.data) ? listingsRes.data
-        : [];
+        : Array.isArray(listingsRes?.items)
+          ? listingsRes.items
+          : Array.isArray(listingsRes?.data)
+            ? listingsRes.data
+            : [];
 
       const mappedListings: ActiveListingCardProps[] = rawListings
         .filter((item: any) => item.quantity_available > 0)
@@ -615,8 +828,12 @@ export default function SalesPage() {
 
             {fetchError && (
               <div className="mb-10 px-6 py-4 bg-red-50 border border-red-200 flex items-center gap-3">
-                <span className="material-symbols-outlined text-red-500">error</span>
-                <span className={`${roboto.className} text-sm text-red-800`}>{fetchError}</span>
+                <span className="material-symbols-outlined text-red-500">
+                  error
+                </span>
+                <span className={`${roboto.className} text-sm text-red-800`}>
+                  {fetchError}
+                </span>
               </div>
             )}
 
@@ -625,7 +842,11 @@ export default function SalesPage() {
               tier="Included"
               description="Core performance metrics available to all members."
             >
-              <BasicSection data={basic} loading={analyticsLoading} tier={tier} />
+              <BasicSection
+                data={basic}
+                loading={analyticsLoading}
+                tier={tier}
+              />
             </AnalyticsTier>
 
             <AnalyticsTier
@@ -659,9 +880,14 @@ export default function SalesPage() {
             <section className="pb-24">
               <div className="flex justify-between items-end mb-6 gap-8 flex-wrap">
                 <div className="max-w-md">
-                  <h3 className={`${gelasio.className} text-3xl mb-4`}>Recent Sales</h3>
-                  <p className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed`}>
-                    Your most recent orders with sale and payout amounts after our {rate}% commission.
+                  <h3 className={`${gelasio.className} text-3xl mb-4`}>
+                    Recent Sales
+                  </h3>
+                  <p
+                    className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed`}
+                  >
+                    Your most recent orders with sale and payout amounts after
+                    our {rate}% commission.
                   </p>
                 </div>
 
@@ -676,7 +902,9 @@ export default function SalesPage() {
                     <select
                       id="sales-status-filter"
                       value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+                      onChange={(e) =>
+                        setStatusFilter(e.target.value as typeof statusFilter)
+                      }
                       className={`${roboto.className} bg-[#f4f3f1] border-b border-[#d1c5b4]/30 px-4 py-2 text-xs focus:outline-none focus:border-[#775a19] cursor-pointer transition-all appearance-none pr-8 bg-no-repeat bg-[right_0.5rem_center]`}
                       style={{
                         backgroundImage:
@@ -684,7 +912,9 @@ export default function SalesPage() {
                       }}
                     >
                       <option value="all">All</option>
-                      <option value="awaiting_shipment">Awaiting shipment</option>
+                      <option value="awaiting_shipment">
+                        Awaiting shipment
+                      </option>
                       <option value="completed">Delivered</option>
                     </select>
                   </div>
@@ -693,15 +923,21 @@ export default function SalesPage() {
 
               {salesLoading ? (
                 <div className="space-y-2">
-                  {[0, 1, 2].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
+                  {[0, 1, 2].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
+                  ))}
                 </div>
               ) : filteredSales.length > 0 ? (
                 <>
                   <div className="overflow-hidden">
                     <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e] bg-[#f4f3f1]`}>
-                          <th className="px-6 py-4 font-medium">Product Detail</th>
+                        <tr
+                          className={`${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e] bg-[#f4f3f1]`}
+                        >
+                          <th className="px-6 py-4 font-medium">
+                            Product Detail
+                          </th>
                           <th className="px-6 py-4 font-medium">Order Date</th>
                           <th className="px-6 py-4 font-medium">Customer</th>
                           <th className="px-6 py-4 font-medium">Sale</th>
@@ -718,18 +954,29 @@ export default function SalesPage() {
                   </div>
 
                   <div className="mt-8 flex items-center justify-between">
-                    <p className={`${roboto.className} text-xs text-[#5f5e5e]/60`}>
-                      Showing {Math.min(salesVisible, filteredSales.length)} of {filteredSales.length}{" "}
+                    <p
+                      className={`${roboto.className} text-xs text-[#5f5e5e]/60`}
+                    >
+                      Showing {Math.min(salesVisible, filteredSales.length)} of{" "}
+                      {filteredSales.length}{" "}
                       {filteredSales.length === 1 ? "sale" : "sales"}
-                      {statusFilter !== "all" && ` (${statusFilter.replace("_", " ")})`}
+                      {statusFilter !== "all" &&
+                        ` (${statusFilter.replace("_", " ")})`}
                     </p>
                     {salesVisible < filteredSales.length && (
                       <button
                         type="button"
-                        onClick={() => setSalesVisible((n) => n + SALES_PAGE_SIZE)}
+                        onClick={() =>
+                          setSalesVisible((n) => n + SALES_PAGE_SIZE)
+                        }
                         className={`${roboto.className} px-6 py-3 border border-[#d1c5b4] text-[#5f5e5e] text-[0.65rem] uppercase tracking-[0.2em] font-medium hover:bg-[#f4f3f1] transition-all cursor-pointer`}
                       >
-                        Load {Math.min(SALES_PAGE_SIZE, filteredSales.length - salesVisible)} more
+                        Load{" "}
+                        {Math.min(
+                          SALES_PAGE_SIZE,
+                          filteredSales.length - salesVisible,
+                        )}{" "}
+                        more
                       </button>
                     )}
                   </div>
@@ -751,10 +998,14 @@ export default function SalesPage() {
 
             <section className="pb-24">
               <div className="flex justify-between items-center mb-10">
-                <h3 className={`${gelasio.className} text-3xl`}>Active Listings</h3>
+                <h3 className={`${gelasio.className} text-3xl`}>
+                  Active Listings
+                </h3>
                 <div className="flex gap-4">
                   <div className="relative group">
-                    <label htmlFor="sales-inventory-search" className="sr-only">Search inventory</label>
+                    <label htmlFor="sales-inventory-search" className="sr-only">
+                      Search inventory
+                    </label>
                     <input
                       id="sales-inventory-search"
                       type="search"
@@ -772,18 +1023,25 @@ export default function SalesPage() {
 
               {listingsLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-                  {[0, 1, 2, 3].map((i) => <Skeleton key={i} className="aspect-[4/5] w-full" />)}
+                  {[0, 1, 2, 3].map((i) => (
+                    <Skeleton key={i} className="aspect-[4/5] w-full" />
+                  ))}
                 </div>
               ) : listings && listings.length > 0 ? (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-12">
-                    {(search ? filteredListings : filteredListings.slice(0, listingsVisible)).map((listing) => (
+                    {(search
+                      ? filteredListings
+                      : filteredListings.slice(0, listingsVisible)
+                    ).map((listing) => (
                       <ActiveListingCard key={listing.title} {...listing} />
                     ))}
 
                     {search && filteredListings.length === 0 && (
                       <div className="col-span-full py-12 text-center">
-                        <p className={`${roboto.className} text-sm text-[#5f5e5e]/60`}>
+                        <p
+                          className={`${roboto.className} text-sm text-[#5f5e5e]/60`}
+                        >
                           No listings match "{search}".
                         </p>
                       </div>
@@ -797,10 +1055,14 @@ export default function SalesPage() {
                         <span className="material-symbols-outlined text-4xl text-[#5f5e5e]/30 group-hover:text-[#775a19] transition-colors mb-4">
                           add_circle
                         </span>
-                        <p className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#5f5e5e]/60`}>
+                        <p
+                          className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#5f5e5e]/60`}
+                        >
                           New Listing
                         </p>
-                        <p className={`${roboto.className} text-[0.6rem] text-[#5f5e5e]/40 mt-2 px-4`}>
+                        <p
+                          className={`${roboto.className} text-[0.6rem] text-[#5f5e5e]/40 mt-2 px-4`}
+                        >
                           Upload an image to create a new listing.
                         </p>
                       </div>
@@ -809,17 +1071,28 @@ export default function SalesPage() {
 
                   {!search && (
                     <div className="mt-10 flex items-center justify-between">
-                      <p className={`${roboto.className} text-xs text-[#5f5e5e]/60`}>
-                        Showing {Math.min(listingsVisible, filteredListings.length)} of {filteredListings.length}{" "}
+                      <p
+                        className={`${roboto.className} text-xs text-[#5f5e5e]/60`}
+                      >
+                        Showing{" "}
+                        {Math.min(listingsVisible, filteredListings.length)} of{" "}
+                        {filteredListings.length}{" "}
                         {filteredListings.length === 1 ? "listing" : "listings"}
                       </p>
                       {listingsVisible < filteredListings.length && (
                         <button
                           type="button"
-                          onClick={() => setListingsVisible((n) => n + LISTINGS_PAGE_SIZE)}
+                          onClick={() =>
+                            setListingsVisible((n) => n + LISTINGS_PAGE_SIZE)
+                          }
                           className={`${roboto.className} px-6 py-3 border border-[#d1c5b4] text-[#5f5e5e] text-[0.65rem] uppercase tracking-[0.2em] font-medium hover:bg-[#f4f3f1] transition-all cursor-pointer`}
                         >
-                          Load {Math.min(LISTINGS_PAGE_SIZE, filteredListings.length - listingsVisible)} more
+                          Load{" "}
+                          {Math.min(
+                            LISTINGS_PAGE_SIZE,
+                            filteredListings.length - listingsVisible,
+                          )}{" "}
+                          more
                         </button>
                       )}
                     </div>
