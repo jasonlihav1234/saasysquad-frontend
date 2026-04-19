@@ -1,6 +1,5 @@
 "use client";
 
-import { Darumadrop_One } from "next/font/google";
 import {
   createContext,
   useContext,
@@ -8,6 +7,7 @@ import {
   useState,
   ReactNode,
 } from "react";
+import { authFetch } from "../../../lib/api";
 
 type Tier = "free" | "pro" | "enterprise";
 
@@ -32,24 +32,27 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchTier = async () => {
     setLoading(true);
-    const token = localStorage.getItem("accessToken");
-
-    if (!token) {
-      setTier("free");
-      setUserId(null);
-      setLoading(false);
-      return;
-    }
 
     try {
-      const res = await fetch("https://sassysquad-backend.vercel.app/profile", {
-        method: "GET",
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await authFetch(
+        "https://sassysquad-backend.vercel.app/profile",
+      );
+
+      if (!res.ok) {
+        throw new Error("Failed to fetch profile");
+      }
+
       const data = await res.json();
-      setTier(data.response[0].subscription_tier || "free");
-      setUserId(data.response[0].user_id || null);
+      const profile = data.response?.[0];
+
+      if (profile) {
+        setTier(profile.subscription_tier || "free");
+        setUserId(profile.user_id || null);
+      } else {
+        setTier("free");
+      }
     } catch (e) {
+      console.error("UserContext Error:", e);
       setTier("free");
       setUserId(null);
     } finally {
@@ -58,7 +61,14 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
-    fetchTier();
+    const hasToken =
+      typeof window !== "undefined" && localStorage.getItem("accessToken");
+
+    if (hasToken) {
+      fetchTier();
+    } else {
+      setLoading(false);
+    }
   }, []);
 
   return (

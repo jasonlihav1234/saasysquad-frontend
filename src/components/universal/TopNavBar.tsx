@@ -7,6 +7,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import "material-symbols";
 import { requestToBodyStream } from "next/dist/server/body-streams";
+import { useUser } from "../providers/UserProvider";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -21,6 +22,7 @@ const gelasio = Gelasio({
 const navLinks = [
   { href: "/dashboard", label: "Catalog" },
   { href: "/product/sell", label: "Sell Items" },
+  { href: "/product/sell/agent", label: "Agent" },
 ];
 
 interface TopNavBarProps {
@@ -36,6 +38,7 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
   const [cartItems, setCartItems] = useState<any[]>([]);
   const [subtotal, setSubtotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const { tier, loading } = useUser();
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -186,6 +189,20 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
     }
   };
 
+  const handleAiButtonClick = (event: any) => {
+    event.preventDefault();
+
+    if (loading) return;
+
+    if (tier === "pro" || tier === "enterprise") {
+      if (onAiClick !== undefined) {
+        onAiClick();
+      }
+    } else {
+      router.push("/subscribe");
+    }
+  };
+
   return (
     <>
       <nav
@@ -243,11 +260,11 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
 
         <div className="flex items-center gap-6">
           <button
-            onClick={onAiClick}
+            onClick={handleAiButtonClick}
             className="flex items-center gap-2 px-5 py-2 bg-[#5F5E5E] text-[#FFFFFF] text-xs uppercase tracking-widest hover:bg-[#1A1C1B] transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-sm">
-              image_arrow_up
+              { tier === "free" ? "lock" : "image_arrow_up" }
             </span>
             <span className="hidden sm:inline">recommend with ai</span>
           </button>

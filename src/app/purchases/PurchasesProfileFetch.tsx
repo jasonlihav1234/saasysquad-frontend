@@ -7,6 +7,7 @@ const BACKEND_BASE = "https://sassysquad-backend.vercel.app";
 const PROFILE_URL = `${BACKEND_BASE}/profile`;
 const EMPTY_IMAGE = "data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=";
 
+// authFetch defined in lib/api.ts will auto refresh tokens if they are expired on load
 function userIdFromProfileJson(json: unknown): string | null {
   if (!json || typeof json !== "object") return null;
   const root = json as Record<string, unknown>;

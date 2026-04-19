@@ -15,7 +15,22 @@ import { Gelasio, Roboto } from "next/font/google";
 import { useUser } from "@/components/providers/UserProvider";
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { resumeAndPrerenderToNodeStream } from "react-dom/static";
+import { authFetch } from "../../../lib/api";
+
+const SELLER_COMMISSION_PERCENT: Record<string, number> = {
+  free: 13,
+  pro: 12.5,
+  enterprise: 12,
+};
+
+function commissionRate(tier: string | undefined): number {
+  return SELLER_COMMISSION_PERCENT[tier ?? "free"] ?? 13;
+}
+
+function applyCommission(gross: number, tier: string | undefined): number {
+  const rate = commissionRate(tier);
+  return gross * (1 - rate / 100);
+}
 
 interface BasicAnalytics {
   revenueThisQuarter: number;
@@ -45,74 +60,16 @@ interface EnterpriseAnalytics {
   marketShareSegment: number;
 }
 
-const gelasio = Gelasio({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-});
-
-const roboto = Roboto({
-  subsets: ["latin"],
-  style: ["normal", "italic"],
-});
+const gelasio = Gelasio({ subsets: ["latin"], style: ["normal", "italic"] });
+const roboto = Roboto({ subsets: ["latin"], style: ["normal", "italic"] });
 
 const backendUrl: string = "https://sassysquad-backend.vercel.app";
 
 const statCardShell =
   "bg-[#efeeec] p-10 flex flex-col justify-center items-center text-center";
-
 const statCardCaption = `${roboto.className} text-[0.65rem] uppercase tracking-widest text-[#5f5e5e]/60`;
 
-const ACTIVE_LISTINGS: ActiveListingCardProps[] = [
-  {
-    title: "Oak dining chair",
-    price: "$850.00",
-    stock: 2,
-    imageSrc: "",
-    imageAlt: "Oak dining chair",
-    showQuickManageOverlay: true,
-  },
-  {
-    title: "Marble Bowl",
-    price: "$310.00",
-    stock: 1,
-    imageSrc: "",
-    imageAlt: "Marble Bowl",
-  },
-  {
-    title: "Amber Glass Decanter",
-    price: "$145.00",
-    stock: 5,
-    imageSrc: "",
-    imageAlt: "Amber Glass Decanter",
-  },
-];
-
-const SALES_ROWS: SaleRowItem[] = [
-  {
-    id: "AT-8829",
-    productTitle: "Stoneware Vase",
-    sku: "AT-8829",
-    orderDate: "Oct 24, 2026",
-    customer: "Julianne Moore",
-    price: "$420.00",
-    status: "awaiting_shipment",
-  },
-  {
-    id: "AT-1092",
-    productTitle: "Salt Set",
-    sku: "AT-1092",
-    orderDate: "Oct 21, 2026",
-    customer: "John Smith",
-    price: "$185.00",
-    status: "delivered",
-  },
-];
-
-const TIER_ORDER: any = {
-  free: 0,
-  pro: 1,
-  enterprise: 2,
-};
+const TIER_ORDER: any = { free: 0, pro: 1, enterprise: 2 };
 
 function hasAccess(
   userTier: string | undefined,
@@ -120,8 +77,39 @@ function hasAccess(
 ): boolean {
   const user = TIER_ORDER[userTier || "free"] ?? 0;
   const required = TIER_ORDER[requiredTier] ?? 0;
-
   return user >= required;
+}
+
+function formatCurrency(val: number | string | undefined | null): string {
+  const n = Number(val ?? 0);
+  if (isNaN(n)) return "$0.00";
+  return `$${n.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
+function formatDate(dateStr: string | undefined | null): string {
+  if (!dateStr) return "-";
+  try {
+    return new Date(dateStr).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return "-";
+  }
+}
+
+function mapSaleStatus(status: string | undefined): SaleRowItem["status"] {
+  if (!status) return "awaiting_shipment";
+  const s = status.toLowerCase();
+  if (s.includes("deliver")) return "delivered";
+  if (s.includes("ship")) return "awaiting_shipment";
+  if (s.includes("cancel")) return "cancelled";
+  if (s.includes("completed")) return "completed";
+  return "awaiting_shipment";
 }
 
 function MetricBox({
@@ -145,9 +133,7 @@ function MetricBox({
         {label}
       </p>
       <h4
-        className={`${gelasio.className} text-2xl ${valueStyle || ""} ${
-          accent === "warning" ? "text-[#ba1a1a]" : "text-[#1a1c1b]"
-        }`}
+        className={`${gelasio.className} text-2xl ${valueStyle || ""} ${accent === "warning" ? "text-[#ba1a1a]" : "text-[#1a1c1b]"}`}
       >
         {value}
       </h4>
@@ -168,7 +154,6 @@ function MiniBarChart({
   data: { month: string; revenue: number }[];
 }) {
   const max = useMemo(() => Math.max(...data.map((d) => d.revenue), 1), [data]);
-
   return (
     <div className="flex items-end justify-between gap-4 h-32">
       {data.map((d) => {
@@ -207,16 +192,15 @@ function Skeleton({ className = "" }: { className?: string }) {
 function BasicSection({
   data,
   loading,
+  tier,
 }: {
   data: BasicAnalytics | null;
   loading: boolean;
+  tier: string | undefined;
 }) {
-  const revenue = loading
-    ? "—"
-    : `$${(data?.revenueThisQuarter ?? 0).toLocaleString(undefined, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      })}`;
+  const gross = data?.revenueThisQuarter ?? 0;
+  const net = applyCommission(gross, tier);
+  const rate = commissionRate(tier);
 
   const mom = data?.monthOverMonth;
   const momLabel = loading
@@ -233,19 +217,29 @@ function BasicSection({
           <span
             className={`${roboto.className} text-[0.7rem] uppercase tracking-widest text-[#775a19] mb-2 block`}
           >
-            Performance Overview
+            Your Earnings · This Quarter
           </span>
+
           <h2
             className={`${gelasio.className} text-5xl font-light text-[#1a1c1b]`}
           >
-            {loading ? <Skeleton className="h-12 w-48" /> : revenue}
+            {loading ? <Skeleton className="h-12 w-48" /> : formatCurrency(net)}
           </h2>
-          <p
-            className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}
-          >
-            Total Revenue this Quarter
-          </p>
+
+          {!loading && gross > 0 && (
+            <p className={`${roboto.className} text-xs text-[#5f5e5e]/70 mt-2`}>
+              {formatCurrency(gross)} gross · {rate}% commission
+            </p>
+          )}
+          {!loading && gross === 0 && (
+            <p
+              className={`${roboto.className} text-sm text-[#5f5e5e]/70 mt-2 italic`}
+            >
+              No sales yet this quarter
+            </p>
+          )}
         </div>
+
         <div
           className={`mt-12 flex items-center gap-2 ${momPositive ? "text-[#775a19]" : "text-red-600"}`}
         >
@@ -316,7 +310,6 @@ function ProSection({
   loading: boolean;
 }) {
   const d = data ?? MOCK_PRO;
-
   return (
     <div className="grid grid-cols-12 gap-8">
       <div className="col-span-12 md:col-span-6 bg-[#f4f3f1] p-10 flex flex-col justify-between min-h-[280px]">
@@ -434,7 +427,6 @@ function EnterpriseSection({
   loading: boolean;
 }) {
   const d = data ?? MOCK_ENTERPRISE;
-
   return (
     <div className="grid grid-cols-12 gap-8">
       <div className="col-span-12 md:col-span-6 bg-[#1a1c1b] text-white p-10 flex flex-col justify-between min-h-[280px]">
@@ -563,9 +555,7 @@ function AnalyticsTier({
 
       <div className="relative">
         <div
-          className={`transition-all duration-500 ${
-            locked ? "blur-md opacity-40 pointer-events-none select-none" : ""
-          }`}
+          className={`transition-all duration-500 ${locked ? "blur-md opacity-40 pointer-events-none select-none" : ""}`}
           aria-hidden={locked}
         >
           {children}
@@ -597,42 +587,6 @@ function AnalyticsTier({
       </div>
     </section>
   );
-}
-
-function formatCurrency(val: number | string | undefined | null): string {
-  const n = Number(val ?? 0);
-  if (isNaN(n)) return "$0.00";
-
-  return `$${n.toLocaleString(undefined, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })}`;
-}
-
-function formatDate(dateStr: string | undefined | null): string {
-  if (!dateStr) return "-";
-
-  try {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return "-";
-  }
-}
-
-function mapSaleStatus(status: string | undefined): SaleRowItem["status"] {
-  if (!status) return "awaiting_shipment";
-
-  const s = status.toLowerCase();
-  if (s.includes("deliver")) return "delivered";
-  if (s.includes("ship")) return "awaiting_shipment";
-  if (s.includes("cancel")) return "cancelled";
-  if (s.includes("completed")) return "completed";
-
-  return "awaiting_shipment";
 }
 
 function EmptyState({
@@ -720,13 +674,15 @@ export default function SalesPage() {
 
     const fetchJson = async <T,>(path: string): Promise<T | null> => {
       try {
-        const res = await fetch(`${backendUrl}${path}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await authFetch(`${backendUrl}${path}`);
+
         if (!res.ok) return null;
+
         return (await res.json()) as T;
       } catch (err) {
-        console.error(`Failed to fetch ${path}:`, err);
+        if (err !== "Session expired") {
+          console.error(`Failed to fetch ${path}:`, err);
+        }
         return null;
       }
     };
@@ -770,15 +726,24 @@ export default function SalesPage() {
               ? salesRes.orders
               : [];
 
-      const mappedSales: SaleRowItem[] = rawSales.map((s: any) => ({
-        id: s.order_id,
-        productTitle: s.item_name ?? s.order_name ?? "Order",
-        sku: s.order_id.slice(0, 8).toUpperCase(),
-        orderDate: formatDate(s.created_at ?? s.issue_date),
-        customer: s.buyer_name ?? "Customer",
-        price: formatCurrency(s.total_cost),
-        status: mapSaleStatus(s.status),
-      }));
+      const mappedSales: SaleRowItem[] = rawSales.map((s: any) => {
+        const grossNum = Number(s.total_cost ?? 0);
+        const payoutNum =
+          s.seller_payout !== undefined && s.seller_payout !== null
+            ? Number(s.seller_payout)
+            : applyCommission(grossNum, tier);
+
+        return {
+          id: s.order_id,
+          productTitle: s.item_name ?? s.order_name ?? "Order",
+          sku: s.order_id.slice(0, 8).toUpperCase(),
+          orderDate: formatDate(s.created_at ?? s.issue_date),
+          customer: s.buyer_name ?? "Customer",
+          price: formatCurrency(grossNum),
+          payout: formatCurrency(payoutNum),
+          status: mapSaleStatus(s.status),
+        };
+      });
 
       setSales(mappedSales);
       setSalesLoading(false);
@@ -811,7 +776,7 @@ export default function SalesPage() {
     return () => {
       cancelled = true;
     };
-  }, [userLoading, canAccessPro, canAccessEnterprise]);
+  }, [userLoading, canAccessPro, canAccessEnterprise, tier, userId]);
 
   const filteredSales = useMemo(() => {
     if (!sales) return [];
@@ -829,6 +794,8 @@ export default function SalesPage() {
     if (!q) return listings;
     return listings.filter((l) => l.title.toLowerCase().includes(q));
   }, [listings, search]);
+
+  const rate = commissionRate(tier);
 
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
@@ -875,7 +842,11 @@ export default function SalesPage() {
               tier="Included"
               description="Core performance metrics available to all members."
             >
-              <BasicSection data={basic} loading={analyticsLoading} />
+              <BasicSection
+                data={basic}
+                loading={analyticsLoading}
+                tier={tier}
+              />
             </AnalyticsTier>
 
             <AnalyticsTier
@@ -907,7 +878,7 @@ export default function SalesPage() {
             </AnalyticsTier>
 
             <section className="pb-24">
-              <div className="flex justify-between items-end mb-10 gap-8 flex-wrap">
+              <div className="flex justify-between items-end mb-6 gap-8 flex-wrap">
                 <div className="max-w-md">
                   <h3 className={`${gelasio.className} text-3xl mb-4`}>
                     Recent Sales
@@ -915,7 +886,8 @@ export default function SalesPage() {
                   <p
                     className={`${roboto.className} text-sm text-[#5f5e5e] leading-relaxed`}
                   >
-                    Your most recent orders and their fulfillment status.
+                    Your most recent orders with sale and payout amounts after
+                    our {rate}% commission.
                   </p>
                 </div>
 
@@ -968,7 +940,8 @@ export default function SalesPage() {
                           </th>
                           <th className="px-6 py-4 font-medium">Order Date</th>
                           <th className="px-6 py-4 font-medium">Customer</th>
-                          <th className="px-6 py-4 font-medium">Price</th>
+                          <th className="px-6 py-4 font-medium">Sale</th>
+                          <th className="px-6 py-4 font-medium">Your Payout</th>
                           <th className="px-6 py-4 font-medium">Status</th>
                         </tr>
                       </thead>

@@ -5,6 +5,19 @@ import { projectCompilationEventsSubscribe } from "next/dist/build/swc/generated
 import { deleteReactDebugChannelForHtmlRequest } from "next/dist/server/dev/debug-channel";
 import { Roboto, Gelasio, Fleur_De_Leah } from "next/font/google";
 import { useRef, useState, useCallback, useEffect } from "react";
+import { useUser } from "@/components/providers/UserProvider";
+import { useRouter } from "next/navigation";
+import { authFetch } from "../../../../../lib/api";
+
+const SELLER_COMMISSION_PERCENT: Record<string, number> = {
+  free: 13,
+  pro: 12.5,
+  enterprise: 12,
+};
+
+function commissionRate(tier: string | undefined): number {
+  return SELLER_COMMISSION_PERCENT[tier ?? "free"] ?? 13;
+}
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -38,7 +51,6 @@ function statusIcon(status: any) {
 function statusColour(status: any) {
   if (status === "done") return "text-emerald-600";
   if (status === "analyzing") return "text-[#775a19] animate-spin";
-
   return "text-[#5f5e5e]/30";
 }
 
@@ -46,19 +58,15 @@ function statusLabel(status: any, error?: string) {
   if (status === "done") return "done";
   if (status === "analyzing") return "analyzing...";
   if (status === "error") return error || "failed";
-
   return "ready";
 }
 
-// formatting bytes, kilobytes, and megabytes
 function formatSize(bytes: any) {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1048576) return `${(bytes / 1024).toFixed(0)} KB`;
-
   return `${(bytes / 1048576).toFixed(1)} MB`;
 }
 
-// need to track IDs which have been revealed
 function useRevealSet(ids: string[], staggerMs = 80) {
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
 
@@ -83,6 +91,10 @@ const MAX_IMAGES = 50;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function AgentPage() {
+  const { tier, loading } = useUser();
+  const rate = commissionRate(tier);
+  const router = useRouter();
+
   const [activeTab, setActiveTab] = useState<string>("All");
   const [statuses, setStatuses] = useState<any>({});
   const [files, setFiles] = useState<any>([]);
@@ -99,6 +111,12 @@ export default function AgentPage() {
   const revealedFiles = useRevealSet(fileIds, 40);
 
   useEffect(() => {
+    if (!loading && tier !== "enterprise") {
+      router.push("/subscribe");
+    }
+  }, [tier, loading, router]);
+
+  useEffect(() => {
     if (drafts.length > 0 && !boardVisible) {
       setBoardVisible(true);
     }
@@ -111,9 +129,7 @@ export default function AgentPage() {
 
     setFiles((prev: any) => {
       const remaining = MAX_IMAGES - prev.length;
-      if (remaining <= 0) {
-        return prev;
-      }
+      if (remaining <= 0) return prev;
 
       const toAdd = valid.slice(0, remaining).map((file: any) => ({
         id: crypto.randomUUID(),
@@ -129,7 +145,6 @@ export default function AgentPage() {
 
   const removeFile = (id: any) => {
     if (agentRunning) return;
-
     setFiles((prev: any) => prev.filter((f: any) => f.id !== id));
   };
 
@@ -165,21 +180,17 @@ export default function AgentPage() {
     try {
       const base64 = await fileToBase64(uploadFile.file);
 
-      const res = await fetch(
+      const res = await authFetch(
         "https://sassysquad-backend.vercel.app/v1/agent/process",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
           body: JSON.stringify({ image: base64 }),
         },
       );
 
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Processing Failed");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Processing Failed");
       }
 
       const { draft } = await res.json();
@@ -208,6 +219,8 @@ export default function AgentPage() {
             : file,
         ),
       );
+
+      console.error("Agent Production Error:", error);
     }
   };
 
@@ -230,14 +243,10 @@ export default function AgentPage() {
     );
 
     try {
-      const res = await fetch(
+      const res = await authFetch(
         "https://sassysquad-backend.vercel.app/v1/agent/accept",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
           body: JSON.stringify({
             title: draft.title,
             description: draft.description,
@@ -254,8 +263,8 @@ export default function AgentPage() {
       );
 
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to publish");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to publish");
       }
 
       setDrafts((prev: any) =>
@@ -270,7 +279,11 @@ export default function AgentPage() {
         ),
       );
 
-      console.log("Accept failed: ", error.message);
+      console.error("Accept failed:", error.message);
+
+      if (error.message !== "Session expired") {
+        alert(`Error publishing: ${error.message}`);
+      }
     }
   };
 
@@ -283,11 +296,9 @@ export default function AgentPage() {
   const doneCount: any = files.filter(
     (file: any) => file.status === "done",
   ).length;
-
   const analyzingCount = files.filter(
     (file: any) => file.status === "analyzing",
   ).length;
-
   const errorCount = files.filter(
     (file: any) => file.status === "error",
   ).length;
@@ -315,7 +326,6 @@ export default function AgentPage() {
   const pendingReview = drafts.filter(
     (d: any) => d.status === "pending",
   ).length;
-
   const publishedCount = drafts.filter(
     (d: any) => d.status === "accepted",
   ).length;
@@ -331,7 +341,6 @@ export default function AgentPage() {
     if (activeTab === "Accepted")
       return d.status === "accepted" || d.status === "accepting";
     if (activeTab === "Denied") return d.status === "denied";
-
     return true;
   });
 
@@ -420,13 +429,7 @@ export default function AgentPage() {
                 files.length > 0
                   ? "border-b border-dashed border-[#d1c5b4]"
                   : ""
-              } ${
-                isDragging
-                  ? "bg-[#e9e8e6] scale-[1.01]"
-                  : canAddMore
-                    ? "cursor-pointer hover:bg-[#efeeec]"
-                    : ""
-              } ${!canAddMore ? "opacity-40 cursor-not-allowed" : ""}`}
+              } ${isDragging ? "bg-[#e9e8e6] scale-[1.01]" : canAddMore ? "cursor-pointer hover:bg-[#efeeec]" : ""} ${!canAddMore ? "opacity-40 cursor-not-allowed" : ""}`}
             >
               <input
                 ref={inputRef}
@@ -452,11 +455,7 @@ export default function AgentPage() {
             {files.length > 0 && (
               <div className="px-6 py-4">
                 <div
-                  className={`transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] overflow-hidden ${
-                    agentRunning && analyzingCount > 0
-                      ? "max-h-20 opacity-100 mb-3"
-                      : "max-h-0 opacity-0 mb-0"
-                  }`}
+                  className={`transition-all duration-500 ease-[cubic-bezier(0.25,0.1,0.25,1)] overflow-hidden ${agentRunning && analyzingCount > 0 ? "max-h-20 opacity-100 mb-3" : "max-h-0 opacity-0 mb-0"}`}
                 >
                   <div className="px-3 py-2.5 bg-[#775a19]/5 border border-[#775a19]/10 flex items-center gap-3">
                     <span className="material-symbols-outlined animate-spin text-[18px] text-[#775a19]">
@@ -465,8 +464,7 @@ export default function AgentPage() {
                     <span className="text-[12px] text-[#775a19]">
                       Processing{" "}
                       <span className="font-medium">
-                        {analyzingCount} image
-                        {analyzingCount !== 1 ? "s" : ""}
+                        {analyzingCount} image{analyzingCount !== 1 ? "s" : ""}
                       </span>
                       <span className="text-[#775a19]/50 ml-2">
                         · {doneCount} of {files.length} complete
@@ -481,11 +479,7 @@ export default function AgentPage() {
                     return (
                       <div
                         key={f.id}
-                        className={`group flex items-center gap-3 py-2 px-2 rounded hover:bg-[#efeeec] transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${
-                          isRevealed
-                            ? "opacity-100 translate-y-0"
-                            : "opacity-0 translate-y-2"
-                        }`}
+                        className={`group flex items-center gap-3 py-2 px-2 rounded hover:bg-[#efeeec] transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] ${isRevealed ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
                       >
                         <span
                           className={`material-symbols-outlined text-[18px] ${statusColour(f.status)} flex-shrink-0`}
@@ -636,6 +630,13 @@ export default function AgentPage() {
                 const isAccepting = draft.status === "accepting";
                 const isRevealed = revealedDrafts.has(draft.id);
 
+                // Live payout calc for this draft's current price override
+                const priceNum = Number(draft.priceOverride);
+                const payoutPreview =
+                  !isNaN(priceNum) && priceNum > 0
+                    ? priceNum * (1 - rate / 100)
+                    : 0;
+
                 return (
                   <article
                     key={draft.id}
@@ -775,15 +776,16 @@ export default function AgentPage() {
                         </p>
                       )}
 
-                      <div className="grid grid-cols-2 gap-8 mb-10">
+                      <div className="grid grid-cols-2 gap-8 mb-6">
                         <div>
                           <label className="block text-[9px] uppercase tracking-[0.15em] text-[#5f5e5e]/60 mb-3">
                             Price (Override Prediction)
                           </label>
-                          <div className="relative">
-                            <span className="absolute left-0 bottom-2 text-[#5f5e5e]/40 text-sm">
+                          <div className="relative group">
+                            <span className="absolute left-1 bottom-[10px] text-[#5f5e5e]/40 text-sm pointer-events-none">
                               $
                             </span>
+
                             <input
                               value={draft.priceOverride}
                               onChange={(e) =>
@@ -794,8 +796,30 @@ export default function AgentPage() {
                                 )
                               }
                               disabled={draft.status !== "pending"}
-                              className={`${roboto.className} w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 pl-4 text-sm font-medium focus:outline-none focus:border-[#775a19] transition-colors duration-200 disabled:opacity-50`}
+                              placeholder="0.00"
+                              className={`${roboto.className} w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 pl-6 text-sm font-medium focus:outline-none focus:border-[#775a19] transition-colors duration-200 disabled:opacity-50`}
                             />
+                          </div>
+                          <div
+                            className={`${roboto.className} text-[10px] mt-2 transition-all duration-200 ${
+                              payoutPreview > 0
+                                ? "text-[#775a19]"
+                                : "text-[#5f5e5e]/50"
+                            }`}
+                          >
+                            {payoutPreview > 0 ? (
+                              <>
+                                You receive{" "}
+                                <span className="font-bold">
+                                  ${payoutPreview.toFixed(2)}
+                                </span>{" "}
+                                after {rate}% commission
+                              </>
+                            ) : (
+                              <>
+                                {rate}% commission on your {tier ?? "free"} plan
+                              </>
+                            )}
                           </div>
                         </div>
                         <div>
@@ -814,10 +838,12 @@ export default function AgentPage() {
                             }
                             min={1}
                             disabled={draft.status !== "pending"}
-                            className={`${roboto.className} w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 text-sm font-medium focus:outline-none focus:border-[#775a19] transition-colors duration-200 disabled:opacity-50`}
+                            className={`${roboto.className} pl-2 w-full bg-[#f4f3f1] border-0 border-b border-[#d1c5b4] py-2 text-sm font-medium focus:outline-none focus:border-[#775a19] transition-colors duration-200 disabled:opacity-50`}
                           />
                         </div>
                       </div>
+
+                      <div className="mb-10" />
 
                       <div className="flex gap-4">
                         {draft.status === "accepted" ? (

@@ -5,8 +5,7 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
-import { useUser } from "@/components/providers/UserProvider";
-import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
+import { authFetch } from "../../../lib/api";
 
 export default function CheckoutPage() {
   const stripePromise = loadStripe(
@@ -14,18 +13,26 @@ export default function CheckoutPage() {
   );
 
   const fetchClientSecret = useCallback(async () => {
-    const response = await fetch(
-      "https://sassysquad-backend.vercel.app/create-checkout-session",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      },
-    );
+    try {
+      const response = await authFetch(
+        "https://sassysquad-backend.vercel.app/create-checkout-session",
+        {
+          method: "POST",
+        }
+      );
 
-    const data = await response.json();
-    return data.clientSecret;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create checkout session");
+      }
+
+      const data = await response.json();
+      return data.clientSecret;
+
+    } catch (error) {
+      console.error("Stripe Session Error:", error);
+      return null; 
+    }
   }, []);
 
   const options = { fetchClientSecret };
