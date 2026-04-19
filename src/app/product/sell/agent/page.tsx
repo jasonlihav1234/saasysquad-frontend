@@ -7,6 +7,7 @@ import { Roboto, Gelasio, Fleur_De_Leah } from "next/font/google";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useUser } from "@/components/providers/UserProvider";
 import { useRouter } from "next/navigation";
+import { authFetch } from "../../../../../lib/api";
 
 const SELLER_COMMISSION_PERCENT: Record<string, number> = {
   free: 13,
@@ -172,28 +173,24 @@ export default function AgentPage() {
   const processFile = async (uploadFile: any) => {
     setFiles((prev: any) =>
       prev.map((file: any) =>
-        file.id === uploadFile.id ? { ...file, status: "analyzing" } : file,
-      ),
+        file.id === uploadFile.id ? { ...file, status: "analyzing" } : file
+      )
     );
 
     try {
       const base64 = await fileToBase64(uploadFile.file);
 
-      const res = await fetch(
-        "https://sassysquad-backend-git-story-sa-a9481f-jasons-projects-ac5e4f90.vercel.app/v1/agent/process",
+      const res = await authFetch(
+        "https://sassysquad-backend.vercel.app/v1/agent/process",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
           body: JSON.stringify({ image: base64 }),
-        },
+        }
       );
 
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Processing Failed");
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Processing Failed");
       }
 
       const { draft } = await res.json();
@@ -211,17 +208,19 @@ export default function AgentPage() {
 
       setFiles((prev: any) =>
         prev.map((file: any) =>
-          file.id === uploadFile.id ? { ...file, status: "done" } : file,
-        ),
+          file.id === uploadFile.id ? { ...file, status: "done" } : file
+        )
       );
     } catch (error: any) {
       setFiles((prev: any) =>
         prev.map((file: any) =>
           file.id === uploadFile.id
             ? { ...file, status: "error", error: error.message }
-            : file,
-        ),
+            : file
+        )
       );
+      
+      console.error("Agent Production Error:", error);
     }
   };
 
@@ -233,51 +232,53 @@ export default function AgentPage() {
     setAgentRunning(false);
   };
 
-  const handleAccept = async (draftId: string) => {
-    const draft = drafts.find((d: any) => d.id === draftId);
-    if (!draft) return;
+const handleAccept = async (draftId: string) => {
+  const draft = drafts.find((d: any) => d.id === draftId);
+  if (!draft) return;
 
-    setDrafts((prev: any) =>
-      prev.map((d: any) => (d.id === draftId ? { ...d, status: "accepting" } : d)),
+  setDrafts((prev: any) =>
+    prev.map((d: any) => (d.id === draftId ? { ...d, status: "accepting" } : d)),
+  );
+
+  try {
+    const res = await authFetch(
+      "https://sassysquad-backend.vercel.app/v1/agent/accept",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          title: draft.title,
+          description: draft.description,
+          category: draft.category,
+          tags: draft.tags,
+          imageBase64: draft.imageBase64,
+          suggestedPrice: draft.suggestedPrice,
+          sellerPrice: draft.priceOverride ? parseFloat(draft.priceOverride) : null,
+          quantityAvailable: draft.qtyOverride,
+        }),
+      }
     );
 
-    try {
-      const res = await fetch(
-        "https://sassysquad-backend-git-story-sa-a9481f-jasons-projects-ac5e4f90.vercel.app/v1/agent/accept",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({
-            title: draft.title,
-            description: draft.description,
-            category: draft.category,
-            tags: draft.tags,
-            imageBase64: draft.imageBase64,
-            suggestedPrice: draft.suggestedPrice,
-            sellerPrice: draft.priceOverride ? parseFloat(draft.priceOverride) : null,
-            quantityAvailable: draft.qtyOverride,
-          }),
-        },
-      );
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || "Failed to publish");
-      }
-
-      setDrafts((prev: any) =>
-        prev.map((d: any) => (d.id === draftId ? { ...d, status: "accepted" } : d)),
-      );
-    } catch (error: any) {
-      setDrafts((prev: any) =>
-        prev.map((d: any) => (d.id === draftId ? { ...d, status: "pending" } : d)),
-      );
-      console.log("Accept failed: ", error.message);
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || "Failed to publish");
     }
-  };
+
+    setDrafts((prev: any) =>
+      prev.map((d: any) => (d.id === draftId ? { ...d, status: "accepted" } : d)),
+    );
+
+  } catch (error: any) {
+    setDrafts((prev: any) =>
+      prev.map((d: any) => (d.id === draftId ? { ...d, status: "pending" } : d)),
+    );
+    
+    console.error("Accept failed:", error.message);
+    
+    if (error.message !== "Session expired") {
+      alert(`Error publishing: ${error.message}`);
+    }
+  }
+};
 
   const handleDeny = (draftId: string) => {
     setDrafts((prev: any) =>
