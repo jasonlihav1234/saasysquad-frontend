@@ -6,6 +6,7 @@ import { deleteReactDebugChannelForHtmlRequest } from "next/dist/server/dev/debu
 import { Roboto, Gelasio, Fleur_De_Leah } from "next/font/google";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { useUser } from "@/components/providers/UserProvider";
+import { useRouter } from "next/navigation";
 
 const SELLER_COMMISSION_PERCENT: Record<string, number> = {
   free: 13,
@@ -89,8 +90,9 @@ const MAX_IMAGES = 50;
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function AgentPage() {
-  const { tier } = useUser();
+  const { tier, loading } = useUser();
   const rate = commissionRate(tier);
+  const router = useRouter();
 
   const [activeTab, setActiveTab] = useState<string>("All");
   const [statuses, setStatuses] = useState<any>({});
@@ -106,6 +108,12 @@ export default function AgentPage() {
 
   const fileIds = files.map((file: any) => file.id);
   const revealedFiles = useRevealSet(fileIds, 40);
+
+  useEffect(() => {
+    if (!loading && tier !== "enterprise") {
+      router.push("/subscribe");
+    }
+  }, [tier, loading, router]);
 
   useEffect(() => {
     if (drafts.length > 0 && !boardVisible) {

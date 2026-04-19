@@ -5,8 +5,6 @@ import {
   EmbeddedCheckoutProvider,
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
-import { useUser } from "@/components/providers/UserProvider";
-import { responseCookiesToRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 export default function CheckoutPage() {
   const stripePromise = loadStripe(
@@ -15,7 +13,7 @@ export default function CheckoutPage() {
 
   const fetchClientSecret = useCallback(async () => {
     const response = await fetch(
-      "https://sassysquad-backend.vercel.app/create-checkout-session",
+      "https://sassysquad-backend-git-story-sa-a9481f-jasons-projects-ac5e4f90.vercel.app/create-checkout-session",
       {
         method: "POST",
         headers: {
