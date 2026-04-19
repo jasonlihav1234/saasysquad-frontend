@@ -114,104 +114,55 @@ function DashboardContent() {
     setCurrentPage(newPageNumber);
   };
 
-  const handleGenerateAIItems = async () => {
-    if (!imageBase64 || !itemCategory) {
-      alert("Provide a valid picture and item category");
+const handleGenerateAIItems = async () => {
+  if (!imageBase64 || !itemCategory) {
+    alert("Provide a valid picture and item category");
+    return;
+  }
+
+  const formattedItemCategory = itemCategory
+    .split(" ")
+    .join("-")
+    .toLowerCase();
+
+  setAiState("loading");
+
+  try {
+    const response = await authFetch("https://sassysquad-backend.vercel.app/items/recommendations", {
+      method: "POST",
+      body: JSON.stringify({
+        category: formattedItemCategory,
+        image: imageBase64,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      alert(errorData.message || "Something went wrong");
+      setAiState("awaiting");
       return;
     }
 
-    const formattedItemCategory = itemCategory
-      .split(" ")
-      .join("-")
-      .toLowerCase();
+    const data = await response.json();
 
-    setAiState("loading");
-    try {
-      const itemResponse = await fetch(
-        "https://sassysquad-backend.vercel.app/items/recommendations",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({
-            category: formattedItemCategory,
-            image: imageBase64,
-          }),
-        },
-      );
-
-      if (itemResponse.status === 200) {
-        const itemBody = await itemResponse.json();
-
-        if (itemBody.items && itemBody.items.length !== 0) {
-          setAiItems(itemBody.items);
-        } else if (itemBody.message) {
-          setMessage(itemBody.message);
-        } else {
-          throw new Error("Fatal error occured in AI return");
-        }
-
-        setAiState("completed");
-      } else if (itemResponse.status === 401) {
-        const responseRefresh = await fetch(
-          "https://sassysquad-backend.vercel.app/auth/refresh",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              refreshToken: localStorage.getItem("refreshToken"),
-            }),
-          },
-        );
-
-        if (responseRefresh.status === 200) {
-          const body = await responseRefresh.json();
-          localStorage.setItem("accessToken", body.accessToken);
-          localStorage.setItem("refreshToken", body.refreshToken);
-
-          const itemResponse2 = await fetch(
-            "https://sassysquad-backend.vercel.app/items/recommendations",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-              },
-              body: JSON.stringify({
-                category: itemCategory,
-                image: imageBase64,
-              }),
-            },
-          );
-
-          const itemBody2 = await itemResponse2.json();
-          if (itemBody2.items && itemBody2.items.length !== 0) {
-            setAiItems(itemBody2.items);
-          } else if (itemBody2.message) {
-            setMessage(itemBody2.message);
-          } else {
-            throw new Error("Fatal error occured in AI return");
-          }
-
-          setAiState("completed");
-        } else {
-          localStorage.clear();
-          router.push("/login");
-        }
-      } else {
-        alert(await itemResponse.json());
-        setAiState("awaiting");
-      }
-    } catch (error) {
-      console.log(error);
-      alert(error);
-      setAiState("awaiting");
+    if (data.items && data.items.length !== 0) {
+      setAiItems(data.items);
+    } else if (data.message) {
+      setMessage(data.message);
+    } else {
+      throw new Error("Fatal error occurred in AI return");
     }
-  };
+
+    setAiState("completed");
+
+  } catch (error) {
+    console.error("AI Generation Error:", error);
+    setAiState("awaiting");
+    if (error !== "Session expired") {
+      alert("An error occurred while generating recommendations.");
+    }
+  }
+};
 
   const handleFileChange = (e: any) => {
     const file = e.target.files?.[0];
