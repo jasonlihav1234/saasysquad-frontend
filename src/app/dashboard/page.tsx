@@ -183,74 +183,42 @@ const handleGenerateAIItems = async () => {
     reader.readAsDataURL(file);
   };
 
-  const handleSearchSubmit = async (e: any) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const searchString =
-      formData.get("search-string")?.toString().toLowerCase() || "";
+const handleSearchSubmit = async (e: any) => {
+  e.preventDefault();
+  
+  const formData = new FormData(e.currentTarget);
+  const searchString = formData.get("search-string")?.toString().toLowerCase() || "";
 
-    const executeSearch = async (searchString: string) => {
-      const response = await fetch(
-        "https://sassysquad-backend.vercel.app/items",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-        },
-      );
+  try {
+    const response = await authFetch("https://sassysquad-backend.vercel.app/items");
 
-      if (response.status === 200) {
-        const body = await response.json();
-        // filter out items that don't match the string
-        const filteredArray = body.items.filter((item: any) => {
-          return item.item_name.trim().toLowerCase().includes(searchString);
-        });
-
-        if (filteredArray.length === 0) {
-          setHasItems(false);
-          setItems([]);
-        } else {
-          setHasItems(true);
-          setItems(filteredArray);
-        }
-      } else if (response.status === 401) {
-        const responseRefresh = await fetch(
-          "https://sassysquad-backend.vercel.app/auth/refresh",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              refreshToken: localStorage.getItem("refreshToken"),
-            }),
-          },
-        );
-
-        if (responseRefresh.status === 200) {
-          const body = await responseRefresh.json();
-          localStorage.setItem("accessToken", body.accessToken);
-          localStorage.setItem("refreshToken", body.refreshToken);
-
-          await executeSearch(searchString);
-        } else {
-          localStorage.clear();
-          router.push("/login");
-        }
-      } else {
-        const body = await response.json();
-        alert(body);
-      }
-    };
-
-    try {
-      await executeSearch(searchString);
-    } catch (error) {
-      alert(`Fatal error: ${error}`);
+    if (!response.ok) {
+      const errorData = await response.json();
+      alert(errorData.message || "Failed to fetch items");
+      return;
     }
-  };
+
+    const body = await response.json();
+
+    const filteredArray = body.items.filter((item: any) =>
+      item.item_name.trim().toLowerCase().includes(searchString)
+    );
+
+    if (filteredArray.length === 0) {
+      setHasItems(false);
+      setItems([]);
+    } else {
+      setHasItems(true);
+      setItems(filteredArray);
+    }
+
+  } catch (error) {
+    console.error("Search Error:", error);
+    if (error !== "Session expired") {
+      alert(`An error occurred: ${error}`);
+    }
+  }
+};
 
   const getPaginationItems = () => {
     if (totalPages <= 10) {
