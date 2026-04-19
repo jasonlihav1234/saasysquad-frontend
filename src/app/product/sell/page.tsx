@@ -152,54 +152,38 @@ export default function SellProducePage() {
       .join(",");
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         "https://sassysquad-backend.vercel.app/v1/pricing/estimate",
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
           body: JSON.stringify({
             tags: formattedTags,
             category: formattedCategory,
           }),
-        },
-      );
-      const body = await response.json();
-
-      if (response.status === 200) {
-        setExpectedMonthlyVolume(body.prediction.expected_monthly_volume);
-        setMaxExpectedRevenue(body.prediction.max_expected_revenue);
-        setOptimalPrice(body.prediction.optimal_price);
-        setSuggestedPriceRange(body.prediction.suggested_price_range);
-      } else if (response.status === 401) {
-        const responseRefresh = await fetch(
-          "https://sassysquad-backend.vercel.app/auth/refresh",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              refreshToken: localStorage.getItem("refreshToken"),
-            }),
-          },
-        );
-
-        if (responseRefresh.status === 200) {
-          const refreshBody = await responseRefresh.json();
-          localStorage.setItem("accessToken", refreshBody.accessToken);
-          localStorage.setItem("refreshToken", refreshBody.refreshToken);
-
-          await handleGenerateEstimate();
         }
-      } else {
-        throw new Error("Critical Error");
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Critical Error");
       }
+
+      const body = await response.json();
+      
+      const { prediction } = body;
+      setExpectedMonthlyVolume(prediction.expected_monthly_volume);
+      setMaxExpectedRevenue(prediction.max_expected_revenue);
+      setOptimalPrice(prediction.optimal_price);
+      setSuggestedPriceRange(prediction.suggested_price_range);
 
       setInsightState("complete");
     } catch (error) {
       setInsightState("awaiting");
-      console.log(error);
+      console.error("Pricing Estimate Error:", error);
+      
+      if (error !== "Session expired") {
+        alert("Failed to generate pricing estimate. Please try again.");
+      }
     }
   };
 
@@ -250,45 +234,38 @@ export default function SellProducePage() {
 
     if (isSubmittingRef.current) return;
 
-    isSubmittingRef.current = true;
-    setIsSubmitting(true);
-
     if (!category || !selectedTags || selectedTags.length === 0) {
-      setIsSubmitting(false);
-      isSubmittingRef.current = false;
+      alert("Please select a category and at least one tag.");
       return;
     }
 
+    isSubmittingRef.current = true;
+    setIsSubmitting(true);
+
     const formattedCategory = category.toLowerCase().split(" ").join("-");
     const formattedTags = selectedTags.map((tag) =>
-      tag.toLowerCase().split(" ").join("-"),
+      tag.toLowerCase().split(" ").join("-")
     );
+    
     const itemName = formData.get("item-name");
     const price = formData.get("listing-price");
     const quantity = formData.get("quantity");
 
     try {
-      const submitResponse = await fetch(
-        "https://sassysquad-backend.vercel.app/v2/items",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
-          body: JSON.stringify({
-            itemName: itemName,
-            description: description,
-            price: Number(price),
-            quantityAvailable: Number(quantity),
-            imageUrl: imageBase64,
-            categoryName: formattedCategory,
-            tags: formattedTags,
-          }),
-        },
-      );
+      const response = await authFetch("https://sassysquad-backend.vercel.app/v2/items", {
+        method: "POST",
+        body: JSON.stringify({
+          itemName: itemName,
+          description: description,
+          price: Number(price),
+          quantityAvailable: Number(quantity),
+          imageUrl: imageBase64,
+          categoryName: formattedCategory,
+          tags: formattedTags,
+        }),
+      });
 
-      if (submitResponse.status === 201) {
+      if (response.status === 201) {
         alert("Item successfully created");
 
         e.target.reset();
@@ -298,32 +275,17 @@ export default function SellProducePage() {
         setInsightState("awaiting");
         setDescription("");
         setListingPrice("");
-        isSubmittingRef.current = false;
-      } else if (submitResponse.status === 401) {
-        const responseRefresh = await fetch(
-          "https://sassysquad-backend.vercel.app/auth/refresh",
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              refreshToken: localStorage.getItem("refreshToken"),
-            }),
-          },
-        );
-
-        if (responseRefresh.status === 200) {
-          const refreshBody = await responseRefresh.json();
-          localStorage.setItem("accessToken", refreshBody.accessToken);
-          localStorage.setItem("refreshToken", refreshBody.refreshToken);
-
-          alert("Token expired, submit forum again");
-        }
       } else {
-        console.log(await submitResponse.json());
-        alert("fatal error in submission");
+        const errorData = await response.json();
+        console.error("Submission Error:", errorData);
+        alert(errorData.message || "A fatal error occurred in submission");
       }
+
     } catch (error) {
-      console.log(error);
+      console.error("Request failed:", error);
+      if (error !== "Session expired") {
+        alert("Failed to connect to the server.");
+      }
     } finally {
       setIsSubmitting(false);
       isSubmittingRef.current = false;
