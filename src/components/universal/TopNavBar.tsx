@@ -269,17 +269,18 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
             <span className="hidden sm:inline">recommend with ai</span>
           </button>
           <button onClick={openCart}>
-            <span className="material-symbols-outlined text-primary cursor-pointer hover:text-secondary transition-colors">
+            <span className="!text-4xl material-symbols-outlined text-primary cursor-pointer hover:text-secondary transition-colors">
               shopping_cart
             </span>
           </button>
-          <div className="w-8 h-8 bg-surface-container-highest flex items-center justify-center overflow-hidden">
+          <div className="w-10 h-10 rounded-full overflow-hidden bg-[#e9e8e6] ring-1 ring-[#d1c5b4] group-hover:ring-2 group-hover:ring-[#775a19] transition-all duration-200">
             <Link href="/settings">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIEWWIsS24oEuhS288WfCZjz-DYqXxsIG0aCNeFSv78p1rnf6XwcNzKSw-Xn1_AUFH_ESsayZqp-A6g9FAOCencuC1ka2p90hh06vwU4RCpA5Hwuk70p6PViQLxszYYVWfaLRm4VcP-tFyWJY2Zgqmwlg37Yt-iN7qKnSfl812uX1V6D9gAzX43IGcr63yiDKlxJjky5qS3cDTR63mrstO31kxFyupT6m7F2_peMXjtNvbrgTXD5doEoG3vBr0gESyhoIGCZvtgLi7"
+                src="/images/login_image.png"
                 alt="User Profile"
-                width={32}
-                height={32}
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
               />
             </Link>
           </div>
