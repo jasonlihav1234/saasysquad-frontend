@@ -23,15 +23,6 @@ const inter = Inter({
 });
 
 export default function RootPage() {
-  const [email, setEmail] = useState("");
-
-  const handleSubscribe = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // Hook up your newsletter signup endpoint here.
-    console.log("Subscribe:", email);
-    setEmail("");
-  };
-
   return (
     <div
       className={`${inter.className} bg-[#faf9f7] text-[#1a1c1b] antialiased min-h-screen`}
@@ -41,7 +32,7 @@ export default function RootPage() {
           <div
             className={`${gelasio.className} text-3xl font-black tracking-tighter text-[#1a1c1b] uppercase`}
           >
-            The Althaïr
+            The Curated Althaïr
           </div>
         </nav>
       </header>
@@ -68,12 +59,12 @@ export default function RootPage() {
                 Discover a meticulously curated selection of homeware that
                 transforms houses into personal sanctuaries.
               </p>
-              <button
-                type="button"
+              <Link
+                href="/login"
                 className="bg-[#5f5e5e] text-white px-10 py-5 uppercase tracking-widest text-xs hover:bg-[#775a19] transition-colors duration-300 cursor-pointer border-none"
               >
                 Shop the Collection
-              </button>
+              </Link>
             </div>
           </div>
         </section>
