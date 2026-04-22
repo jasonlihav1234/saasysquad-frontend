@@ -9,7 +9,10 @@ import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, Suspense } from "react";
 import ItemCard from "@/components/dashboard/ItemCard";
+import { STATIC_SAVED_ITEMS, toItemCardItem } from "@/data/savedItems";
 import { authFetch } from "../../../lib/api";
+
+const staticItemsForCard = STATIC_SAVED_ITEMS.map(toItemCardItem);
 
 // probably should make this user/dashboard
 
@@ -33,7 +36,9 @@ interface Item {
 function DashboardContent() {
   const [hasItems, setHasItems] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
+  const [totalPages, setTotalPages] = useState(
+    Math.ceil(staticItemsForCard.length / 6),
+  );
   const [category, setCategory] = useState("new-arrival");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [itemCategory, setItemCategory] = useState<string>("");
@@ -54,7 +59,7 @@ function DashboardContent() {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   // useful - item_name, price, image_url, item_id
-  const [items, setItems] = useState<any[]>();
+  const [items, setItems] = useState<any[]>(staticItemsForCard);
   const [aiChoice, setAIChoice] = useState(category);
   const router = useRouter();
   const isAiSidebarOpen = searchParams.get("sidebar") === "ai";
@@ -72,8 +77,10 @@ function DashboardContent() {
         if (!itemRes.ok) throw new Error("Failed to fetch items");
 
         const itemData = await itemRes.json();
-        setItems(itemData.items);
-        setTotalPages(Math.ceil(itemData.items.length / 6));
+        setItems([...staticItemsForCard, ...itemData.items]);
+        setTotalPages(
+          Math.ceil((staticItemsForCard.length + itemData.items.length) / 6),
+        );
 
         const catRes = await authFetch(
           "https://sassysquad-backend.vercel.app/categories",
@@ -204,12 +211,18 @@ const handleSearchSubmit = async (e: any) => {
       item.item_name.trim().toLowerCase().includes(searchString)
     );
 
-    if (filteredArray.length === 0) {
+    const staticMatches = staticItemsForCard.filter((item) =>
+      item.item_name.trim().toLowerCase().includes(searchString)
+    );
+
+    const combined = [...staticMatches, ...filteredArray];
+
+    if (combined.length === 0) {
       setHasItems(false);
       setItems([]);
     } else {
       setHasItems(true);
-      setItems(filteredArray);
+      setItems(combined);
     }
 
   } catch (error) {
