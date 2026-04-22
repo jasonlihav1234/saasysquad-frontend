@@ -36,9 +36,7 @@ interface Item {
 function DashboardContent() {
   const [hasItems, setHasItems] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(
-    Math.ceil(staticItemsForCard.length / 6),
-  );
+  const [totalPages, setTotalPages] = useState(1);
   const [category, setCategory] = useState("new-arrival");
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [itemCategory, setItemCategory] = useState<string>("");
@@ -59,7 +57,7 @@ function DashboardContent() {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   // useful - item_name, price, image_url, item_id
-  const [items, setItems] = useState<any[]>(staticItemsForCard);
+  const [items, setItems] = useState<any[]>([]);
   const [aiChoice, setAIChoice] = useState(category);
   const router = useRouter();
   const isAiSidebarOpen = searchParams.get("sidebar") === "ai";
@@ -77,10 +75,9 @@ function DashboardContent() {
         if (!itemRes.ok) throw new Error("Failed to fetch items");
 
         const itemData = await itemRes.json();
-        setItems([...staticItemsForCard, ...itemData.items]);
-        setTotalPages(
-          Math.ceil((staticItemsForCard.length + itemData.items.length) / 6),
-        );
+        const backendItems = itemData.items ?? [];
+        setItems(backendItems);
+        setTotalPages(Math.max(1, Math.ceil(backendItems.length / 6)));
 
         const catRes = await authFetch(
           "https://sassysquad-backend.vercel.app/categories",
