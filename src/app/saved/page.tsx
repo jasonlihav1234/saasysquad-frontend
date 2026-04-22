@@ -4,9 +4,16 @@ import Sidebar from "@/components/user-settings/shared-components/Sidebar";
 import Footer from "@/components/universal/Footer";
 import PageSectionHeading from "@/components/user-settings/shared-components/PageSectionHeading";
 import SubpageHeader from "@/components/user-settings/shared-components/SubpageHeader";
-import SavedItemCard from "@/components/user-settings/saved/SavedItemCard";
-import { STATIC_SAVED_ITEMS } from "@/data/savedItems";
+import SavedItemCard, {
+  SavedItemProps,
+} from "@/components/user-settings/saved/SavedItemCard";
+import {
+  getSavedItems,
+  removeSavedItem,
+  subscribe,
+} from "@/lib/savedItemsStorage";
 import { Gelasio, Roboto } from "next/font/google";
+import { useEffect, useState } from "react";
 import "material-symbols";
 
 const roboto = Roboto({
@@ -20,6 +27,19 @@ const gelasio = Gelasio({
 });
 
 export default function SavedPage() {
+  const [items, setItems] = useState<SavedItemProps[]>([]);
+
+  useEffect(() => {
+    setItems(getSavedItems());
+    const unsubscribe = subscribe(() => setItems(getSavedItems()));
+    return unsubscribe;
+  }, []);
+
+  const handleRemove = (id: string) => {
+    removeSavedItem(id);
+    setItems(getSavedItems());
+  };
+
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
       <SubpageHeader title="Saved" />
@@ -37,7 +57,7 @@ export default function SavedPage() {
             </header>
             
             <section className="w-full">
-              {STATIC_SAVED_ITEMS.length === 0 ? (
+              {items.length === 0 ? (
                 <div className="text-center py-6">
                   <h1
                     className={`${gelasio.className} text-3xl md:text-4xl font-bold text-[#1a1c1b] mb-4 tracking-tight`}
@@ -52,8 +72,12 @@ export default function SavedPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-                  {STATIC_SAVED_ITEMS.map((item) => (
-                    <SavedItemCard key={item.id} {...item} />
+                  {items.map((item) => (
+                    <SavedItemCard
+                      key={item.id}
+                      {...item}
+                      onRemove={handleRemove}
+                    />
                   ))}
                 </div>
               )}

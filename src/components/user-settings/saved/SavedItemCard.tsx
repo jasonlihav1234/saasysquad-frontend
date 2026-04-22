@@ -18,17 +18,24 @@ export interface SavedItemProps {
   price: number;
 }
 
+interface SavedItemCardProps extends SavedItemProps {
+  onRemove?: (id: string) => void;
+}
+
 export default function SavedItemCard({
+  id,
   imageUrl,
   tag,
   name,
   price,
-}: SavedItemProps) {
+  onRemove,
+}: SavedItemCardProps) {
   return (
     <div className="group relative flex flex-col h-full">
       <button
         type="button"
-        className="absolute top-4 right-4 z-10 flex items-center justify-center w-8 h-8 text-[#1a1c1b] hover:text-[#ba1a1a] transition-colors bg-[#faf9f7]/80 backdrop-blur-sm"
+        onClick={() => onRemove?.(id)}
+        className="absolute top-4 right-4 z-10 flex items-center justify-center w-8 h-8 text-[#1a1c1b] hover:text-[#ba1a1a] transition-colors bg-[#faf9f7]/80 backdrop-blur-sm cursor-pointer"
       >
         <span className="material-symbols-outlined text-xl">close</span>
       </button>

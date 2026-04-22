@@ -5,8 +5,13 @@ import "material-symbols";
 import TopNavBar from "@/components/universal/TopNavBar";
 import ReviewCard from "@/components/item/ReviewCard";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { findSavedItemById } from "@/data/savedItems";
+import {
+  addSavedItem,
+  isSaved,
+  removeSavedItem,
+} from "@/lib/savedItemsStorage";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -55,10 +60,27 @@ function ItemDetailsContent() {
   const id = searchParams.get("id");
   const savedItem = findSavedItemById(id);
 
+  const currentId = id ?? "fallback";
   const tag = savedItem?.tag ?? FALLBACK.tag;
   const name = savedItem?.name ?? FALLBACK.name;
   const price = savedItem?.price ?? FALLBACK.price;
   const imageUrl = savedItem?.imageUrl ?? FALLBACK.imageUrl;
+
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    setSaved(isSaved(currentId));
+  }, [currentId]);
+
+  const handleToggleSaved = () => {
+    if (saved) {
+      removeSavedItem(currentId);
+      setSaved(false);
+    } else {
+      addSavedItem({ id: currentId, tag, name, price, imageUrl });
+      setSaved(true);
+    }
+  };
 
   return (
     <div className={`min-h-screen bg-[#faf9f7] text-[#1a1c1b] ${roboto.className} selection:bg-[#fed488] selection:text-[#785a1a]`}>
@@ -92,6 +114,18 @@ function ItemDetailsContent() {
             <div className="space-y-4">
               <button className={`w-full bg-[#5f5e5e] cursor-pointer text-white py-6 text-[0.7rem] uppercase tracking-[0.2em] hover:bg-[#1a1c1b] ${roboto.className}`}>
                 Add to Cart
+              </button>
+              <button
+                onClick={handleToggleSaved}
+                className={`w-full border border-[#5f5e5e] cursor-pointer py-6 text-[0.7rem] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-colors ${roboto.className} ${saved ? "bg-[#1a1c1b] text-white border-[#1a1c1b]" : "bg-transparent text-[#1a1c1b] hover:bg-[#f4f3f1]"}`}
+              >
+                <span
+                  className="material-symbols-outlined text-base"
+                  style={{ fontVariationSettings: saved ? "'FILL' 1" : "'FILL' 0" }}
+                >
+                  bookmark
+                </span>
+                {saved ? "Saved" : "Save to Archive"}
               </button>
             </div>
 
