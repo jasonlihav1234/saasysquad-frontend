@@ -6,12 +6,12 @@ import TopNavBar from "@/components/universal/TopNavBar";
 import ReviewCard from "@/components/item/ReviewCard";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { findSavedItemById } from "@/data/savedItems";
 import {
   addSavedItem,
   isSaved,
   removeSavedItem,
 } from "@/lib/savedItemsStorage";
+import { authFetch } from "../../../../lib/api";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -24,95 +24,200 @@ const gelasio = Gelasio({
   style: ["normal", "italic"],
 });
 
-// placeholder data
-const reviewData = {
-  rating: 4.8,
-  count: 24,
-};
+interface BackendReview {
+  review_id: string;
+  user_id: string;
+  item_id: string;
+  review: string;
+  review_date: string;
+  rating: number;
+  user_name: string;
+}
 
-const reviews = [
-  {
-    id: 1,
-    name: "Eleanor Smith",
-    date: "March 12, 2026",
-    rating: 5,
-    body: "Amazing product.",
-  },
-  {
-    id: 2,
-    name: "Julian Thorne",
-    date: "Feb 04, 2026",
-    rating: 4,
-    body: "Loved the product, but the colors could be better.",
-  },
-];
-
-const FALLBACK = {
-  tag: "Chair",
-  name: "Serpentine Abstract Lounge",
-  price: 12500,
-  imageUrl:
-    "https://images.unsplash.com/photo-1760716478125-aa948e99ef85?q=80&w=1364&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-};
+interface BackendItem {
+  item_id: string;
+  item_name: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  itemTags: string[];
+  reviews: BackendReview[];
+}
 
 function ItemDetailsContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
-  const savedItem = findSavedItemById(id);
 
-  const currentId = id ?? "fallback";
-  const tag = savedItem?.tag ?? FALLBACK.tag;
-  const name = savedItem?.name ?? FALLBACK.name;
-  const price = savedItem?.price ?? FALLBACK.price;
-  const imageUrl = savedItem?.imageUrl ?? FALLBACK.imageUrl;
-
+  const [item, setItem] = useState<BackendItem | null>(null);
+  const [status, setStatus] = useState<
+    "loading" | "ready" | "not-found" | "error"
+  >("loading");
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setSaved(isSaved(currentId));
-  }, [currentId]);
+    if (!id) {
+      setStatus("not-found");
+      return;
+    }
+
+    (async () => {
+      try {
+        const res = await authFetch(
+          `https://sassysquad-backend.vercel.app/items/${id}`,
+        );
+
+        if (res.status === 404) {
+          setStatus("not-found");
+          return;
+        }
+
+        if (!res.ok) {
+          setStatus("error");
+          return;
+        }
+
+        const data = await res.json();
+        const first: BackendItem | undefined = data.items?.[0];
+
+        if (!first) {
+          setStatus("not-found");
+          return;
+        }
+
+        setItem(first);
+        setSaved(isSaved(first.item_id));
+        setStatus("ready");
+      } catch (error) {
+        console.error("Item detail fetch error:", error);
+        setStatus("error");
+      }
+    })();
+  }, [id]);
 
   const handleToggleSaved = () => {
+    if (!item) return;
+
     if (saved) {
-      removeSavedItem(currentId);
+      removeSavedItem(item.item_id);
       setSaved(false);
     } else {
-      addSavedItem({ id: currentId, tag, name, price, imageUrl });
+      addSavedItem({
+        id: item.item_id,
+        tag: item.itemTags?.[0] ?? "",
+        name: item.item_name,
+        price: Number(item.price),
+        imageUrl: item.image_url ?? "",
+      });
       setSaved(true);
     }
   };
 
+  if (status === "loading") {
+    return (
+      <div
+        className={`min-h-screen bg-[#faf9f7] text-[#1a1c1b] ${roboto.className}`}
+      >
+        <TopNavBar />
+        <div className="min-h-[60vh] flex items-center justify-center">
+          Loading...
+        </div>
+      </div>
+    );
+  }
+
+  if (status === "not-found" || status === "error") {
+    const headline =
+      status === "not-found" ? "Item not found." : "Something went wrong.";
+    const subtext =
+      status === "not-found"
+        ? "The piece you're looking for is no longer in the archive."
+        : "We could not load this piece. Please try again later.";
+
+    return (
+      <div
+        className={`min-h-screen bg-[#faf9f7] text-[#1a1c1b] ${roboto.className}`}
+      >
+        <TopNavBar />
+        <div className="w-full flex flex-col items-center justify-center text-center px-8 py-32">
+          <h1
+            className={`text-5xl md:text-7xl mb-8 tracking-tight text-[#1a1c1b] ${gelasio.className}`}
+          >
+            {headline}
+          </h1>
+          <p
+            className={`${roboto.className} text-lg text-[#5f5e5e] leading-relaxed`}
+          >
+            {subtext}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const currentItem = item as BackendItem;
+  const name = currentItem.item_name;
+  const price = Number(currentItem.price);
+  const imageUrl = currentItem.image_url;
+  const tag = currentItem.itemTags?.[0];
+  const description = currentItem.description ?? "No description available.";
+  const dimensions = "No dimensions provided.";
+
+  const reviews = currentItem.reviews ?? [];
+  const reviewCount = reviews.length;
+  const averageRating = reviewCount
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+    : 0;
+
   return (
-    <div className={`min-h-screen bg-[#faf9f7] text-[#1a1c1b] ${roboto.className} selection:bg-[#fed488] selection:text-[#785a1a]`}>
+    <div
+      className={`min-h-screen bg-[#faf9f7] text-[#1a1c1b] ${roboto.className} selection:bg-[#fed488] selection:text-[#785a1a]`}
+    >
       <TopNavBar />
       <main className="max-w-[1920px] mx-auto pt-20">
         <section className="flex flex-col md:flex-row min-h-[819px]">
           <div className="w-full md:w-3/5 bg-[grey] overflow-hidden relative group min-h-[400px]">
-            <img 
-              src={imageUrl} 
-              className="w-full h-full object-cover"
-            />
+            {imageUrl && (
+              <img
+                src={imageUrl}
+                alt={name}
+                className="w-full h-full object-cover"
+              />
+            )}
           </div>
           <div className="w-full md:w-2/5 p-8 md:p-24 flex flex-col justify-center bg-[#faf9f7]">
-            <nav className="mb-12">
-              <span className={`text-[0.65rem] uppercase tracking-[0.2em] text-[#7f7667] ${roboto.className}`}>
-                {tag.toUpperCase()}
-              </span>
-            </nav>
+            {tag && (
+              <nav className="mb-12">
+                <span
+                  className={`text-[0.65rem] uppercase tracking-[0.2em] text-[#7f7667] ${roboto.className}`}
+                >
+                  {tag.toUpperCase()}
+                </span>
+              </nav>
+            )}
 
-            <h1 className={`${gelasio.className} text-5xl md:text-6xl italic tracking-tight text-[#1a1c1b] mb-12`}>
+            <h1
+              className={`${gelasio.className} text-5xl md:text-6xl italic tracking-tight text-[#1a1c1b] mb-12`}
+            >
               {name}
             </h1>
 
             <div className="mb-12">
-              <p className={`${gelasio.className} text-2xl text-[#1a1c1b] mb-8`}>${price.toLocaleString()}</p>
-              <p className={`text-sm leading-relaxed max-w-md text-[#5f5e5e] ${roboto.className}`}>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+              <p
+                className={`${gelasio.className} text-2xl text-[#1a1c1b] mb-8`}
+              >
+                ${price.toLocaleString()}
+              </p>
+              <p
+                className={`text-sm leading-relaxed max-w-md text-[#5f5e5e] ${roboto.className}`}
+              >
+                {description}
               </p>
             </div>
 
             <div className="space-y-4">
-              <button className={`w-full bg-[#5f5e5e] cursor-pointer text-white py-6 text-[0.7rem] uppercase tracking-[0.2em] hover:bg-[#1a1c1b] ${roboto.className}`}>
+              <button
+                className={`w-full bg-[#5f5e5e] cursor-pointer text-white py-6 text-[0.7rem] uppercase tracking-[0.2em] hover:bg-[#1a1c1b] ${roboto.className}`}
+              >
                 Add to Cart
               </button>
               <button
@@ -121,7 +226,9 @@ function ItemDetailsContent() {
               >
                 <span
                   className="material-symbols-outlined text-base"
-                  style={{ fontVariationSettings: saved ? "'FILL' 1" : "'FILL' 0" }}
+                  style={{
+                    fontVariationSettings: saved ? "'FILL' 1" : "'FILL' 0",
+                  }}
                 >
                   bookmark
                 </span>
@@ -131,10 +238,12 @@ function ItemDetailsContent() {
 
             <div className="mt-16 grid grid-cols-2 gap-8 pt-8 border-t border-[#d1c5b4]/30">
               <div>
-                <h4 className={`text-[0.6rem] uppercase tracking-widest text-[#7f7667] mb-2 ${roboto.className}`}>
+                <h4
+                  className={`text-[0.6rem] uppercase tracking-widest text-[#7f7667] mb-2 ${roboto.className}`}
+                >
                   Dimensions
                 </h4>
-                <p className="text-sm text-[#1a1c1b]">86 cm W × 74 cm H</p>
+                <p className="text-sm text-[#1a1c1b]">{dimensions}</p>
               </div>
             </div>
           </div>
@@ -142,10 +251,11 @@ function ItemDetailsContent() {
 
         <section className="bg-[#f4f3f1] py-32 px-8 md:px-24">
           <div className="max-w-6xl mx-auto">
-
             <div className="flex flex-col md:flex-row justify-between items-end mb-24 border-b border-[#d1c5b4]/15 pb-12">
               <div className="mb-8 md:mb-0">
-                <h2 className={`${gelasio.className} text-4xl text-[#1a1c1b] mb-4`}>
+                <h2
+                  className={`${gelasio.className} text-4xl text-[#1a1c1b] mb-4`}
+                >
                   Collector Reviews
                 </h2>
                 <div className="flex items-center gap-4">
@@ -160,25 +270,48 @@ function ItemDetailsContent() {
                       </span>
                     ))}
                   </div>
-                  <span className={`${roboto.className} text-lg font-medium text-[#1a1c1b]`}>
-                    {reviewData.rating.toFixed(1)} / 5.0
+                  <span
+                    className={`${roboto.className} text-lg font-medium text-[#1a1c1b]`}
+                  >
+                    {averageRating.toFixed(1)} / 5.0
                   </span>
-                  <span className={`${roboto.className} text-sm text-[#7f7667]`}>
-                    ({reviewData.count} Reviews)
+                  <span
+                    className={`${roboto.className} text-sm text-[#7f7667]`}
+                  >
+                    ({reviewCount} Reviews)
                   </span>
                 </div>
               </div>
-              <button className={`${roboto.className} cursor-pointer text-[0.75rem] uppercase tracking-widest text-[#1a1c1b] border-b border-[#775a19] pb-1 hover:text-[#775a19] transition-colors`}>
+              <button
+                className={`${roboto.className} cursor-pointer text-[0.75rem] uppercase tracking-widest text-[#1a1c1b] border-b border-[#775a19] pb-1 hover:text-[#775a19] transition-colors`}
+              >
                 Write a Review
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-24">
-              {reviews.map((review) => (
-                <ReviewCard key={review.id} {...review} />
-              ))}
-            </div>
-
+            {reviewCount === 0 ? (
+              <p
+                className={`${gelasio.className} italic text-2xl text-[#5f5e5e] text-center`}
+              >
+                No reviews yet.
+              </p>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-24">
+                {reviews.map((review) => (
+                  <ReviewCard
+                    key={review.review_id}
+                    name={review.user_name}
+                    date={new Intl.DateTimeFormat("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    }).format(new Date(review.review_date))}
+                    rating={review.rating}
+                    body={review.review}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </section>
       </main>
