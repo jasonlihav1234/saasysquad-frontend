@@ -8,12 +8,17 @@ import SavedItemCard, {
   SavedItemProps,
 } from "@/components/user-settings/saved/SavedItemCard";
 import {
-  getSavedItems,
-  removeSavedItem,
+  hydrateSavedIds,
   subscribe,
 } from "@/lib/savedItemsStorage";
+import {
+  fetchItemById,
+  getSavedItemIds,
+  type BackendSavedItem,
+} from "@/lib/api/saved";
+import { useUser } from "@/components/providers/UserProvider";
 import { Gelasio, Roboto } from "next/font/google";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "material-symbols";
 
 const roboto = Roboto({
@@ -26,19 +31,59 @@ const gelasio = Gelasio({
   style: ["normal", "italic"],
 });
 
+function toSavedItemProps(item: BackendSavedItem): SavedItemProps {
+  return {
+    id: item.item_id,
+    imageUrl: item.image_url ?? "",
+    tag: item.itemTags?.[0] ?? "",
+    name: item.item_name,
+    price: Number(item.price),
+  };
+}
+
 export default function SavedPage() {
+  const { userId, loading: userLoading } = useUser();
   const [items, setItems] = useState<SavedItemProps[]>([]);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">(
+    "loading",
+  );
+
+  const loadSaved = useCallback(async () => {
+    if (!userId) return;
+    setStatus("loading");
+    try {
+      const ids = await getSavedItemIds(userId);
+      hydrateSavedIds(ids);
+
+      const results = await Promise.all(ids.map((id) => fetchItemById(id)));
+      const hydrated = results
+        .filter((r): r is BackendSavedItem => r !== null)
+        .map(toSavedItemProps);
+
+      setItems(hydrated);
+      setStatus("ready");
+    } catch (err) {
+      console.error("Failed to load saved items:", err);
+      setStatus("error");
+    }
+  }, [userId]);
 
   useEffect(() => {
-    setItems(getSavedItems());
-    const unsubscribe = subscribe(() => setItems(getSavedItems()));
-    return unsubscribe;
-  }, []);
+    if (userLoading) return;
+    if (!userId) {
+      setItems([]);
+      setStatus("ready");
+      return;
+    }
+    loadSaved();
+  }, [userId, userLoading, loadSaved]);
 
-  const handleRemove = (id: string) => {
-    removeSavedItem(id);
-    setItems(getSavedItems());
-  };
+  useEffect(() => {
+    const unsubscribe = subscribe(() => {
+      if (userId) loadSaved();
+    });
+    return unsubscribe;
+  }, [userId, loadSaved]);
 
   return (
     <main className="bg-[#F9F8F6] min-h-screen w-full flex flex-col">
@@ -55,9 +100,30 @@ export default function SavedPage() {
                 description="Your curated list of saved items."
               />
             </header>
-            
+
             <section className="w-full">
-              {items.length === 0 ? (
+              {status === "loading" ? (
+                <div className="text-center py-6">
+                  <p
+                    className={`${roboto.className} text-[#5f5e5e] text-base`}
+                  >
+                    Loading saved items...
+                  </p>
+                </div>
+              ) : status === "error" ? (
+                <div className="text-center py-6">
+                  <h1
+                    className={`${gelasio.className} text-3xl md:text-4xl font-bold text-[#1a1c1b] mb-4 tracking-tight`}
+                  >
+                    Something went wrong.
+                  </h1>
+                  <p
+                    className={`${roboto.className} text-[#5f5e5e] text-base max-w-md mx-auto leading-relaxed`}
+                  >
+                    We could not load your saved items. Please try again later.
+                  </p>
+                </div>
+              ) : items.length === 0 ? (
                 <div className="text-center py-6">
                   <h1
                     className={`${gelasio.className} text-3xl md:text-4xl font-bold text-[#1a1c1b] mb-4 tracking-tight`}
@@ -73,11 +139,7 @@ export default function SavedPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
                   {items.map((item) => (
-                    <SavedItemCard
-                      key={item.id}
-                      {...item}
-                      onRemove={handleRemove}
-                    />
+                    <SavedItemCard key={item.id} {...item} />
                   ))}
                 </div>
               )}

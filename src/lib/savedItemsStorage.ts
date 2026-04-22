@@ -1,38 +1,36 @@
-import type { SavedItemProps } from "@/components/user-settings/saved/SavedItemCard";
-
-const KEY = "saved_items";
 const EVENT = "saved-items-changed";
 
-export function getSavedItems(): SavedItemProps[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+const ids = new Set<string>();
+let hydrated = false;
+
+function dispatch(): void {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(EVENT));
 }
 
 export function isSaved(id: string): boolean {
-  return getSavedItems().some((i) => i.id === id);
+  return ids.has(id);
 }
 
-export function addSavedItem(item: SavedItemProps): void {
-  if (typeof window === "undefined") return;
-  const current = getSavedItems();
-  if (current.some((i) => i.id === item.id)) return;
-  const next = [...current, item];
-  localStorage.setItem(KEY, JSON.stringify(next));
-  window.dispatchEvent(new Event(EVENT));
+export function isHydrated(): boolean {
+  return hydrated;
 }
 
-export function removeSavedItem(id: string): void {
-  if (typeof window === "undefined") return;
-  const next = getSavedItems().filter((i) => i.id !== id);
-  localStorage.setItem(KEY, JSON.stringify(next));
-  window.dispatchEvent(new Event(EVENT));
+export function markSaved(id: string): void {
+  if (ids.has(id)) return;
+  ids.add(id);
+  dispatch();
+}
+
+export function hydrateSavedIds(next: string[]): void {
+  ids.clear();
+  for (const id of next) ids.add(id);
+  hydrated = true;
+  dispatch();
+}
+
+export function getSavedIds(): string[] {
+  return Array.from(ids);
 }
 
 export function subscribe(cb: () => void): () => void {

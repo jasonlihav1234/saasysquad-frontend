@@ -7,10 +7,16 @@ import ReviewCard from "@/components/item/ReviewCard";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import {
-  addSavedItem,
+  hydrateSavedIds,
+  isHydrated,
   isSaved,
-  removeSavedItem,
+  markSaved,
 } from "@/lib/savedItemsStorage";
+import {
+  addSavedItem as addSavedItemApi,
+  getSavedItemIds,
+} from "@/lib/api/saved";
+import { useUser } from "@/components/providers/UserProvider";
 import { authFetch } from "../../../../lib/api";
 
 const roboto = Roboto({
@@ -47,12 +53,14 @@ interface BackendItem {
 function ItemDetailsContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
+  const { userId } = useUser();
 
   const [item, setItem] = useState<BackendItem | null>(null);
   const [status, setStatus] = useState<
     "loading" | "ready" | "not-found" | "error"
   >("loading");
   const [saved, setSaved] = useState(false);
+  const [savingInFlight, setSavingInFlight] = useState(false);
 
   useEffect(() => {
     if (!id) {
@@ -85,30 +93,38 @@ function ItemDetailsContent() {
         }
 
         setItem(first);
-        setSaved(isSaved(first.item_id));
         setStatus("ready");
+
+        if (!isHydrated() && userId) {
+          try {
+            const ids = await getSavedItemIds(userId);
+            hydrateSavedIds(ids);
+          } catch (err) {
+            console.error("Failed to hydrate saved IDs:", err);
+          }
+        }
+        setSaved(isSaved(first.item_id));
       } catch (error) {
         console.error("Item detail fetch error:", error);
         setStatus("error");
       }
     })();
-  }, [id]);
+  }, [id, userId]);
 
-  const handleToggleSaved = () => {
-    if (!item) return;
+  const handleSave = async () => {
+    if (!item || saved || savingInFlight) return;
 
-    if (saved) {
-      removeSavedItem(item.item_id);
+    setSavingInFlight(true);
+    setSaved(true);
+    markSaved(item.item_id);
+
+    try {
+      await addSavedItemApi(item.item_id);
+    } catch (err) {
+      console.error("Failed to save item:", err);
       setSaved(false);
-    } else {
-      addSavedItem({
-        id: item.item_id,
-        tag: item.itemTags?.[0] ?? "",
-        name: item.item_name,
-        price: Number(item.price),
-        imageUrl: item.image_url ?? "",
-      });
-      setSaved(true);
+    } finally {
+      setSavingInFlight(false);
     }
   };
 
@@ -221,8 +237,9 @@ function ItemDetailsContent() {
                 Add to Cart
               </button>
               <button
-                onClick={handleToggleSaved}
-                className={`w-full border border-[#5f5e5e] cursor-pointer py-6 text-[0.7rem] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-colors ${roboto.className} ${saved ? "bg-[#1a1c1b] text-white border-[#1a1c1b]" : "bg-transparent text-[#1a1c1b] hover:bg-[#f4f3f1]"}`}
+                onClick={handleSave}
+                disabled={saved || savingInFlight}
+                className={`w-full border border-[#5f5e5e] py-6 text-[0.7rem] uppercase tracking-[0.2em] flex items-center justify-center gap-2 transition-colors ${roboto.className} ${saved ? "bg-[#1a1c1b] text-white border-[#1a1c1b] cursor-default" : "bg-transparent text-[#1a1c1b] hover:bg-[#f4f3f1] cursor-pointer"} ${savingInFlight ? "opacity-70" : ""}`}
               >
                 <span
                   className="material-symbols-outlined text-base"
