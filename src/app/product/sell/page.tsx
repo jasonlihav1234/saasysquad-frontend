@@ -160,7 +160,7 @@ export default function SellProducePage() {
             tags: formattedTags,
             category: formattedCategory,
           }),
-        }
+        },
       );
 
       if (!response.ok) {
@@ -169,7 +169,7 @@ export default function SellProducePage() {
       }
 
       const body = await response.json();
-      
+
       const { prediction } = body;
       setExpectedMonthlyVolume(prediction.expected_monthly_volume);
       setMaxExpectedRevenue(prediction.max_expected_revenue);
@@ -180,7 +180,7 @@ export default function SellProducePage() {
     } catch (error) {
       setInsightState("awaiting");
       console.error("Pricing Estimate Error:", error);
-      
+
       if (error !== "Session expired") {
         alert("Failed to generate pricing estimate. Please try again.");
       }
@@ -244,26 +244,29 @@ export default function SellProducePage() {
 
     const formattedCategory = category.toLowerCase().split(" ").join("-");
     const formattedTags = selectedTags.map((tag) =>
-      tag.toLowerCase().split(" ").join("-")
+      tag.toLowerCase().split(" ").join("-"),
     );
-    
+
     const itemName = formData.get("item-name");
     const price = formData.get("listing-price");
     const quantity = formData.get("quantity");
 
     try {
-      const response = await authFetch("https://sassysquad-backend.vercel.app/v2/items", {
-        method: "POST",
-        body: JSON.stringify({
-          itemName: itemName,
-          description: description,
-          price: Number(price),
-          quantityAvailable: Number(quantity),
-          imageUrl: imageBase64,
-          categoryName: formattedCategory,
-          tags: formattedTags,
-        }),
-      });
+      const response = await authFetch(
+        "https://sassysquad-backend.vercel.app/v2/items",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            itemName: itemName,
+            description: description,
+            price: Number(price),
+            quantityAvailable: Number(quantity),
+            imageUrl: imageBase64,
+            categoryName: formattedCategory,
+            tags: formattedTags,
+          }),
+        },
+      );
 
       if (response.status === 201) {
         alert("Item successfully created");
@@ -280,7 +283,6 @@ export default function SellProducePage() {
         console.error("Submission Error:", errorData);
         alert(errorData.message || "A fatal error occurred in submission");
       }
-
     } catch (error) {
       console.error("Request failed:", error);
       if (error !== "Session expired") {
@@ -332,15 +334,6 @@ export default function SellProducePage() {
                 Orders
               </span>
               Sales
-            </Link>
-            <Link
-              href="/messages"
-              className="flex items-center gap-4 px-4 py-3 text-sm font-medium text-[#737373] hover:text-[#2D2D2D] transition-colors"
-            >
-              <span className="material-symbols-outlined !text-2xl text-[#5f5e5e] leading-none">
-                Forum
-              </span>
-              Messages
             </Link>
           </ul>
         </nav>
