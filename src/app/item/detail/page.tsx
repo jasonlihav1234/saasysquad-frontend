@@ -53,6 +53,7 @@ function ItemDetailsContent() {
     "loading" | "ready" | "not-found" | "error"
   >("loading");
   const [saved, setSaved] = useState(false);
+  const [cartStatus, setCartStatus] = useState<"idle" | "adding" | "added" | "error">("idle");
 
   useEffect(() => {
     if (!id) {
@@ -111,6 +112,35 @@ function ItemDetailsContent() {
       setSaved(true);
     }
   };
+
+  const handleAddToCart = async () => {
+    if (!item || cartStatus === "adding") return;
+
+    setCartStatus("adding");
+
+    try {
+      const res = await authFetch("https://sassysquad-backend.vercel.app/cart/items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          itemId: item.item_id,
+          quantity: 1,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.log("Cart error:", data.error);
+        setCartStatus("error");
+
+        setTimeout(() => setCartStatus("idle"), 3000);
+        return;
+      }
+    }
+  }
 
   if (status === "loading") {
     return (
