@@ -9,10 +9,7 @@ import "material-symbols";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useRef, Suspense } from "react";
 import ItemCard from "@/components/dashboard/ItemCard";
-import { STATIC_SAVED_ITEMS, toItemCardItem } from "@/data/savedItems";
 import { authFetch } from "../../../lib/api";
-
-const staticItemsForCard = STATIC_SAVED_ITEMS.map(toItemCardItem);
 
 // probably should make this user/dashboard
 
@@ -34,7 +31,6 @@ interface Item {
 }
 
 function DashboardContent() {
-  const [hasItems, setHasItems] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [category, setCategory] = useState("new-arrival");
@@ -187,48 +183,6 @@ const handleGenerateAIItems = async () => {
     reader.readAsDataURL(file);
   };
 
-const handleSearchSubmit = async (e: any) => {
-  e.preventDefault();
-  
-  const formData = new FormData(e.currentTarget);
-  const searchString = formData.get("search-string")?.toString().toLowerCase() || "";
-
-  try {
-    const response = await authFetch("https://sassysquad-backend.vercel.app/items");
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      alert(errorData.message || "Failed to fetch items");
-      return;
-    }
-
-    const body = await response.json();
-
-    const filteredArray = body.items.filter((item: any) =>
-      item.item_name.trim().toLowerCase().includes(searchString)
-    );
-
-    const staticMatches = staticItemsForCard.filter((item) =>
-      item.item_name.trim().toLowerCase().includes(searchString)
-    );
-
-    const combined = [...staticMatches, ...filteredArray];
-
-    if (combined.length === 0) {
-      setHasItems(false);
-      setItems([]);
-    } else {
-      setHasItems(true);
-      setItems(combined);
-    }
-
-  } catch (error) {
-    console.error("Search Error:", error);
-    if (error !== "Session expired") {
-      alert(`An error occurred: ${error}`);
-    }
-  }
-};
 
   const getPaginationItems = () => {
     if (totalPages <= 10) {
@@ -288,7 +242,6 @@ const handleSearchSubmit = async (e: any) => {
     <>
       <TopNavBar
         activeHref="/dashboard"
-        onSearch={(term) => handleSearchSubmit(term)}
         onAiClick={openSidebar}
       />
       <div className="flex items-center gap-6">
@@ -578,8 +531,7 @@ const handleSearchSubmit = async (e: any) => {
         className="bg-[#F9F8F6] pb-24 px-12 mx-auto min-h-screen"
         ref={topRef}
       >
-        {hasItems ? (
-          <>
+        <>
             <header
               className="mb-20 -mx-12 px-12 pt-32 pb-32 bg-cover bg-center flex flex-col md:flex-row justify-between items-end gap-8"
               style={{
@@ -683,39 +635,7 @@ const handleSearchSubmit = async (e: any) => {
                 chevron_right
               </button>
             </footer>
-          </>
-        ) : (
-          <>
-            <div className="w-full flex flex-col items-center justify-center">
-              <h1
-                className={`text-5xl md:text-7xl mb-8 tracking-tight text-[#1A1C1B] ${gelasio.className}`}
-              >
-                The Catalog is Silent
-              </h1>
-              <p
-                className={`${roboto.className} text-lg text-[#5f5e5e] leading-relaxed`}
-              >
-                No items found.
-              </p>
-            </div>
-            <section className="relative w-full h-[600px] mb-32 overflow-hidden bg-[#f4f3f1] mt-27">
-              <div className="absolute inset-0 flex items-center justify-center opacity-40 mix-blend-multiply">
-                <img
-                  alt="Minimalist Interior"
-                  className="w-full h-full object-cover grayscale"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBVsxfbGX4ssS40oOqR6_-Dp_UR7HydLoV35Mh_pUlk0-R98KMzCQHVTroLIMKPEGPQ9pNLxztumaPE0yU-1pd23q1XCyaMABomllIlsiuF3Ory6NB-zH1kff8huBk-nHBNywn1vY3nkTqvQVtoS9pAkeLqWQB_opXUHjdyUFBiV5foD-k14knxjy1KVNe4nkkD0FmbLs-lVEU-N3jgRtvyTqMgqEK0DJAk_86F_aGpAJt6ATmFZ_W6gh7_m4IXJUnyvs8EzFgQYE_9"
-                ></img>
-              </div>
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-12">
-                <h2
-                  className={`${gelasio.className} text-3xl italic text-[#4e4639] tracking-wide`}
-                >
-                  Finding beauty in the absence.
-                </h2>
-              </div>
-            </section>
-          </>
-        )}
+        </>
         <Footer />
       </main>
     </>
