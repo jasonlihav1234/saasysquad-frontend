@@ -4,7 +4,7 @@ import { Roboto, Gelasio } from "next/font/google";
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import "material-symbols";
 import { requestToBodyStream } from "next/dist/server/body-streams";
 import { useUser } from "../providers/UserProvider";
@@ -39,6 +39,7 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
   const [subtotal, setSubtotal] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const { tier, loading } = useUser();
+  const pathname = usePathname();
 
   const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -113,8 +114,17 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
     fetchCart();
   }, [isCartSidebarOpen]);
 
-  const openCart = () => router.push("?sidebar=cart");
-  const closeCart = () => router.push("?");
+  const openCart = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sidebar", "cart");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  };
+
+  const closeCart = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("sidebar");
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }
 
   const recalculateSubtotal = (items: any[]) => {
     const newTotal = items.reduce((sum, item) => sum + item.itemTotal, 0);
@@ -264,7 +274,7 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
             className="flex items-center gap-2 px-5 py-2 bg-[#5F5E5E] text-[#FFFFFF] text-xs uppercase tracking-widest hover:bg-[#1A1C1B] transition-colors cursor-pointer"
           >
             <span className="material-symbols-outlined text-sm">
-              { tier === "free" ? "lock" : "image_arrow_up" }
+              {tier === "free" ? "lock" : "image_arrow_up"}
             </span>
             <span className="hidden sm:inline">recommend with ai</span>
           </button>
