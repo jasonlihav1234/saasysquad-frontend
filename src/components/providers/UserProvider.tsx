@@ -36,6 +36,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     try {
       const res = await authFetch(
         "https://sassysquad-backend.vercel.app/profile",
+        {
+          cache: "no-store",
+        },
       );
 
       if (!res.ok) {
