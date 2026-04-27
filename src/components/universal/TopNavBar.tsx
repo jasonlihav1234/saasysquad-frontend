@@ -251,7 +251,7 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
             />
             <button
               type="submit"
-              className="material-symbols-sharp absolute right-2 top-2 text-primary opacity-50 cursor-pointer"
+              className="material-symbols-sharp absolute right-2 top-2 text-[#000000] opacity-50 cursor-pointer"
             >
               search
             </button>
