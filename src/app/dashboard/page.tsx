@@ -187,11 +187,8 @@ const handleGenerateAIItems = async () => {
     reader.readAsDataURL(file);
   };
 
-const handleSearchSubmit = async (e: any) => {
-  e.preventDefault();
-  
-  const formData = new FormData(e.currentTarget);
-  const searchString = formData.get("search-string")?.toString().toLowerCase() || "";
+const handleSearchSubmit = async (term: string) => {
+  const searchString = term.trim().toLowerCase();
 
   try {
     const response = await authFetch("https://sassysquad-backend.vercel.app/items");
@@ -686,7 +683,7 @@ const handleSearchSubmit = async (e: any) => {
           </>
         ) : (
           <>
-            <div className="w-full flex flex-col items-center justify-center">
+            <div className="w-full mt-44 flex flex-col items-center justify-center">
               <h1
                 className={`text-5xl md:text-7xl mb-8 tracking-tight text-[#1A1C1B] ${gelasio.className}`}
               >

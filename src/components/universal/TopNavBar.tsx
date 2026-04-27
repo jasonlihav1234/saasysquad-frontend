@@ -45,7 +45,7 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
     if (onSearch) {
       onSearch(searchTerm);
     } else {
-      router.push(`/dashboard?search=${encodeURIComponent(searchTerm)}`);
+      router.push(`/search?q=${encodeURIComponent(searchTerm)}`);
     }
   };
 
@@ -243,7 +243,7 @@ function TopNavBarContent({ activeHref, onSearch, onAiClick }: TopNavBarProps) {
         <div className="relative hidden lg:block group">
           <form className="relative inline-block" onSubmit={handleSearchSubmit}>
             <input
-              className={`bg-[#F4F3F1] focus:ring-0 sm:w-50 md:w-100 lg:w-150 py-2 px-2 text-sm ${roboto.className} outline-none border-b border-[#D1C5B4] focus:border-[#775A19] transition-all`}
+              className={`bg-[#F4F3F1] focus:ring-0 sm:w-50 md:w-100 lg:w-150 py-2 px-2 text-sm ${roboto.className} text-black outline-none border-b border-[#D1C5B4] focus:border-[#775A19] transition-all`}
               placeholder="Search catalog..."
               name="search-string"
               value={searchTerm}
