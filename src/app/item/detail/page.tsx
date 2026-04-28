@@ -53,6 +53,7 @@ function ItemDetailsContent() {
     "loading" | "ready" | "not-found" | "error"
   >("loading");
   const [saved, setSaved] = useState(false);
+  const [cartStatus, setCartStatus] = useState<"idle" | "adding" | "added" | "error">("idle");
 
   useEffect(() => {
     if (!id) {
@@ -111,6 +112,45 @@ function ItemDetailsContent() {
       setSaved(true);
     }
   };
+
+  const handleAddToCart = async () => {
+    if (!item || cartStatus === "adding") return;
+
+    setCartStatus("adding");
+
+    try {
+      const res = await authFetch("https://sassysquad-backend.vercel.app/cart/items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          itemId: item.item_id,
+          quantity: 1,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.log("Cart error:", data.error);
+        setCartStatus("error");
+
+        setTimeout(() => setCartStatus("idle"), 3000);
+        return;
+      }
+
+      setCartStatus("added");
+
+      setTimeout(() => {
+        setCartStatus("idle");
+      }, 2000);
+    } catch (error) {
+      console.log("Error:", error);
+      setCartStatus("error");
+      setTimeout(() => setCartStatus("idle"), 3000);
+    }
+  }
 
   if (status === "loading") {
     return (
@@ -216,9 +256,41 @@ function ItemDetailsContent() {
 
             <div className="space-y-4">
               <button
-                className={`w-full bg-[#5f5e5e] cursor-pointer text-white py-6 text-[0.7rem] uppercase tracking-[0.2em] hover:bg-[#1a1c1b] ${roboto.className}`}
+                onClick={handleAddToCart}
+                disabled={cartStatus === "adding"}
+                className={`w-full cursor-pointer py-6 text-[0.7rem] uppercase tracking-[0.2em] transition-all duration-300 flex items-center justify-center gap-2 ${roboto.className} ${
+                  cartStatus === "added"
+                    ? "bg-[#2d4a22] text-white border border-[#2d4a22]"
+                    : cartStatus === "error"
+                    ? "bg-[#8a2e2e] text-white border border-[#8a2e2e]"
+                    : "bg-[#5f5e5e] text-white hover:bg-[#1a1c1b] border border-transparent"
+                }`}
               >
-                Add to Cart
+                {cartStatus === "adding" ? (
+                  "Adding..."
+                ) : cartStatus === "added" ? (
+                  <>
+                    <span
+                      className="material-symbols-outlined text-base"
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
+                      check_circle
+                    </span>
+                    Added to Cart
+                  </>
+                ) : cartStatus === "error" ? (
+                  <>
+                    <span
+                      className="material-symbols-outlined text-base"
+                      style={{ fontVariationSettings: "'FILL' 1" }}
+                    >
+                      error
+                    </span>
+                    Failed to Add
+                  </>
+                ) : (
+                  "Add to Cart"
+                )}
               </button>
               <button
                 onClick={handleToggleSaved}

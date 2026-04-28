@@ -6,6 +6,7 @@ import Footer from "@/components/universal/Footer";
 import Link from "next/link";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useUser } from "@/components/providers/UserProvider";
 
 const gelasio = Gelasio({
   subsets: ["latin"],
@@ -21,6 +22,7 @@ export default function Login() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isSubmittingRef = useRef<boolean>(false);
   const router = useRouter();
+  const { refreshTier } = useUser();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -52,6 +54,7 @@ export default function Login() {
         const body = await response.json();
         localStorage.setItem("accessToken", body.accessToken);
         localStorage.setItem("refreshToken", body.refreshToken);
+        await refreshTier();
         router.push("/dashboard");
       } else {
         alert("incorrect credentials");
